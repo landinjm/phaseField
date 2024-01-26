@@ -65,11 +65,11 @@ void customPDE<dim,degree>::explicitEquationRHS(variableContainer<dim,degree,dea
 
 		//Setting the expressions for the terms in the governing equations
 		vectorvalueType eq_u = u-constV(userInputs.dtValue)*advecTerm;
-		vectorgradType eqx_u = constV(-nu*userInputs.dtValue)*ux;
+		vectorgradType eqx_u = constV(-userInputs.dtValue/Re)*ux;
 
 		if(this->currentIncrement <= switchToFractional){
 			scalargradType Px = variable_list.get_scalar_gradient(1);
-			eq_u -= constV(userInputs.dtValue/rho)*Px;
+			eq_u -= constV(userInputs.dtValue)*Px;
 		}
 		//Submitting the terms for the governing equations
 		variable_list.set_vector_value_term_RHS(0,eq_u);
@@ -83,7 +83,7 @@ void customPDE<dim,degree>::explicitEquationRHS(variableContainer<dim,degree,dea
 		scalargradType Px = variable_list.get_scalar_gradient(1);
 	
 		//Setting the expressions for the terms in the governing equations
-		vectorvalueType eq_u = u-constV(userInputs.dtValue/rho)*Px;
+		vectorvalueType eq_u = u-constV(userInputs.dtValue)*Px;
 
 		if(this->currentIncrement <= switchToFractional){
 			eq_u = u;
@@ -133,7 +133,7 @@ void customPDE<dim,degree>::nonExplicitEquationRHS(variableContainer<dim,degree,
 		vectorvalueType u = variable_list.get_vector_value(0);
 		scalargradType Px = variable_list.get_scalar_gradient(1);
 
-		vectorvalueType eq_P = constV(rho/userInputs.dtValue)*u;
+		vectorvalueType eq_P = constV(1.0/userInputs.dtValue)*u;
 
 		variable_list.set_scalar_gradient_term_RHS(1,eq_P-Px);
 	}
