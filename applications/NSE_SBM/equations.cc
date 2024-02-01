@@ -27,9 +27,9 @@ void variableAttributeLoader::loadVariableAttributes(){
 	set_variable_type				(1,SCALAR);
 	set_variable_equation_type		(1,TIME_INDEPENDENT);
 
-    set_dependencies_value_term_RHS(1, "grad(u),psi,grad(psi)");
+    set_dependencies_value_term_RHS(1, "grad(u)");
     set_dependencies_gradient_term_RHS(1, "grad(P),u");
-	set_dependencies_value_term_LHS(1, "grad(P),hess(P),change(P),psi,grad(psi)");
+	set_dependencies_value_term_LHS(1, "");
     set_dependencies_gradient_term_LHS(1, "grad(change(P))");
 
 	// Variable 2 - SBM
@@ -57,15 +57,19 @@ template <int dim, int degree>
 void customPDE<dim,degree>::explicitEquationRHS(variableContainer<dim,degree,dealii::VectorizedArray<double> > & variable_list,
 				 dealii::Point<dim, dealii::VectorizedArray<double> > q_point_loc) const {
 
+	//Grab derivative model variable
+	vectorvalueType u = variable_list.get_vector_value(0);
+	vectorgradType ux = variable_list.get_vector_gradient(0);
+	scalargradType Px = variable_list.get_scalar_gradient(1);
 	scalarvalueType psi = variable_list.get_scalar_value(2);
 	scalargradType psix = variable_list.get_scalar_gradient(2);
 	
+	//Initialize submission variables
+	vectorvalueType eq_u;
+	vectorgradType eqx_u;
+
 	//Step one of the Chorin projection
 	if(!ChorinSwitch){
-		//Grab derivative model variable
-		vectorvalueType u = variable_list.get_vector_value(0);
-		vectorgradType ux = variable_list.get_vector_gradient(0);
-	
 		//Calculating the advection term
 		vectorvalueType advecTerm;
 		for(unsigned int i=0; i<dim; i++){
@@ -74,43 +78,34 @@ void customPDE<dim,degree>::explicitEquationRHS(variableContainer<dim,degree,dea
 			}
 		}
 
-		vectorvalueType SBMterm = u*psix.norm_square()/(psi*psi+1e-4);
+		vectorvalueType SBMterm = u*psix.norm_square()/(psi*psi*Re+psiReg);
 
 		//Setting the expressions for the terms in the governing equations
-		vectorvalueType eq_u = u-constV(userInputs.dtValue)*(advecTerm+SBMterm);
-		vectorgradType eqx_u = constV(-nu*userInputs.dtValue)*ux;
+		eq_u = u-constV(userInputs.dtValue)*(advecTerm+SBMterm);
+		eqx_u = constV(-userInputs.dtValue/Re)*ux;
 
 		if(this->currentIncrement <= switchToFractional){
-			scalargradType Px = variable_list.get_scalar_gradient(1);
-			eq_u -= constV(userInputs.dtValue/rho)*Px;
+			eq_u -= constV(userInputs.dtValue)*Px;
 		}
-		//Submitting the terms for the governing equations
-		variable_list.set_vector_value_term_RHS(0,eq_u);
-		variable_list.set_vector_gradient_term_RHS(0,eqx_u);
 	}
 
 	//Step three of the Chorin projection
 	if(ChorinSwitch == true){
-		//Grab derivative model variable
-		vectorvalueType u = variable_list.get_vector_value(0);
-		scalargradType Px = variable_list.get_scalar_gradient(1);
-	
 		//Setting the expressions for the terms in the governing equations
-		vectorvalueType eq_u = u-constV(userInputs.dtValue/rho)*Px;
+		eq_u = u-constV(userInputs.dtValue)*Px;
 
 		if(this->currentIncrement <= switchToFractional){
 			eq_u = u;
 		}
 
 		//This dummy variable is neccessary to remove the residual from step 1 chorin
-		vectorgradType dummy;
-
-		//Submitting the terms for the governing equations
-		variable_list.set_vector_value_term_RHS(0,eq_u);
-		variable_list.set_vector_gradient_term_RHS(0,0.0*dummy);
+		eqx_u = constV(0.0)*eqx_u;
 	}
 
-	variable_list.set_scalar_value_term_RHS(2,psi+constV(1.0));
+	//Submitting the terms for the governing equations
+	variable_list.set_vector_value_term_RHS(0,eq_u);
+	variable_list.set_vector_gradient_term_RHS(0,eqx_u);
+	variable_list.set_scalar_value_term_RHS(2,psi);
 
 }
 
@@ -130,32 +125,31 @@ template <int dim, int degree>
 void customPDE<dim,degree>::nonExplicitEquationRHS(variableContainer<dim,degree,dealii::VectorizedArray<double> > & variable_list,
 				 dealii::Point<dim, dealii::VectorizedArray<double> > q_point_loc) const {
 	
-	if(this->currentIncrement <= switchToFractional){
-		vectorgradType ux = variable_list.get_vector_gradient(0);
-		scalargradType Px = variable_list.get_scalar_gradient(1);
+	//Grab derivative model variable
+	scalargradType Px = variable_list.get_scalar_gradient(1);
+	vectorvalueType u = variable_list.get_vector_value(0);
+	vectorgradType ux = variable_list.get_vector_gradient(0);
 
-		scalarvalueType eq_P;
+	//Initialize submission variables
+	scalarvalueType eq_P;
+	scalargradType eq_Px;
+
+	if(this->currentIncrement <= switchToFractional){
+		eq_P = constV(0.0);
 		for(unsigned int i=0; i<dim; i++){
 			for(unsigned int j=0; j<dim; j++){
 				eq_P += ux[i][j]*ux[j][i];
 			}
 		}
 
-		variable_list.set_scalar_value_term_RHS(1,eq_P);
-		variable_list.set_scalar_gradient_term_RHS(1,-Px);
+		eq_Px = -Px;
 	}
 	else{
-		vectorvalueType u = variable_list.get_vector_value(0);
-		scalargradType Px = variable_list.get_scalar_gradient(1);
-		scalarvalueType psi = variable_list.get_scalar_value(2);
-		scalargradType psix = variable_list.get_scalar_gradient(2);
-
-		scalarvalueType eq_P = -Px*psix/(psi+1e-6);
-		vectorvalueType eq_Px = constV(rho/userInputs.dtValue)*u-Px;
-
-		variable_list.set_scalar_value_term_RHS(1,eq_P);
-		variable_list.set_scalar_gradient_term_RHS(1,eq_Px);
+		eq_P = constV(0.0);
+		eq_Px = constV(1.0/userInputs.dtValue)*u-Px;		
 	}
+	variable_list.set_scalar_value_term_RHS(1,eq_P);
+	variable_list.set_scalar_gradient_term_RHS(1,eq_Px);
 
 }
 
@@ -179,27 +173,10 @@ void customPDE<dim,degree>::equationLHS(variableContainer<dim,degree,dealii::Vec
 	
 	// --- Getting the values and derivatives of the model variables ---
   	scalargradType DPx = variable_list.get_change_in_scalar_gradient(1);
-	scalarvalueType DP = variable_list.get_change_in_scalar_value(1);
-	scalarvalueType psi = variable_list.get_scalar_value(2);
-	scalargradType psix = variable_list.get_scalar_gradient(2);
-	scalargradType Px = variable_list.get_scalar_gradient(1);
-	scalarhessType Pxx = variable_list.get_scalar_hessian(1);
 
-	scalarvalueType SBMterm;
-	for(unsigned int i=0; i<dim; i++){
-		for(unsigned int j=0; j<dim; j++){
-			SBMterm -= psix[i]*Pxx[i][j]/(psi+Px[j]+1e-6);
-		}
-	}
-
-	scalarvalueType eq_lP = DP*SBMterm;
 	scalargradType eq_lPx = DPx;
-	if(this->currentIncrement <= switchToFractional){
-		eq_lP = constV(0.0);
-	}
 
 	// --- Submitting the terms for the governing equations ---
-	variable_list.set_scalar_value_term_LHS(1,eq_lP);
 	variable_list.set_scalar_gradient_term_LHS(1,eq_lPx);
 
 }

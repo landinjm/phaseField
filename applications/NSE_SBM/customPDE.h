@@ -53,8 +53,8 @@ private:
 	// Model constants specific to this subclass
 	// ================================================================
 
-	double rho = userInputs.get_model_constant_double("rho");
-	double nu = userInputs.get_model_constant_double("nu");
+	double Re = userInputs.get_model_constant_double("Re");
+	double psiReg = userInputs.get_model_constant_double("psiReg");
     int switchFractional = userInputs.get_model_constant_int("switchToFractional");
 
     //Change var type
