@@ -8,7 +8,7 @@ set Number of dimensions = 2
 # (Domain size Z ignored in 2D)
 # =================================================================================
 # Each axes spans from zero to the specified length
-set Domain size X = 8
+set Domain size X = 4
 set Domain size Y = 2
 set Domain size Z = 1
 
@@ -18,11 +18,11 @@ set Domain size Z = 1
 # The number of elements in each direction is 2^(refineFactor) * subdivisions
 # Subdivisions Z ignored in 2D
 # For optimal performance, use refineFactor primarily to determine the element size
-set Subdivisions X = 12
-set Subdivisions Y = 3
+set Subdivisions X = 2
+set Subdivisions Y = 1
 set Subdivisions Z = 1
 
-set Refine factor = 4
+set Refine factor = 5
 
 # Set the polynomial degree of the element (allowed values: 1, 2, or 3)
 set Element degree = 1
@@ -31,11 +31,11 @@ set Element degree = 1
 # Set the time step parameters
 # =================================================================================
 # The size of the time step
-set Time step = 1.0e-5
+set Time step = 1.0e-3
 
 # The simulation ends when either the number of time steps is reached or the
 # simulation time is reached.
-set Number of time steps = 10000
+set Number of time steps = 1000
 
 # =================================================================================
 # Set the boundary conditions
@@ -57,32 +57,9 @@ set Number of time steps = 10000
 # 1.5 on the top and bottom for variable 'n' in 2D
 # set Boundary condition for variable n = NATURAL, NATURAL, DIRICHLET: 1.5, DIRICHLET: 1.5
 
-
-#These are the boundary conditions for Couette flow
-#set Boundary condition for variable u, x component = NATURAL, NATURAL, DIRICHLET: 0.0, DIRICHLET: 1.0, PERIODIC, PERIODIC
-#set Boundary condition for variable u, y component = NATURAL, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0, PERIODIC, PERIODIC
-#set Boundary condition for variable u, z component = NATURAL, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0, PERIODIC, PERIODIC
-
-#set Boundary condition for variable P = DIRICHLET: 0.0, DIRICHLET: 0.0, NATURAL, NATURAL, PERIODIC, PERIODIC
-
-#Boundary conditions for pipe flow / Poisueille flow
-#set Boundary condition for variable u, x component = NATURAL, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0, PERIODIC, PERIODIC
-#set Boundary condition for variable u, y component = NATURAL, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0, PERIODIC, PERIODIC
-#set Boundary condition for variable u, z component = NATURAL, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0, PERIODIC, PERIODIC
-
-#set Boundary condition for variable P = DIRICHLET: 1.0, DIRICHLET: 0.0, NATURAL, NATURAL, PERIODIC, PERIODIC
-
-#These are the boundary conditions for Cavity flow
-#set Boundary condition for variable u, x component = DIRICHLET: 0.0, DIRICHLET: 0.0, DIRICHLET: 0.0, DIRICHLET: 1.0, PERIODIC, PERIODIC
-#set Boundary condition for variable u, y component = DIRICHLET: 0.0, DIRICHLET: 0.0, DIRICHLET: 0.0, DIRICHLET: 0.0, PERIODIC, PERIODIC
-#set Boundary condition for variable u, z component = DIRICHLET: 0.0, DIRICHLET: 0.0, DIRICHLET: 0.0, DIRICHLET: 0.0, PERIODIC, PERIODIC
-
-#set Boundary condition for variable P = NATURAL, NATURAL, NATURAL, DIRICHLET: 0.0, PERIODIC, PERIODIC
-
 #These are the boundary conditions for stokes flow around a particle
 set Boundary condition for variable u, x component = NATURAL, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0
 set Boundary condition for variable u, y component = NATURAL, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0
-#set Boundary condition for variable u, z component = NATURAL, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0
 
 set Boundary condition for variable P = DIRICHLET: 1.0, DIRICHLET: 0.0, NATURAL, NATURAL
 
@@ -98,7 +75,7 @@ set Boundary condition for variable psi = NATURAL
 # where [symmetry] is ISOTROPIC, TRANSVERSE, ORTHOTROPIC, or ANISOTROPIC.
 
 #Reynolds number
-set Model constant Re = 1.0, DOUBLE
+set Model constant Re = 100.0, DOUBLE
 
 #Psi regularization value
 set Model constant psiReg = 1e-5, DOUBLE
@@ -123,6 +100,20 @@ subsection Linear solver parameters: P
 end
 
 # =================================================================================
+# Set the nonlinear solver parameters
+# =================================================================================
+
+set Maximum nonlinear solver iterations = 100
+
+subsection Nonlinear solver parameters: P
+    set Tolerance type = ABSOLUTE_SOLUTION_CHANGE
+    set Tolerance value = 1.0e-4
+    #set Use backtracking line search damping = false
+    #set Constant damping value = 0.3
+    #set Use Laplace's equation to determine the initial guess = true
+end
+
+# =================================================================================
 # Set the output parameters
 # =================================================================================
 # Type of spacing between outputs ("EQUAL_SPACING", "LOG_SPACING", "N_PER_DECADE",
@@ -131,7 +122,7 @@ set Output condition = EQUAL_SPACING
 
 # Number of times the program outputs the fields (total number for "EQUAL_SPACING"
 # and "LOG_SPACING", number per decade for "N_PER_DECADE", ignored for "LIST")
-set Number of outputs = 50
+set Number of outputs = 10
 
 # The number of time steps between updates being printed to the screen
 set Skip print steps = 1

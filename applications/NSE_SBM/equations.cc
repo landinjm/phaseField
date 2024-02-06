@@ -27,9 +27,9 @@ void variableAttributeLoader::loadVariableAttributes(){
 	set_variable_type				(1,SCALAR);
 	set_variable_equation_type		(1,TIME_INDEPENDENT);
 
-    set_dependencies_value_term_RHS(1, "grad(u)");
+    set_dependencies_value_term_RHS(1, "grad(u),psi,grad(psi)");
     set_dependencies_gradient_term_RHS(1, "grad(P),u");
-	set_dependencies_value_term_LHS(1, "");
+	set_dependencies_value_term_LHS(1, "grad(P),hess(P),change(P),psi,grad(psi)");
     set_dependencies_gradient_term_LHS(1, "grad(change(P))");
 
 	// Variable 2 - SBM
@@ -37,7 +37,7 @@ void variableAttributeLoader::loadVariableAttributes(){
 	set_variable_type				(2,SCALAR);
 	set_variable_equation_type		(2,EXPLICIT_TIME_DEPENDENT);
 
-    set_dependencies_value_term_RHS(2, "psi");
+    set_dependencies_value_term_RHS(2, "");
     set_dependencies_gradient_term_RHS(2, "");
 
 }
@@ -105,7 +105,7 @@ void customPDE<dim,degree>::explicitEquationRHS(variableContainer<dim,degree,dea
 	//Submitting the terms for the governing equations
 	variable_list.set_vector_value_term_RHS(0,eq_u);
 	variable_list.set_vector_gradient_term_RHS(0,eqx_u);
-	variable_list.set_scalar_value_term_RHS(2,psi);
+	//variable_list.set_scalar_value_term_RHS(2,psi);
 
 }
 
@@ -129,13 +129,14 @@ void customPDE<dim,degree>::nonExplicitEquationRHS(variableContainer<dim,degree,
 	scalargradType Px = variable_list.get_scalar_gradient(1);
 	vectorvalueType u = variable_list.get_vector_value(0);
 	vectorgradType ux = variable_list.get_vector_gradient(0);
+	scalarvalueType psi = variable_list.get_scalar_value(2);
+	scalargradType psix = variable_list.get_scalar_gradient(2);
 
 	//Initialize submission variables
-	scalarvalueType eq_P;
+	scalarvalueType eq_P = constV(0.0);
 	scalargradType eq_Px;
 
 	if(this->currentIncrement <= switchToFractional){
-		eq_P = constV(0.0);
 		for(unsigned int i=0; i<dim; i++){
 			for(unsigned int j=0; j<dim; j++){
 				eq_P += ux[i][j]*ux[j][i];
@@ -145,9 +146,11 @@ void customPDE<dim,degree>::nonExplicitEquationRHS(variableContainer<dim,degree,
 		eq_Px = -Px;
 	}
 	else{
-		eq_P = constV(0.0);
 		eq_Px = constV(1.0/userInputs.dtValue)*u-Px;		
 	}
+
+	eq_P += Px*psix/(psi+constV(psiReg));
+
 	variable_list.set_scalar_value_term_RHS(1,eq_P);
 	variable_list.set_scalar_gradient_term_RHS(1,eq_Px);
 
@@ -173,10 +176,22 @@ void customPDE<dim,degree>::equationLHS(variableContainer<dim,degree,dealii::Vec
 	
 	// --- Getting the values and derivatives of the model variables ---
   	scalargradType DPx = variable_list.get_change_in_scalar_gradient(1);
+	scalarvalueType DP = variable_list.get_change_in_scalar_value(1);
+	scalarvalueType psi = variable_list.get_scalar_value(2);
+	scalargradType psix = variable_list.get_scalar_gradient(2);
+	scalargradType Px = variable_list.get_scalar_gradient(1);
+	scalarhessType Pxx = variable_list.get_scalar_hessian(1);
 
+	scalarvalueType SBMterm = constV(0.0);
+	for(unsigned int i=0; i<dim; i++){
+		SBMterm -= psix[i]*Pxx[i][i]/(psi*Px[i]+constV(psiReg));
+	}
+
+	scalarvalueType eq_lP = DP*SBMterm;
 	scalargradType eq_lPx = DPx;
 
 	// --- Submitting the terms for the governing equations ---
+	variable_list.set_scalar_value_term_LHS(1,eq_lP);
 	variable_list.set_scalar_gradient_term_LHS(1,eq_lPx);
 
 }

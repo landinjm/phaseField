@@ -36,9 +36,9 @@ void customPDE<dim,degree>::setInitialCondition(const dealii::Point<dim> &p, con
     //SBM
     if(index == 2){
         //SBM profile
-        double rad = 0.5;
-        double Width = 0.1;
-        double WallCenter[3] = {0.25*userInputs.domain_size[0], 0.5*userInputs.domain_size[1], 0.0};
+        double rad = 0.25*userInputs.domain_size[1];
+        double Width = 0.05*userInputs.domain_size[1];
+        double WallCenter[3] = {0.33*userInputs.domain_size[0], 0.5*userInputs.domain_size[1], 0.0};
         double Wdist = 0.0;
         //2D rotation matrix for point
         for (unsigned int dir = 0; dir < 2; dir++){
