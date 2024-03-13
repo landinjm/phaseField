@@ -295,6 +295,9 @@ class MatrixFreePDE:public Subscriptor
   /** Method for applying Neumann boundary conditions.*/
   void applyNeumannBCs();
 
+  /** Method for settign Dirichlet boundary conditions*/
+  void setDirichlet();
+
   // Methods to apply periodic BCs
   void setPeriodicity();
   void setPeriodicityConstraints(AffineConstraints<double>*, const DoFHandler<dim>*) const;
