@@ -295,8 +295,11 @@ class MatrixFreePDE:public Subscriptor
   /** Method for applying Neumann boundary conditions.*/
   void applyNeumannBCs();
 
-  /** Method for settign Dirichlet boundary conditions*/
+  /** Method for setting Dirichlet boundary conditions*/
   void setDirichlet();
+
+  /** Method for distributing constraints and updating ghostzones*/
+  void distributeConstraintsAndGhosts();
 
   // Methods to apply periodic BCs
   void setPeriodicity();

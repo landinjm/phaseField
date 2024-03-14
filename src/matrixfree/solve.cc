@@ -27,12 +27,7 @@ void MatrixFreePDE<dim,degree>::solve(){
 
         //output initial conditions for time dependent BVP
         if (userInputs.outputTimeStepList[currentOutput] == currentIncrement) {
-
-            for(unsigned int fieldIndex=0; fieldIndex<fields.size(); fieldIndex++){
-                constraintsDirichletSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
-                constraintsOtherSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
-                solutionSet[fieldIndex]->update_ghost_values();
-            }
+            distributeConstraintsAndGhosts();
             outputResults();
             currentOutput++;
         }
@@ -80,11 +75,7 @@ void MatrixFreePDE<dim,degree>::solve(){
 
             // Output results to file (on the proper increments)
             if (userInputs.outputTimeStepList[currentOutput] == currentIncrement) {
-                for(unsigned int fieldIndex=0; fieldIndex<fields.size(); fieldIndex++){
-                    constraintsDirichletSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
-                    constraintsOtherSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
-                    solutionSet[fieldIndex]->update_ghost_values();
-                }
+                distributeConstraintsAndGhosts();
                 outputResults();
                 if (userInputs.print_timing_with_output && currentIncrement < userInputs.totalIncrements){
                     computing_timer.print_summary();

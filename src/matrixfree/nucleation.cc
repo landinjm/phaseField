@@ -16,11 +16,7 @@ void MatrixFreePDE<dim,degree>::updateNucleiList() {
             if (userInputs.dtValue*(double)currentIncrement >= userInputs.nucleation_start_time && userInputs.dtValue*(double)currentIncrement <= userInputs.nucleation_end_time){
                 computing_timer.enter_subsection("matrixFreePDE: nucleation");
                 // Apply constraints
-                for(unsigned int fieldIndex=0; fieldIndex<fields.size(); fieldIndex++){
-                    constraintsDirichletSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
-                    constraintsOtherSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
-                    solutionSet[fieldIndex]->update_ghost_values();
-                }
+                distributeConstraintsAndGhosts();
 
                 std::vector<nucleus<dim> > new_nuclei;
                 if (currentIncrement == 1 && !userInputs.evolution_before_nucleation){

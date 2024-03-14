@@ -27,11 +27,7 @@ if (userInputs.h_adaptivity == true){
 		computing_timer.enter_subsection("matrixFreePDE: AMR");
 
 		// Apply constraints before remeshing
-		for(unsigned int fieldIndex=0; fieldIndex<fields.size(); fieldIndex++){
-			constraintsDirichletSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
-			constraintsOtherSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
-			solutionSet[fieldIndex]->update_ghost_values();
-		}
+		distributeConstraintsAndGhosts();
 		adaptiveRefineCriterion();
 		refineGrid();
 		reinit();

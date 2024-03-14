@@ -6,6 +6,18 @@
 #include "../../include/nonUniformDirichletBC.h"
 
 // =================================================================================
+// Methods to distribute constraints and update ghosts
+// =================================================================================
+template <int dim, int degree>
+void MatrixFreePDE<dim,degree>::distributeConstraintsAndGhosts(){
+	for(unsigned int fieldIndex=0; fieldIndex<fields.size(); fieldIndex++){
+		constraintsDirichletSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
+		constraintsOtherSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
+		solutionSet[fieldIndex]->update_ghost_values();
+    }
+}
+
+// =================================================================================
 // Methods to apply non-zero Neumann BCs
 // =================================================================================
 template <int dim, int degree>

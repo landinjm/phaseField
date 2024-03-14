@@ -254,11 +254,7 @@ template <int dim, int degree>
 	 }
 
 	 // Ghost the solution vectors. Also apply the constraints (if any) on the solution vectors
-     for(unsigned int fieldIndex=0; fieldIndex<fields.size(); fieldIndex++){
-         constraintsDirichletSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
-         constraintsOtherSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
-         solutionSet[fieldIndex]->update_ghost_values();
-     }
+     distributeConstraintsAndGhosts();
 
 	 // If not resuming from a checkpoint, check and perform adaptive mesh refinement, which reinitializes the system with the new mesh
       if (!userInputs.resume_from_checkpoint){
