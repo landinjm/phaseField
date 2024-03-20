@@ -31,28 +31,28 @@
 //#include <deal.II/distributed/solution_transfer.h>
 //#include <deal.II/grid/manifold_lib.h>
 
-//define data types
+// define data types
 #ifndef scalarType
 typedef dealii::VectorizedArray<double> scalarType;
 #endif
 #ifndef vectorType
 typedef dealii::LinearAlgebra::distributed::Vector<double> vectorType;
 #endif
-//define FE system types
+// define FE system types
 #ifndef typeScalar
-typedef dealii::FEEvaluation<dim,degree,degree+1,1,double>           typeScalar;
+typedef dealii::FEEvaluation<dim, degree, degree + 1, 1, double> typeScalar;
 #endif
 #ifndef typeVector
-typedef dealii::FEEvaluation<dim,degree,degree+1,dim,double>  typeVector;
+typedef dealii::FEEvaluation<dim, degree, degree + 1, dim, double> typeVector;
 #endif
-//define data value types
+// define data value types
 #ifndef scalarvalueType
 typedef dealii::VectorizedArray<double> scalarvalueType;
 #endif
 #ifndef vectorvalueType
-typedef dealii::Tensor<1, dim, dealii::VectorizedArray<double> > vectorvalueType;
+typedef dealii::Tensor<1, dim, dealii::VectorizedArray<double>> vectorvalueType;
 #endif
-#if problemDIM==1
+#if problemDIM == 1
 #ifndef scalargradType
 typedef dealii::VectorizedArray<double> scalargradType;
 #endif
@@ -64,16 +64,16 @@ typedef dealii::VectorizedArray<double> vectorhessType;
 #endif
 #else
 #ifndef scalargradType
-typedef dealii::Tensor<1, dim, dealii::VectorizedArray<double> > scalargradType;
+typedef dealii::Tensor<1, dim, dealii::VectorizedArray<double>> scalargradType;
 #endif
 #ifndef scalarhessType
-typedef dealii::Tensor<2,dim,dealii::VectorizedArray<double> > scalarhessType;
+typedef dealii::Tensor<2, dim, dealii::VectorizedArray<double>> scalarhessType;
 #endif
 #ifndef vectorgradType
-typedef dealii::Tensor<2, dim, dealii::VectorizedArray<double> > vectorgradType;
+typedef dealii::Tensor<2, dim, dealii::VectorizedArray<double>> vectorgradType;
 #endif
 #ifndef vectorhessType
-typedef dealii::Tensor<3, dim, dealii::VectorizedArray<double> > vectorhessType;
+typedef dealii::Tensor<3, dim, dealii::VectorizedArray<double>> vectorhessType;
 #endif
 #endif
 

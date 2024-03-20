@@ -3,7 +3,8 @@
 // ===========================================================================
 
 template <int dim, int degree>
-void customPDE<dim,degree>::setInitialCondition(const dealii::Point<dim> &p, const unsigned int index, double & scalar_IC, dealii::Vector<double> & vector_IC){
+void customPDE<dim, degree>::setInitialCondition(const dealii::Point<dim>& p, const unsigned int index, double& scalar_IC, dealii::Vector<double>& vector_IC)
+{
     // ---------------------------------------------------------------------
     // ENTER THE INITIAL CONDITIONS HERE
     // ---------------------------------------------------------------------
@@ -14,35 +15,35 @@ void customPDE<dim,degree>::setInitialCondition(const dealii::Point<dim> &p, con
     // The initial condition is a set of overlapping circles/spheres defined
     // by a hyperbolic tangent function. The center of each circle/sphere is
     // given by "center" and its radius is given by "radius".
-    double center[3] = {0.5, 0.0, 0.0};
-    scalar_IC = 0;      
+    double center[3] = { 0.5, 0.0, 0.0 };
+    scalar_IC = 0;
     double dist = 0.0;
     double rad = 10.0;
-    for (unsigned int dir = 0; dir < dim; dir++){
-        dist += (p[dir]-center[dir]*userInputs.domain_size[dir])*(p[dir]-center[dir]*userInputs.domain_size[dir]);
+    for (unsigned int dir = 0; dir < dim; dir++) {
+        dist += (p[dir] - center[dir] * userInputs.domain_size[dir]) * (p[dir] - center[dir] * userInputs.domain_size[dir]);
     }
     dist = std::sqrt(dist);
-    double particle = 0.5*(1.0-std::tanh((dist-rad)/(W*std::sqrt(2))));
+    double particle = 0.5 * (1.0 - std::tanh((dist - rad) / (W * std::sqrt(2))));
 
-    //Velocity
-    if(index == 0){
-        for(unsigned int d = 0; d < dim; d++){ 
+    // Velocity
+    if (index == 0) {
+        for (unsigned int d = 0; d < dim; d++) {
             vector_IC(d) = 0.0;
         }
     }
-    //Pressure
-    else if (index == 1){
+    // Pressure
+    else if (index == 1) {
         scalar_IC = 0.0;
     }
-    //Solid-liquid Order
-    else if (index == 2){
-        scalar_IC = 2.0*particle-1.0;
+    // Solid-liquid Order
+    else if (index == 2) {
+        scalar_IC = 2.0 * particle - 1.0;
     }
-    //Dimensionless Temperature
-    else if (index == 4){
+    // Dimensionless Temperature
+    else if (index == 4) {
         scalar_IC = -0.55;
     }
-   
+
     // ---------------------------------------------------------------------
 }
 
@@ -51,7 +52,7 @@ void customPDE<dim,degree>::setInitialCondition(const dealii::Point<dim> &p, con
 // ===========================================================================
 
 template <int dim, int degree>
-void customPDE<dim,degree>::setNonUniformDirichletBCs(const dealii::Point<dim> &p, const unsigned int index, const unsigned int direction, const double time, double & scalar_BC, dealii::Vector<double> & vector_BC)
+void customPDE<dim, degree>::setNonUniformDirichletBCs(const dealii::Point<dim>& p, const unsigned int index, const unsigned int direction, const double time, double& scalar_BC, dealii::Vector<double>& vector_BC)
 {
     // --------------------------------------------------------------------------
     // ENTER THE NON-UNIFORM DIRICHLET BOUNDARY CONDITIONS HERE
@@ -73,5 +74,4 @@ void customPDE<dim,degree>::setNonUniformDirichletBCs(const dealii::Point<dim> &
     }*/
 
     // -------------------------------------------------------------------------
-
 }
