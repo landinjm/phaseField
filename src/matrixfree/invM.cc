@@ -1,7 +1,8 @@
 // computeInvM() method for MatrixFreePDE class
 
-#include "../../include/matrixFreePDE.h"
 #include <numeric>
+
+#include "../../include/matrixFreePDE.h"
 
 // compute inverse of the diagonal mass matrix and store in vector invM
 template <int dim, int degree>

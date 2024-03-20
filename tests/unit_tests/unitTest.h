@@ -1,5 +1,4 @@
 #include <deal.II/base/config.h>
-
 #include <deal.II/base/exceptions.h>
 #include <deal.II/base/quadrature.h>
 #include <deal.II/base/timer.h>
@@ -91,9 +90,6 @@ public:
     bool test_OrderParameterRemapper();
 };
 
-#include "../../include/SolverParameters.h"
-#include "../../src/EquationDependencyParser/EquationDependencyParser.cc"
-#include "../../src/SolverParameters/SolverParameters.cc"
 #include "test_EquationDependencyParser.h"
 #include "test_FloodFiller.h"
 #include "test_LinearSolverParameters.h"
@@ -111,3 +107,7 @@ public:
 #include "test_setOutputTimeSteps.h"
 #include "test_setRigidBodyModeConstraints.h"
 #include "variableAttributeLoader_test.cc"
+
+#include "../../include/SolverParameters.h"
+#include "../../src/EquationDependencyParser/EquationDependencyParser.cc"
+#include "../../src/SolverParameters/SolverParameters.cc"

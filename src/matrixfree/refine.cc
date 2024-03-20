@@ -45,9 +45,9 @@ void MatrixFreePDE<dim, degree>::adaptiveRefineCriterion()
     // Old code to implement a Kelly error estimator
     // Kelly error estimation criterion
     // estimate cell wise errors for mesh refinement
-    //#if hAdaptivity==true
-    //#ifdef adaptivityType
-    //#if adaptivityType=="KELLY"
+    // #if hAdaptivity==true
+    // #ifdef adaptivityType
+    // #if adaptivityType=="KELLY"
     //  Vector<float> estimated_error_per_cell (triangulation.n_locally_owned_active_cells());
     //  KellyErrorEstimator<dim>::estimate (*dofHandlersSet_nonconst[refinementDOF],
     //				      QGaussLobatto<dim-1>(degree+1),
@@ -63,9 +63,9 @@ void MatrixFreePDE<dim, degree>::adaptiveRefineCriterion()
     //									    estimated_error_per_cell,
     //									    topRefineFraction,
     //									    bottomCoarsenFraction);
-    //#endif
-    //#endif
-    //#endif
+    // #endif
+    // #endif
+    // #endif
 
     {
         std::vector<std::vector<double>> valuesV;

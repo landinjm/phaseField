@@ -19,7 +19,6 @@
 #include <deal.II/fe/mapping_fe.h>
 #endif
 #include <deal.II/base/config.h>
-
 #include <deal.II/base/exceptions.h>
 #include <deal.II/distributed/solution_transfer.h>
 #include <deal.II/distributed/tria.h>
@@ -268,17 +267,20 @@ protected:
         const std::pair<unsigned int, unsigned int>& cell_range) const;
 
     virtual void explicitEquationRHS(variableContainer<dim, degree, dealii::VectorizedArray<double>>& variable_list,
-        dealii::Point<dim, dealii::VectorizedArray<double>> q_point_loc) const = 0;
+        dealii::Point<dim, dealii::VectorizedArray<double>> q_point_loc) const
+        = 0;
 
     virtual void nonExplicitEquationRHS(variableContainer<dim, degree, dealii::VectorizedArray<double>>& variable_list,
-        dealii::Point<dim, dealii::VectorizedArray<double>> q_point_loc) const = 0;
+        dealii::Point<dim, dealii::VectorizedArray<double>> q_point_loc) const
+        = 0;
 
     virtual void equationLHS(variableContainer<dim, degree, dealii::VectorizedArray<double>>& variable_list,
-        dealii::Point<dim, dealii::VectorizedArray<double>> q_point_loc) const = 0;
+        dealii::Point<dim, dealii::VectorizedArray<double>> q_point_loc) const
+        = 0;
 
     virtual void postProcessedFields(const variableContainer<dim, degree, dealii::VectorizedArray<double>>& variable_list,
         variableContainer<dim, degree, dealii::VectorizedArray<double>>& pp_variable_list,
-        const dealii::Point<dim, dealii::VectorizedArray<double>> q_point_loc) const {};
+        const dealii::Point<dim, dealii::VectorizedArray<double>> q_point_loc) const { };
     void computePostProcessedFields(std::vector<vectorType*>& postProcessedSet);
 
     void getPostProcessedFields(const dealii::MatrixFree<dim, double>& data,

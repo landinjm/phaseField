@@ -10,7 +10,7 @@ void MatrixFreePDE<dim, degree>::initForTests()
 
     // creating mesh
     std::vector<unsigned int> subdivisions;
-    for (unsigned int i = 0; i < dim; i++){
+    for (unsigned int i = 0; i < dim; i++) {
         subdivisions.push_back(10);
     }
 

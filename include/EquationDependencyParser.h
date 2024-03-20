@@ -1,9 +1,10 @@
 #ifndef INCLUDE_EQUATIONDEPENDECYPARSER_H_
 #define INCLUDE_EQUATIONDEPENDECYPARSER_H_
 
-#include "varTypeEnums.h"
 #include <string>
 #include <vector>
+
+#include "varTypeEnums.h"
 
 /**
  * This is a class to parse the strings the user puts into the variableAttributeLoader to specify which variable values,

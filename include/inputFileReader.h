@@ -5,10 +5,11 @@
 
 #include <deal.II/base/parameter_handler.h>
 
-#include "variableAttributeLoader.h"
 #include <fstream>
 #include <string>
 #include <vector>
+
+#include "variableAttributeLoader.h"
 
 class inputFileReader {
 public:

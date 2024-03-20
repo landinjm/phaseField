@@ -61,9 +61,9 @@
 // Set the time step parameters
 // =================================================================================
 // The size of the time step
-//#define timeStep 9.0e-6
-//#define timeFinal 100000000
-//#define timeIncrements 10000
+// #define timeStep 9.0e-6
+// #define timeFinal 100000000
+// #define timeIncrements 10000
 
 // =================================================================================
 // Set the elliptic solver parameters

@@ -1,6 +1,7 @@
-#include "../../include/matrixFreePDE.h"
 #include <cmath>
 #include <iostream>
+
+#include "../../include/matrixFreePDE.h"
 using namespace std;
 
 template <int dim, int degree>
@@ -9,7 +10,7 @@ public:
     // Constructor
     customPDE(userInputParameters<dim> _userInputs)
         : MatrixFreePDE<dim, degree>(_userInputs)
-        , userInputs(_userInputs) {};
+        , userInputs(_userInputs) { };
 
     // Function to set the initial conditions (in ICs_and_BCs.h)
     void setInitialCondition(const dealii::Point<dim>& p,

@@ -1,16 +1,18 @@
 // Calls the unit tests for the PRISMS-PF code
 // Orignal author: Stephen DeWitt (stvdwtt@umich.edu)
 
+#include <iostream>
+
+#include "boundaryConditions.cc"
+#include "initialConditions.cc"
+#include "unitTest.h"
+#include "unit_test_inputs.cc"
+
 #include "../../include/initialConditions.h"
 #include "../../include/userInputParameters.h"
 #include "../../include/vectorBCFunction.h"
 #include "../../src/userInputParameters/userInputParameters.cc"
 #include "../../src/utilities/vectorBCFunction.cc"
-#include "boundaryConditions.cc"
-#include "initialConditions.cc"
-#include "unitTest.h"
-#include "unit_test_inputs.cc"
-#include <iostream>
 
 int main(int argc, char** argv)
 {

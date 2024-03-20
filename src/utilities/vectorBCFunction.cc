@@ -5,12 +5,10 @@
  *      Author: stephendewitt
  */
 
+#include "../../include/vectorBCFunction.h"
+
 #include <deal.II/base/function.h>
 #include <deal.II/lac/vector.h>
-
-// clang-format off
-#include "../../include/vectorBCFunction.h"
-// clang-format on
 
 template <int dim>
 vectorBCFunction<dim>::vectorBCFunction(std::vector<double> input_values)

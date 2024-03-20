@@ -1,10 +1,11 @@
 // Methods in MatrixFreePDE to update the list of nuclei
 #include <time.h>
 
+#include <random>
+
 #include "../../include/matrixFreePDE.h"
 #include "../../include/parallelNucleationList.h"
 #include "../../include/varBCs.h"
-#include <random>
 
 // =======================================================================================================
 // Function called in solve to update the global list of nuclei

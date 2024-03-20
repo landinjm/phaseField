@@ -1,11 +1,13 @@
 // Header files
+#include "customPDE.h"
+
+#include "ICs_and_BCs.cc"
+#include "equations.cc"
+
 #include "../../include/ParseCommandLineOpts.h"
 #include "../../include/inputFileReader.h"
 #include "../../src/models/mechanics/computeStress.h"
 #include "../../src/variableAttributeLoader/variableAttributeLoader.cc"
-#include "ICs_and_BCs.cc"
-#include "customPDE.h"
-#include "equations.cc"
 
 // Header file for postprocessing that may or may not exist
 #ifdef POSTPROCESS_FILE_EXISTS
@@ -18,8 +20,9 @@ void variableAttributeLoader::loadPostProcessorVariableAttributes() { }
 #ifdef NUCLEATION_FILE_EXISTS
 #include <time.h>
 
-#include "nucleation.cc"
 #include <random>
+
+#include "nucleation.cc"
 #endif
 
 // main

@@ -200,7 +200,7 @@ dealii::Tensor<2, 2 * dim - 1 + dim / 3> userInputParameters<dim>::get_Cij_tenso
 // implementation of various models of anisotropy for
 // st.venant-kirchoff material model of elasticity
 
-//#include <deal.II/base/conditional_ostream.h>
+// #include <deal.II/base/conditional_ostream.h>
 
 // Each material model is characterized by the number of independent
 // constants required to characterize its elasticity tensor in the Voigt

@@ -1,13 +1,15 @@
 // Allen-Cahn example application
 
 // Header files
+#include "customPDE.h"
+
+#include "ICs_and_BCs.h"
+#include "equations.h"
+
 #include "../../include/ParseCommandLineOpts.h"
 #include "../../include/inputFileReader.h"
 #include "../../src/models/mechanics/computeStress.h"
 #include "../../src/variableAttributeLoader/variableAttributeLoader.cc"
-#include "ICs_and_BCs.h"
-#include "customPDE.h"
-#include "equations.h"
 
 // Header file for postprocessing that may or may not exist
 #ifdef POSTPROCESS_FILE_EXISTS
@@ -20,8 +22,9 @@ void variableAttributeLoader::loadPostProcessorVariableAttributes() { }
 #ifdef NUCLEATION_FILE_EXISTS
 #include <time.h>
 
-#include "nucleation.h"
 #include <random>
+
+#include "nucleation.h"
 #endif
 
 // main

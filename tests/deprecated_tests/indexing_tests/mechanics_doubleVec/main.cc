@@ -1,12 +1,13 @@
 // Linear elasticity example application
 
 // Header files
-#include "../../../include/dealIIheaders.h"
-#include "../../../src/models/coupled/generalized_model.h"
-#include "../../../src/models/coupled/generalized_model_functions.h"
 #include "ICs_and_BCs.h"
 #include "equations.h"
 #include "parameters.h"
+
+#include "../../../include/dealIIheaders.h"
+#include "../../../src/models/coupled/generalized_model.h"
+#include "../../../src/models/coupled/generalized_model_functions.h"
 
 // main
 int main(int argc, char** argv)

@@ -8,6 +8,14 @@
 #include <deal.II/lac/la_parallel_vector.h>
 #include <deal.II/lac/vector.h>
 
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/variant.hpp>
+
+#include <iostream>
+#include <unordered_map>
+#include <vector>
+
 #include "RefinementCriterion.h"
 #include "SolverParameters.h"
 #include "inputFileReader.h"
@@ -16,12 +24,6 @@
 #include "varBCs.h"
 #include "varTypeEnums.h"
 #include "variableAttributeLoader.h"
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/variant.hpp>
-#include <iostream>
-#include <unordered_map>
-#include <vector>
 
 enum elasticityModel { ISOTROPIC,
     TRANSVERSE,

@@ -8,14 +8,15 @@
 
 #include "PLibrary.hh"
 
+#include <cstring>
+#include <stdexcept>
+
 #include "pfunct_McV.hh"
 #include "pfunct_Mn1V.hh"
 #include "pfunct_Mn2V.hh"
 #include "pfunct_Mn3V.hh"
 #include "pfunct_faV.hh"
 #include "pfunct_fbV.hh"
-#include <cstring>
-#include <stdexcept>
 
 namespace PRISMS {
 

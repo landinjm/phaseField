@@ -4,8 +4,9 @@
 #include <deal.II/dofs/dof_handler.h>
 #include <deal.II/lac/la_parallel_vector.h>
 
-#include "SimplifiedGrainRepresentation.h"
 #include <vector>
+
+#include "SimplifiedGrainRepresentation.h"
 
 /**
  * This class uses information from the list of SimplifiedGrainRepresentation objects to reassign grains across multiple solution fields.

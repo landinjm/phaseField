@@ -82,18 +82,27 @@ IfMacros:
   - KJ_IF_MAYBE
 IncludeBlocks:   Regroup
 IncludeCategories:
-  # config.h must always be first:
-  - Regex:    '<deal.II/base/config.h>'
+  # customPDE.h in main.cc must always be first
+  - Regex:    '"customPDE.h"'
     Priority:       -1
-  # all other deal.II folders:
-  - Regex:    '<deal.II/.*\\.h>'
+  # deal.II headers:
+  - Regex:    '<deal.II.*>'
     Priority:       1
-  # all other <...> includes
-  - Regex:    '^<.*\.h>'
-    Priority:       2
-  # all local includes except vectorBCFunction
-  - Regex:    '^"*.h"'
+  # boost headers:
+  - Regex:    '<boost.*>'
     Priority:       10
+  # all standard </...> headers
+  - Regex:    '<[-\w\/-_]+[\.\/][-\w\/-_]+>'
+    Priority:       99
+  # all standard <...> headers
+  - Regex:    '<[-\w\/-_]+>'
+    Priority:       100
+  # all local "/..." headers
+  - Regex:    '"[-\w\/-_]+[\.\/][-\w\/-_]+"'
+    Priority:       999 
+  # all local "..." headers
+  - Regex:    '"[-\w\/-_]+"'
+    Priority:       1000
 
 IndentAccessModifiers: false
 IndentCaseLabels: false

@@ -50,23 +50,23 @@
 //// Define the variables in the model
 //// =================================================================================
 //// The number of variables
-//#define num_var 2
+// #define num_var 2
 //
 //// The names of the variables, whether they are scalars or vectors and whether the
 //// governing eqn for the variable is parabolic or elliptic
-//#define variable_name {"n","vec1"}
-//#define variable_type {"SCALAR","VECTOR"}
-//#define variable_eq_type {"PARABOLIC","PARABOLIC"}
+// #define variable_name {"n","vec1"}
+// #define variable_type {"SCALAR","VECTOR"}
+// #define variable_eq_type {"PARABOLIC","PARABOLIC"}
 //
 //// Flags for whether the value, gradient, and Hessian are needed in the residual eqns
-//#define need_val {true,true}
-//#define need_grad {true,true}
-//#define need_hess  {false,false}
+// #define need_val {true,true}
+// #define need_grad {true,true}
+// #define need_hess  {false,false}
 //
 //// Flags for whether the residual equation has a term multiplied by the test function
 //// (need_val_residual) and/or the gradient of the test function (need_grad_residual)
-//#define need_val_residual {true,true}
-//#define need_grad_residual {true,true}
+// #define need_val_residual {true,true}
+// #define need_grad_residual {true,true}
 
 // =================================================================================
 // Define the model parameters and the residual equations

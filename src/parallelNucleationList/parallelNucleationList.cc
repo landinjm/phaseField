@@ -3,8 +3,9 @@
 #include <deal.II/base/mpi.h>
 #include <deal.II/base/utilities.h>
 
-#include "../../include/nucleus.h"
 #include <iostream>
+
+#include "../../include/nucleus.h"
 
 // =================================================================================
 // Constructor

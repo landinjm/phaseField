@@ -2,11 +2,12 @@
 #ifndef VARIABLEATTRIBUTELOADER_H
 #define VARIABLEATTRIBUTELOADER_H
 
+#include <string>
+#include <vector>
+
 #include "EquationDependencyParser.h"
 #include "model_variables.h"
 #include "varTypeEnums.h"
-#include <string>
-#include <vector>
 
 class variableAttributeLoader {
 public:
