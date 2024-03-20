@@ -15,14 +15,14 @@ public:
 
         // call computeInvM()
         this->computeInvM();
-        invMNorm = this->invMscalar.l2_norm();
+        invMNormscalar = this->invMscalar.l2_norm();
     };
     ~testInvM()
     {
         this->matrixFreeObject.clear();
     };
 
-    double invMNorm;
+    double invMNormscalar;
 
     void setBCs() {};
 
@@ -64,7 +64,7 @@ bool unitTest<dim, T>::test_computeInvM(int argc, char** argv, userInputParamete
 
     testInvM<dim, 1> test(userInputs);
     // check invM norm
-    if ((test.invMNorm - 1700.0) < 1.0e-10) {
+    if (std::abs(test.invMNormscalar - 1700.0) < 1.0e-10) {
         pass = true;
     }
     char buffer[100];
