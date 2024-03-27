@@ -18,7 +18,7 @@ void variableAttributeLoader::loadVariableAttributes()
     // Variable 0 - pressure
     set_variable_name(0, "P");
     set_variable_type(0, SCALAR);
-    set_variable_equation_type(0, TIME_INDEPENDENT);
+    set_variable_equation_type(0, TIME_INDEPENDENT_MULTIGRID);
 
     set_dependencies_value_term_RHS(0, "");
     set_dependencies_gradient_term_RHS(0, "grad(P)");
