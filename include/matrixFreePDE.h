@@ -34,6 +34,14 @@
 #include <deal.II/distributed/solution_transfer.h>
 #include <deal.II/grid/manifold_lib.h>
 
+//Multigrid headers
+#include <deal.II/multigrid/multigrid.h>
+#include <deal.II/multigrid/mg_transfer_matrix_free.h>
+#include <deal.II/multigrid/mg_tools.h>
+#include <deal.II/multigrid/mg_coarse.h>
+#include <deal.II/multigrid/mg_smoother.h>
+#include <deal.II/multigrid/mg_matrix.h>
+
 // PRISMS headers
 #include "fields.h"
 #include "userInputParameters.h"
@@ -206,6 +214,10 @@ class MatrixFreePDE:public Subscriptor
   vectorType                           invMvector;
   /*Vector to store the solution increment. This is a temporary vector used during implicit solves of the Elliptic fields.*/
   vectorType                           dU_vector, dU_scalar;
+
+  //multigrid methods
+  MGLevelObject<MatrixFree<dim,double>> multigridObject;
+  MGConstrainedDoFs multigrid_constraints;
 
   //matrix free methods
   /*Current field index*/

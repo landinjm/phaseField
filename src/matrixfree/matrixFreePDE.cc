@@ -10,7 +10,7 @@ template <int dim, int degree>
  Subscriptor(),
  pcout (std::cout, Utilities::MPI::this_mpi_process(MPI_COMM_WORLD)==0),
  userInputs(_userInputs),
- triangulation (MPI_COMM_WORLD),
+ triangulation (MPI_COMM_WORLD, Triangulation<dim>::limit_level_difference_at_vertices, parallel::distributed::Triangulation<dim>::construct_multigrid_hierarchy),
  currentFieldIndex(0),
  isTimeDependentBVP(false),
  isEllipticBVP(false),
@@ -33,6 +33,7 @@ template <int dim, int degree>
  MatrixFreePDE<dim,degree>::~MatrixFreePDE ()
  {
    matrixFreeObject.clear();
+   multigridObject.clear_elements();
 
    // Delete the pointers contained in several member variable vectors
    // The size of each of these must be checked individually in case an exception is thrown

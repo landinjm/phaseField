@@ -123,6 +123,7 @@ template <int dim, int degree>
 		 dofHandlersSet_nonconst.push_back(dof_handler);
 
 		 dof_handler->distribute_dofs (*fe);
+		 dof_handler->distribute_mg_dofs();
 		 totalDOFs+=dof_handler->n_dofs();
 
 		 // Extract locally_relevant_dofs
