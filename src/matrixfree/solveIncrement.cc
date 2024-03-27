@@ -135,7 +135,7 @@ void MatrixFreePDE<dim,degree>::solveIncrement(bool skip_time_dependent){
             for(unsigned int fieldIndex=0; fieldIndex<fields.size(); fieldIndex++){
                 currentFieldIndex = fieldIndex; // Used in computeLHS()
 
-                if ( (fields[fieldIndex].pdetype == IMPLICIT_TIME_DEPENDENT && !skip_time_dependent) || fields[fieldIndex].pdetype == TIME_INDEPENDENT){
+                if ( (fields[fieldIndex].pdetype == IMPLICIT_TIME_DEPENDENT && !skip_time_dependent) || fields[fieldIndex].pdetype == TIME_INDEPENDENT || fields[fieldIndex].pdetype==TIME_INDEPENDENT_MULTIGRID){
 
                     if (currentIncrement%userInputs.skip_print_steps==0 && userInputs.var_nonlinear[fieldIndex]){
                         snprintf(buffer, sizeof(buffer), "field '%2s' [nonlinear solve]: current solution: %12.6e, current residual:%12.6e\n", \

@@ -200,7 +200,7 @@ void MatrixFreePDE<dim,degree>::setPeriodicityConstraints(AffineConstraints<doub
 template <int dim, int degree>
 void MatrixFreePDE<dim,degree>::getComponentsWithRigidBodyModes( std::vector<int> & rigidBodyModeComponents) const {
 	// Rigid body modes only matter for elliptic equations
-		if (userInputs.var_eq_type[currentFieldIndex] == IMPLICIT_TIME_DEPENDENT || userInputs.var_eq_type[currentFieldIndex] == TIME_INDEPENDENT){
+		if (userInputs.var_eq_type[currentFieldIndex] == IMPLICIT_TIME_DEPENDENT || userInputs.var_eq_type[currentFieldIndex] == TIME_INDEPENDENT || userInputs.var_eq_type[currentFieldIndex] == TIME_INDEPENDENT_MULTIGRID){
 
 			// First, get the variable index of the current field
 			unsigned int starting_BC_list_index = 0;

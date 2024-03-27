@@ -74,7 +74,7 @@ void EquationDependencyParser::parse(
             need_value_residual_nonexplicit_LHS.push_back(false);
             need_gradient_residual_nonexplicit_LHS.push_back(false);
         }
-        else if (var_eq_type[i] == IMPLICIT_TIME_DEPENDENT || var_eq_type[i] == TIME_INDEPENDENT){
+        else if (var_eq_type[i] == IMPLICIT_TIME_DEPENDENT || var_eq_type[i] == TIME_INDEPENDENT || var_eq_type[i] == TIME_INDEPENDENT_MULTIGRID){
 
             bool need_value_residual_entry, need_gradient_residual_entry, single_var_nonlinear_RHS, single_var_nonlinear_LHS;
 

@@ -13,7 +13,7 @@ void MatrixFreePDE<dim,degree>::setNonlinearEqInitialGuess(){
     char buffer[200];
 
     for(unsigned int fieldIndex=0; fieldIndex<fields.size(); fieldIndex++){
-        if ( (userInputs.var_eq_type[fieldIndex] == TIME_INDEPENDENT) && userInputs.var_nonlinear[fieldIndex] && userInputs.nonlinear_solver_parameters.getLaplaceInitializationFlag(fieldIndex)){
+        if ( (userInputs.var_eq_type[fieldIndex] == TIME_INDEPENDENT || fields[fieldIndex].pdetype==TIME_INDEPENDENT_MULTIGRID) && userInputs.var_nonlinear[fieldIndex] && userInputs.nonlinear_solver_parameters.getLaplaceInitializationFlag(fieldIndex)){
             currentFieldIndex = fieldIndex; // Used in computeLaplaceLHS()
 
             computeLaplaceRHS(fieldIndex);

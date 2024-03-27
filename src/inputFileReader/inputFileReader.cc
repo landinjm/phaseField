@@ -280,7 +280,7 @@ void inputFileReader::declare_parameters(dealii::ParameterHandler & parameter_ha
     parameter_handler.declare_entry("Simulation end time","-0.1",dealii::Patterns::Double(),"The value of simulated time where the simulation ends.");
 
     for (unsigned int i=0; i<var_types.size(); i++){
-        if (var_eq_types.at(i) == TIME_INDEPENDENT || var_eq_types.at(i) == IMPLICIT_TIME_DEPENDENT){
+        if (var_eq_types.at(i) == TIME_INDEPENDENT || var_eq_types.at(i) == TIME_INDEPENDENT_MULTIGRID || var_eq_types.at(i) == IMPLICIT_TIME_DEPENDENT){
             std::string subsection_text = "Linear solver parameters: ";
             subsection_text.append(var_names.at(i));
             parameter_handler.enter_subsection(subsection_text);

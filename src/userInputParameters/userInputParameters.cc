@@ -100,7 +100,7 @@ userInputParameters<dim>::userInputParameters(inputFileReader & input_file_reade
 
     // Linear solver parameters
     for (unsigned int i=0; i<number_of_variables; i++){
-        if (input_file_reader.var_eq_types.at(i) == TIME_INDEPENDENT || input_file_reader.var_eq_types.at(i) == IMPLICIT_TIME_DEPENDENT){
+        if (input_file_reader.var_eq_types.at(i) == TIME_INDEPENDENT || input_file_reader.var_eq_types.at(i) == TIME_INDEPENDENT_MULTIGRID || input_file_reader.var_eq_types.at(i) == IMPLICIT_TIME_DEPENDENT){
             std::string subsection_text = "Linear solver parameters: ";
             subsection_text.append(input_file_reader.var_names.at(i));
 
@@ -184,7 +184,7 @@ userInputParameters<dim>::userInputParameters(inputFileReader & input_file_reade
 
                 // Set whether to use the solution of Laplace's equation instead of the IC in ICs_and_BCs.h as the initial guess for nonlinear, time independent equations
                 bool temp_laplace_for_initial_guess;
-                if (var_eq_type[i] == TIME_INDEPENDENT){
+                if (var_eq_type[i] == TIME_INDEPENDENT || var_eq_type[i] == TIME_INDEPENDENT_MULTIGRID){
                     temp_laplace_for_initial_guess = parameter_handler.get_bool("Use Laplace's equation to determine the initial guess");
                 }
                 else {
