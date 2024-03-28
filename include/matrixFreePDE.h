@@ -218,6 +218,7 @@ class MatrixFreePDE:public Subscriptor
   //multigrid methods
   MGLevelObject<MatrixFree<dim,double>> multigridObject;
   MGConstrainedDoFs multigrid_constraints;
+  std::vector<const AffineConstraints<double>*> levelConstraintsSet; //Having a set is likely uneccessary but good practice for future
 
   //matrix free methods
   /*Current field index*/

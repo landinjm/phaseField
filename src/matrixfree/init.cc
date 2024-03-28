@@ -28,6 +28,10 @@ void MatrixFreePDE<dim, degree>::init()
         triangulation.refine_global(userInputs.refine_factor);
     }
 
+	// Grab the total refinement levels for multigrid
+	const unsigned int nlevels = triangulation.n_global_levels();
+	multigridObject.resize(0, nlevels - 1);
+
     // Write out the size of the computational domain and the total number of elements
     if (dim < 3) {
         pcout << "problem dimensions: " << userInputs.domain_size[0] << "x" << userInputs.domain_size[1] << std::endl;
@@ -45,7 +49,7 @@ void MatrixFreePDE<dim, degree>::init()
 
         char buffer[100];
 
-        // print to std::out
+        {// print to std::out
         std::string var_type;
         if (it->pdetype == EXPLICIT_TIME_DEPENDENT) {
             var_type = "EXPLICIT_TIME_DEPENDENT";
@@ -89,7 +93,7 @@ void MatrixFreePDE<dim, degree>::init()
             isEllipticBVP = true;
             ellipticFieldIndex = it->index;
             hasNonExplicitEquation = true;
-        }
+        }}
 
         // create FESystem
         FESystem<dim>* fe;
@@ -179,6 +183,30 @@ void MatrixFreePDE<dim, degree>::init()
             }
         }
 
+		//Intialize multigrid constraints (hanging nodes & dirichlet)
+		multigrid_constraints.initialize(*dof_handler);
+		for (unsigned int direction = 0; direction < 2*dim; direction++){
+			std::set<types::boundary_id> dirichlet_boundary_ids = {direction};
+			multigrid_constraints.make_zero_boundary_constraints(*dof_handler,dirichlet_boundary_ids); //I hope this is doing what I think it does
+		}
+		for (unsigned int level = 0; level < nlevels; ++level){
+			// Extract relevant_dofs
+			IndexSet* relevant_dofs;
+			relevant_dofs = new IndexSet;
+			relevant_dofs->clear(); //not sure how necessary this is
+
+			DoFTools::extract_locally_relevant_dofs(*dof_handler, *relevant_dofs);
+
+			// MG constraints for this level
+			AffineConstraints<double> *levelConstraints;
+			levelConstraints = new AffineConstraints<double>;
+			levelConstraintsSet.push_back(levelConstraints);
+			levelConstraints->clear();
+			levelConstraints->reinit(*relevant_dofs);;
+			levelConstraints->add_lines(multigrid_constraints.get_boundary_indices(level));
+			levelConstraints->close();
+		}
+
         snprintf(buffer, sizeof(buffer), "field '%2s' DOF : %u (Constraint DOF : %u)\n",
             it->name.c_str(), dof_handler->n_dofs(), constraintsDirichlet->n_constraints());
         pcout << buffer;
@@ -195,6 +223,21 @@ void MatrixFreePDE<dim, degree>::init()
         dofHandlersSet, constraintsOtherSet, quadrature, additional_data);
     bool dU_scalar_init = false;
     bool dU_vector_init = false;
+
+	// Setup the multigrid matrix free object
+	for (unsigned int level = 0; level < nlevels; ++level){
+		additional_data.mg_level = level;
+		multigridObject[level].clear();
+
+		multigridObject[level].reinit(MappingFE<dim, dim>(FE_Q<dim>(QGaussLobatto<1>(degree + 1))),
+        	dofHandlersSet, levelConstraintsSet, quadrature, additional_data);
+		//Not sure why we use the above code and not what's provided in the example... need to understand what reinit does
+		//std::shared_ptr<MatrixFree<dim, double>> mg_matrixfree_storage_level(new MatrixFree<dim, double>());
+		//mg_matrixfree_storage_level->reinit(MappingFE<dim, dim>(FE_Q<dim>(QGaussLobatto<1>(degree + 1))),
+			//dofHandlersSet, levelConstraintsSet, quadrature, additional_data);
+		
+		//multigridObject[level].initialize_dof_vector(mg_matrixfree_storage_level, multigrid_constraints, level);
+	}
 
     // Setup solution vectors
     pcout << "initializing parallel::distributed residual and solution vectors\n";
