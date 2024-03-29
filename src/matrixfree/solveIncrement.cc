@@ -2,6 +2,7 @@
 
 #include "../../include/matrixFreePDE.h"
 #include <deal.II/lac/solver_cg.h>
+#include <deal.II/lac/precondition.h>
 
 //solve each time increment
 template <int dim, int degree>
@@ -163,15 +164,30 @@ void MatrixFreePDE<dim,degree>::solveIncrement(bool skip_time_dependent){
                     // Currently the only allowed solver is SolverCG, the SolverType input variable is a dummy
                     SolverCG<vectorType> solver(solver_control);
 
+                    //Grab identity matrix for preconditioner
+                    PreconditionIdentity preconditioner;
+
+                    //Multigrid methods
+                    if (fields[fieldIndex].pdetype = TIME_INDEPENDENT_MULTIGRID) {
+                        MGTransferMatrixFree<dim, double> multigrid_transfer(multigrid_constraints);
+                        multigrid_transfer.build(*dofHandlersSet[fieldIndex]);
+
+                        //Smoother
+                        using SmootherType = PreconditionChebyshev<MatrixFree<dim,double>,LinearAlgebra::distributed::Vector<double>>;
+                        mg::SmootherRelaxation<SmootherType,LinearAlgebra::distributed::Vector<double>> multigrid_smoother;
+                        MGLevelObject<typename SmootherType::AdditionalData> smoother_data;
+
+                    }
+
                     //solve
                     try{
                         if (fields[fieldIndex].type == SCALAR){
                             dU_scalar=0.0;
-                            solver.solve(*this, dU_scalar, *residualSet[fieldIndex], IdentityMatrix(solutionSet[fieldIndex]->size()));
+                            solver.solve(*this, dU_scalar, *residualSet[fieldIndex], preconditioner);
                         }
                         else {
                             dU_vector=0.0;
-                            solver.solve(*this, dU_vector, *residualSet[fieldIndex], IdentityMatrix(solutionSet[fieldIndex]->size()));
+                            solver.solve(*this, dU_vector, *residualSet[fieldIndex], preconditioner);
                         }
                     }
                     catch (...) {
