@@ -49,12 +49,19 @@ template <int dim, int degree>
 void customPDE<dim,degree>::explicitEquationRHS(variableContainer<dim,degree,dealii::VectorizedArray<double> > & variable_list,
 				 dealii::Point<dim, dealii::VectorizedArray<double> > q_point_loc) const {
 
+	//Grab derivative model variable
+	vectorvalueType u = variable_list.get_vector_value(0);
+	vectorgradType ux = variable_list.get_vector_gradient(0);
+	scalargradType Px = variable_list.get_scalar_gradient(1);
+
+	//Initialize submission terms
+	vectorvalueType eq_u;
+	eq_u = eq_u*constV(0.0);
+	vectorgradType eqx_u;
+	eqx_u = eqx_u*constV(0.0);
+
 	//Step one of the Chorin projection
 	if(!ChorinSwitch){
-		//Grab derivative model variable
-		vectorvalueType u = variable_list.get_vector_value(0);
-		vectorgradType ux = variable_list.get_vector_gradient(0);
-	
 		//Calculating the advection term
 		vectorvalueType advecTerm;
 		for(unsigned int i=0; i<dim; i++){
@@ -63,40 +70,27 @@ void customPDE<dim,degree>::explicitEquationRHS(variableContainer<dim,degree,dea
 			}
 		}
 
-		//Setting the expressions for the terms in the governing equations
-		vectorvalueType eq_u = u-constV(userInputs.dtValue)*advecTerm;
-		vectorgradType eqx_u = constV(-userInputs.dtValue/Re)*ux;
+		eq_u = u-constV(userInputs.dtValue)*advecTerm;
+		eqx_u = constV(-userInputs.dtValue/Re)*ux;
 
 		if(this->currentIncrement <= switchToFractional){
-			scalargradType Px = variable_list.get_scalar_gradient(1);
 			eq_u -= constV(userInputs.dtValue)*Px;
 		}
-		//Submitting the terms for the governing equations
-		variable_list.set_vector_value_term_RHS(0,eq_u);
-		variable_list.set_vector_gradient_term_RHS(0,eqx_u);
 	}
 
 	//Step three of the Chorin projection
 	if(ChorinSwitch == true){
-		//Grab derivative model variable
-		vectorvalueType u = variable_list.get_vector_value(0);
-		scalargradType Px = variable_list.get_scalar_gradient(1);
-	
 		//Setting the expressions for the terms in the governing equations
-		vectorvalueType eq_u = u-constV(userInputs.dtValue)*Px;
+		eq_u = u-constV(userInputs.dtValue)*Px;
 
 		if(this->currentIncrement <= switchToFractional){
 			eq_u = u;
 		}
-
-		//This dummy variable is neccessary to remove the residual from step 1 chorin
-		vectorgradType dummy;
-
-		//Submitting the terms for the governing equations
-		variable_list.set_vector_value_term_RHS(0,eq_u);
-		variable_list.set_vector_gradient_term_RHS(0,0.0*dummy);
 	}
 
+	//Submitting the terms for the governing equations
+	variable_list.set_vector_value_term_RHS(0,eq_u);
+	variable_list.set_vector_gradient_term_RHS(0,eqx_u);
 }
 
 // =============================================================================================
@@ -114,30 +108,32 @@ void customPDE<dim,degree>::explicitEquationRHS(variableContainer<dim,degree,dea
 template <int dim, int degree>
 void customPDE<dim,degree>::nonExplicitEquationRHS(variableContainer<dim,degree,dealii::VectorizedArray<double> > & variable_list,
 				 dealii::Point<dim, dealii::VectorizedArray<double> > q_point_loc) const {
-	
-	if(this->currentIncrement <= switchToFractional){
-		vectorgradType ux = variable_list.get_vector_gradient(0);
-		scalargradType Px = variable_list.get_scalar_gradient(1);
 
-		scalarvalueType eq_P;
+	//Grab derivative model variable
+	vectorvalueType u = variable_list.get_vector_value(0);
+	vectorgradType ux = variable_list.get_vector_gradient(0);
+	scalargradType Px = variable_list.get_scalar_gradient(1);
+
+	//Initialize submission terms
+	scalarvalueType eq_P = constV(0.0);
+	scalargradType eqx_P;
+	eqx_P = eqx_P*constV(0.0);
+
+	if(this->currentIncrement <= switchToFractional){
 		for(unsigned int i = 0; i<dim; i++){
 			for(unsigned int j = 0; j<dim; j++){
 				eq_P += ux[i][j]*ux[j][i];
 			}
 		}
-
-		variable_list.set_scalar_value_term_RHS(1,eq_P);
-		variable_list.set_scalar_gradient_term_RHS(1,-Px);
+		eqx_P = -Px;
 	}
 	else{
-		vectorvalueType u = variable_list.get_vector_value(0);
-		scalargradType Px = variable_list.get_scalar_gradient(1);
-
-		vectorvalueType eq_P = constV(1.0/userInputs.dtValue)*u;
-
-		variable_list.set_scalar_gradient_term_RHS(1,eq_P-Px);
+		eqx_P = constV(1.0/userInputs.dtValue)*u-Px;
 	}
 
+	//Submitting the terms for the governing equations
+	variable_list.set_scalar_value_term_RHS(1,eq_P);
+	variable_list.set_scalar_gradient_term_RHS(1,eqx_P);
 }
 
 // =============================================================================================
