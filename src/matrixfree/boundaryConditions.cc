@@ -262,8 +262,8 @@ void MatrixFreePDE<dim,degree>::setRigidBodyModeConstraints(const std::vector<in
 						for (unsigned int component_num = 0; component_num < rigidBodyModeComponents.size(); component_num++){
 							unsigned int nodeID=cell->vertex_dof_index(i,component_num);
 							//Temporarily disabling the addition of inhomogeneous constraints
-							//constraints->add_line(nodeID);
-							//constraints->set_inhomogeneity(nodeID,0.0);
+							constraints->add_line(nodeID);
+							constraints->set_inhomogeneity(nodeID,0.0);
 						}
 				   }
 			   }
