@@ -35,7 +35,7 @@ set Time step = 1.0e-5
 
 # The simulation ends when either the number of time steps is reached or the
 # simulation time is reached.
-set Number of time steps = 1000000
+set Number of time steps = 10000
 
 # =================================================================================
 # Set the boundary conditions
@@ -61,21 +61,18 @@ set Number of time steps = 1000000
 #These are the boundary conditions for Couette flow
 #set Boundary condition for variable u, x component = NATURAL, NATURAL, DIRICHLET: 0.0, DIRICHLET: 1.0
 #set Boundary condition for variable u, y component = NATURAL, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0
-#set Boundary condition for variable u, z component = NATURAL, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0
 
 #set Boundary condition for variable P = DIRICHLET: 0.0, DIRICHLET: 0.0, NATURAL, NATURAL
 
 #Boundary conditions for pipe flow / Poisueille flow
 #set Boundary condition for variable u, x component = NATURAL, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0
 #set Boundary condition for variable u, y component = NATURAL, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0
-#set Boundary condition for variable u, z component = NATURAL, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0
 
 #set Boundary condition for variable P = DIRICHLET: 1.0, DIRICHLET: 0.0, NATURAL, NATURAL
 
 #These are the boundary conditions for Cavity flow
 set Boundary condition for variable u, x component = DIRICHLET: 0.0, DIRICHLET: 0.0, DIRICHLET: 0.0, DIRICHLET: 1.0
 set Boundary condition for variable u, y component = DIRICHLET: 0.0, DIRICHLET: 0.0, DIRICHLET: 0.0, DIRICHLET: 0.0
-set Boundary condition for variable u, z component = DIRICHLET: 0.0, DIRICHLET: 0.0, DIRICHLET: 0.0, DIRICHLET: 0.0
 
 set Boundary condition for variable P = NATURAL, NATURAL, DIRICHLET: 0.0, NATURAL
 
@@ -89,7 +86,7 @@ set Boundary condition for variable P = NATURAL, NATURAL, DIRICHLET: 0.0, NATURA
 # where [symmetry] is ISOTROPIC, TRANSVERSE, ORTHOTROPIC, or ANISOTROPIC.
 
 #Reynolds number
-set Model constant Re = 100.0, DOUBLE
+set Model constant Re = 0.01, DOUBLE
 
 #What increment to switch from normal to fractional methods
 set Model constant switchToFractional = 10, INT
@@ -119,7 +116,7 @@ set Output condition = EQUAL_SPACING
 
 # Number of times the program outputs the fields (total number for "EQUAL_SPACING"
 # and "LOG_SPACING", number per decade for "N_PER_DECADE", ignored for "LIST")
-set Number of outputs = 100
+set Number of outputs = 10
 
 # The number of time steps between updates being printed to the screen
 set Skip print steps = 1
@@ -136,4 +133,4 @@ set Checkpoint condition = EQUAL_SPACING
 
 # Number of times the creates checkpoints (total number for "EQUAL_SPACING"
 # and "LOG_SPACING", number per decade for "N_PER_DECADE", ignored for "LIST")
-set Number of checkpoints = 1
+set Number of checkpoints = 0
