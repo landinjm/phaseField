@@ -53,11 +53,15 @@ private:
 	// Model constants specific to this subclass
 	// ================================================================
 
-	double Re = userInputs.get_model_constant_double("Re");
+	double reynolds_i = userInputs.get_model_constant_double("ReynoldsInitial");
+    double reynolds_f = userInputs.get_model_constant_double("ReynoldsFinal");
     int switchFractional = userInputs.get_model_constant_int("switchToFractional");
 
     //Change var type
     unsigned int switchToFractional = switchFractional;
+
+    //Scaling reynolds number
+    double Re = reynolds_i;
 
     //This bool acts as a switch to indicate what Chorin projection step is being calculating
     bool ChorinSwitch;
@@ -80,6 +84,10 @@ void customPDE<dim,degree>::solveIncrement(bool skip_time_dependent)
     this->computing_timer.enter_subsection("matrixFreePDE: solveIncrements");
     Timer time;
     char buffer[200];
+
+    //Scale reynolds number
+    Re = reynolds_i + (reynolds_f-reynolds_i)*this->currentIncrement/userInputs.totalIncrements;
+    this->pcout << Re << std::endl;
 
     //Set ChorinSwitch to false so steps 1 and 2 may occur
     ChorinSwitch = false;

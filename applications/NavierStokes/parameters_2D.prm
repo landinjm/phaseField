@@ -86,7 +86,8 @@ set Boundary condition for variable P = NATURAL, NATURAL, DIRICHLET: 0.0, NATURA
 # where [symmetry] is ISOTROPIC, TRANSVERSE, ORTHOTROPIC, or ANISOTROPIC.
 
 #Reynolds number
-set Model constant Re = 0.01, DOUBLE
+set Model constant ReynoldsInitial = 1.0, DOUBLE
+set Model constant ReynoldsFinal = 10.0, DOUBLE
 
 #What increment to switch from normal to fractional methods
 set Model constant switchToFractional = 10, INT
