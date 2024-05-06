@@ -35,7 +35,7 @@ set Time step = 1.0e-5
 
 # The simulation ends when either the number of time steps is reached or the
 # simulation time is reached.
-set Number of time steps = 10000
+set Number of time steps = 100000
 
 # =================================================================================
 # Set the boundary conditions
@@ -74,7 +74,7 @@ set Number of time steps = 10000
 set Boundary condition for variable u, x component = DIRICHLET: 0.0, DIRICHLET: 0.0, DIRICHLET: 0.0, DIRICHLET: 1.0
 set Boundary condition for variable u, y component = DIRICHLET: 0.0, DIRICHLET: 0.0, DIRICHLET: 0.0, DIRICHLET: 0.0
 
-set Boundary condition for variable P = NATURAL, NATURAL, DIRICHLET: 0.0, NATURAL
+set Boundary condition for variable P = NATURAL
 
 # =================================================================================
 # Set the model constants
@@ -87,7 +87,7 @@ set Boundary condition for variable P = NATURAL, NATURAL, DIRICHLET: 0.0, NATURA
 
 #Reynolds number
 set Model constant ReynoldsInitial = 1.0, DOUBLE
-set Model constant ReynoldsFinal = 10.0, DOUBLE
+set Model constant ReynoldsFinal = 100.0, DOUBLE
 
 #What increment to switch from normal to fractional methods
 set Model constant switchToFractional = 10, INT
