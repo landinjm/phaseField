@@ -53,12 +53,16 @@ private:
 	// Model constants specific to this subclass
 	// ================================================================
 
-	double Re = userInputs.get_model_constant_double("Re");
-	double psiReg = userInputs.get_model_constant_double("psiReg");
+	double reynolds_i = userInputs.get_model_constant_double("ReynoldsInitial");
+    double reynolds_f = userInputs.get_model_constant_double("ReynoldsFinal");
     int switchFractional = userInputs.get_model_constant_int("switchToFractional");
+	double psiReg = userInputs.get_model_constant_double("psiReg");
 
     //Change var type
     unsigned int switchToFractional = switchFractional;
+
+    //Scaling reynolds number
+    double Re = reynolds_i;
 
     //This bool acts as a switch to indicate what Chorin projection step is being calculating
     bool ChorinSwitch;
@@ -82,6 +86,10 @@ void customPDE<dim,degree>::solveIncrement(bool skip_time_dependent)
     Timer time;
     char buffer[200];
 
+    //Scale reynolds number
+    Re = reynolds_i + (reynolds_f-reynolds_i)*this->currentIncrement/userInputs.totalIncrements;
+    this->pcout << Re << std::endl;
+
     //Set ChorinSwitch to false so steps 1 and 2 may occur
     ChorinSwitch = false;
 
@@ -99,20 +107,11 @@ void customPDE<dim,degree>::solveIncrement(bool skip_time_dependent)
         //applyNeumannBCs();
         
         //Parabolic (first order derivatives in time) fields
-        if (this->fields[fieldIndex].pdetype==EXPLICIT_TIME_DEPENDENT && userInputs.var_name[fieldIndex] != "psi" && !skip_time_dependent){
+        if (this->fields[fieldIndex].pdetype==EXPLICIT_TIME_DEPENDENT && !skip_time_dependent){
             
             // Explicit-time step each DOF
-            // Takes advantage of knowledge that the length of solutionSet and residualSet is an integer multiple of the length of invM for vector variables
-#if (DEAL_II_VERSION_MAJOR == 9 && DEAL_II_VERSION_MINOR < 4)
-            unsigned int invM_size = this->invM.local_size();
-            for (unsigned int dof=0; dof<this->solutionSet[fieldIndex]->local_size(); ++dof){
-#else
-            unsigned int invM_size = this->invM.locally_owned_size();
-            for (unsigned int dof=0; dof<this->solutionSet[fieldIndex]->locally_owned_size(); ++dof){
-#endif
-                this->solutionSet[fieldIndex]->local_element(dof)=            \
-                this->invM.local_element(dof%invM_size)*this->residualSet[fieldIndex]->local_element(dof);
-            }
+            this->updateExplicitSolution(fieldIndex);
+
             // Set the Dirichelet values (hanging node constraints don't need to be distributed every time step, only at output)
             if (this->has_Dirichlet_BCs){
                 this->constraintsDirichletSet[fieldIndex]->distribute(*this->solutionSet[fieldIndex]);
@@ -176,16 +175,9 @@ void customPDE<dim,degree>::solveIncrement(bool skip_time_dependent)
                         this->pcout<<buffer;
                     }
                     
-                    dealii::LinearAlgebra::distributed::Vector<double> solution_diff = *this->solutionSet[fieldIndex];
-                    
                     //apply Dirichlet BC's
-                    // Loops through all DoF to which ones have Dirichlet BCs applied, replace the ones that do with the Dirichlet value
                     // This clears the residual where we want to apply Dirichlet BCs, otherwise the solver sees a positive residual
-                    for (std::map<types::global_dof_index, double>::const_iterator it=this->valuesDirichletSet[fieldIndex]->begin(); it!=this->valuesDirichletSet[fieldIndex]->end(); ++it){
-                        if (this->residualSet[fieldIndex]->in_local_range(it->first)){
-                            (*this->residualSet[fieldIndex])(it->first) = 0.0;
-                        }
-                    }
+                    this->constraintsDirichletSet[fieldIndex]->set_zero(*this->residualSet[fieldIndex]);
                     
                     //solver controls
                     double tol_value;
@@ -352,17 +344,7 @@ void customPDE<dim,degree>::solveIncrement(bool skip_time_dependent)
                         }
                         
                         // Explicit-time step each DOF
-                        // Takes advantage of knowledge that the length of solutionSet and residualSet is an integer multiple of the length of invM for vector variables
-#if (DEAL_II_VERSION_MAJOR == 9 && DEAL_II_VERSION_MINOR < 4)
-                        unsigned int invM_size = this->invM.local_size();
-                        for (unsigned int dof=0; dof<this->solutionSet[fieldIndex]->local_size(); ++dof){
-#else
-                        unsigned int invM_size = this->invM.locally_owned_size();
-                        for (unsigned int dof=0; dof<this->solutionSet[fieldIndex]->locally_owned_size(); ++dof){
-#endif
-                            this->solutionSet[fieldIndex]->local_element(dof)=            \
-                            this->invM.local_element(dof%invM_size)*this->residualSet[fieldIndex]->local_element(dof);
-                        }
+                        this->updateExplicitSolution(fieldIndex);
                         
                         // Set the Dirichelet values (hanging node constraints don't need to be distributed every time step, only at output)
                         this->constraintsDirichletSet[fieldIndex]->distribute(*this->solutionSet[fieldIndex]);
@@ -437,17 +419,8 @@ void customPDE<dim,degree>::solveIncrement(bool skip_time_dependent)
         ChorinSwitch = false;
 
         // Explicit-time step each DOF
-        // Takes advantage of knowledge that the length of solutionSet and residualSet is an integer multiple of the length of invM for vector variables
-#if (DEAL_II_VERSION_MAJOR == 9 && DEAL_II_VERSION_MINOR < 4)
-        unsigned int invM_size = this->invM.local_size();
-        for (unsigned int dof=0; dof<this->solutionSet[fieldIndex]->local_size(); ++dof){
-#else
-        unsigned int invM_size = this->invM.locally_owned_size();
-        for (unsigned int dof=0; dof<this->solutionSet[fieldIndex]->locally_owned_size(); ++dof){
-#endif
-            this->solutionSet[fieldIndex]->local_element(dof)=            \
-            this->invM.local_element(dof%invM_size)*this->residualSet[fieldIndex]->local_element(dof);
-        }
+        this->updateExplicitSolution(fieldIndex);
+
         // Set the Dirichlet values
         if (this->has_Dirichlet_BCs){
             this->constraintsDirichletSet[fieldIndex]->distribute(*this->solutionSet[fieldIndex]);

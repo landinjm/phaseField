@@ -37,7 +37,7 @@ void variableAttributeLoader::loadVariableAttributes(){
 	set_variable_type				(2,SCALAR);
 	set_variable_equation_type		(2,EXPLICIT_TIME_DEPENDENT);
 
-    set_dependencies_value_term_RHS(2, "");
+    set_dependencies_value_term_RHS(2, "psi");
     set_dependencies_gradient_term_RHS(2, "");
 
 }
@@ -63,10 +63,12 @@ void customPDE<dim,degree>::explicitEquationRHS(variableContainer<dim,degree,dea
 	scalargradType Px = variable_list.get_scalar_gradient(1);
 	scalarvalueType psi = variable_list.get_scalar_value(2);
 	scalargradType psix = variable_list.get_scalar_gradient(2);
-	
+
 	//Initialize submission variables
 	vectorvalueType eq_u;
+	eq_u = eq_u*constV(0.0);
 	vectorgradType eqx_u;
+	eqx_u = eqx_u*constV(0.0);
 
 	//Step one of the Chorin projection
 	if(!ChorinSwitch){
@@ -105,7 +107,7 @@ void customPDE<dim,degree>::explicitEquationRHS(variableContainer<dim,degree,dea
 	//Submitting the terms for the governing equations
 	variable_list.set_vector_value_term_RHS(0,eq_u);
 	variable_list.set_vector_gradient_term_RHS(0,eqx_u);
-	//variable_list.set_scalar_value_term_RHS(2,psi);
+	variable_list.set_scalar_value_term_RHS(2,psi);
 
 }
 
@@ -135,6 +137,7 @@ void customPDE<dim,degree>::nonExplicitEquationRHS(variableContainer<dim,degree,
 	//Initialize submission variables
 	scalarvalueType eq_P = constV(0.0);
 	scalargradType eq_Px;
+	eq_Px = eq_Px*constV(0.0);
 
 	if(this->currentIncrement <= switchToFractional){
 		for(unsigned int i=0; i<dim; i++){
@@ -146,7 +149,7 @@ void customPDE<dim,degree>::nonExplicitEquationRHS(variableContainer<dim,degree,
 		eq_Px = -Px;
 	}
 	else{
-		eq_Px = constV(1.0/userInputs.dtValue)*u-Px;		
+		eq_Px = constV(1.0/userInputs.dtValue)*u-Px;
 	}
 
 	eq_P += Px*psix/(psi+constV(psiReg));
