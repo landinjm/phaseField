@@ -35,7 +35,7 @@ set Time step = 1.0e-5
 
 # The simulation ends when either the number of time steps is reached or the
 # simulation time is reached.
-set Number of time steps = 100000
+set Number of time steps = 1000000
 
 # =================================================================================
 # Set the boundary conditions
@@ -87,7 +87,7 @@ set Boundary condition for variable P = NATURAL
 
 #Reynolds number
 set Model constant ReynoldsInitial = 1.0, DOUBLE
-set Model constant ReynoldsFinal = 100.0, DOUBLE
+set Model constant ReynoldsFinal = 1000.0, DOUBLE
 
 #What increment to switch from normal to fractional methods
 set Model constant switchToFractional = 10, INT
@@ -117,10 +117,10 @@ set Output condition = EQUAL_SPACING
 
 # Number of times the program outputs the fields (total number for "EQUAL_SPACING"
 # and "LOG_SPACING", number per decade for "N_PER_DECADE", ignored for "LIST")
-set Number of outputs = 10
+set Number of outputs = 0
 
 # The number of time steps between updates being printed to the screen
-set Skip print steps = 1
+set Skip print steps = 10000
 
 # =================================================================================
 # Set the checkpoint/restart parameters

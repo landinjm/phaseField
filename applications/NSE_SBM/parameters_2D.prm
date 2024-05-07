@@ -35,7 +35,7 @@ set Time step = 1.0e-3
 
 # The simulation ends when either the number of time steps is reached or the
 # simulation time is reached.
-set Number of time steps = 1000
+set Number of time steps = 10000
 
 # =================================================================================
 # Set the boundary conditions
@@ -75,7 +75,8 @@ set Boundary condition for variable psi = NATURAL
 # where [symmetry] is ISOTROPIC, TRANSVERSE, ORTHOTROPIC, or ANISOTROPIC.
 
 #Reynolds number
-set Model constant Re = 100.0, DOUBLE
+set Model constant ReynoldsInitial = 1.0, DOUBLE
+set Model constant ReynoldsFinal = 1.0, DOUBLE
 
 #Psi regularization value
 set Model constant psiReg = 1e-5, DOUBLE
