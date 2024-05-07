@@ -35,6 +35,7 @@ set Time step = 1.0e-5
 
 # The simulation ends when either the number of time steps is reached or the
 # simulation time is reached.
+set Number of time steps = 1000
 set Number of time steps = 1000000
 
 # =================================================================================
@@ -65,16 +66,16 @@ set Number of time steps = 1000000
 #set Boundary condition for variable P = DIRICHLET: 0.0, DIRICHLET: 0.0, NATURAL, NATURAL
 
 #Boundary conditions for pipe flow / Poisueille flow
-#set Boundary condition for variable u, x component = NATURAL, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0
-#set Boundary condition for variable u, y component = NATURAL, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0
-
-#set Boundary condition for variable P = DIRICHLET: 1.0, DIRICHLET: 0.0, NATURAL, NATURAL
-
-#These are the boundary conditions for Cavity flow
-set Boundary condition for variable u, x component = DIRICHLET: 0.0, DIRICHLET: 0.0, DIRICHLET: 0.0, DIRICHLET: 1.0
-set Boundary condition for variable u, y component = DIRICHLET: 0.0, DIRICHLET: 0.0, DIRICHLET: 0.0, DIRICHLET: 0.0
+set Boundary condition for variable u, x component = NON_UNIFORM_DIRICHLET, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0
+set Boundary condition for variable u, y component = DIRICHLET: 0.0, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0
 
 set Boundary condition for variable P = NATURAL
+
+#These are the boundary conditions for Cavity flow
+#set Boundary condition for variable u, x component = DIRICHLET: 0.0, DIRICHLET: 0.0, DIRICHLET: 0.0, DIRICHLET: 1.0
+#set Boundary condition for variable u, y component = DIRICHLET: 0.0, DIRICHLET: 0.0, DIRICHLET: 0.0, DIRICHLET: 0.0
+
+#set Boundary condition for variable P = NATURAL
 
 # =================================================================================
 # Set the model constants
@@ -87,6 +88,7 @@ set Boundary condition for variable P = NATURAL
 
 #Reynolds number
 set Model constant ReynoldsInitial = 1.0, DOUBLE
+set Model constant ReynoldsFinal = 1.0, DOUBLE
 set Model constant ReynoldsFinal = 1000.0, DOUBLE
 
 #What increment to switch from normal to fractional methods
@@ -120,6 +122,7 @@ set Output condition = EQUAL_SPACING
 set Number of outputs = 0
 
 # The number of time steps between updates being printed to the screen
+set Skip print steps = 100
 set Skip print steps = 10000
 
 # =================================================================================

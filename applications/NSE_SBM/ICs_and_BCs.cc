@@ -83,8 +83,9 @@ void customPDE<dim,degree>::setNonUniformDirichletBCs(const dealii::Point<dim> &
 
     if(index == 0){
         if(direction == 0){
+            double MaxFlow = 1.0;
             double normalizedPos = p[1]/userInputs.domain_size[1];
-            vector_BC(0) = 4.0*normalizedPos*(1.0-normalizedPos);
+            vector_BC(direction) = MaxFlow*(1.0-4.0*(normalizedPos-0.5)*(normalizedPos-0.5));
         }
     }
 

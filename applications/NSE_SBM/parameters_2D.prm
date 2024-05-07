@@ -31,11 +31,11 @@ set Element degree = 1
 # Set the time step parameters
 # =================================================================================
 # The size of the time step
-set Time step = 1.0e-3
+set Time step = 5.0e-5
 
 # The simulation ends when either the number of time steps is reached or the
 # simulation time is reached.
-set Number of time steps = 10000
+set Number of time steps = 50
 
 # =================================================================================
 # Set the boundary conditions
@@ -58,10 +58,10 @@ set Number of time steps = 10000
 # set Boundary condition for variable n = NATURAL, NATURAL, DIRICHLET: 1.5, DIRICHLET: 1.5
 
 #These are the boundary conditions for stokes flow around a particle
-set Boundary condition for variable u, x component = NATURAL, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0
-set Boundary condition for variable u, y component = NATURAL, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0
+set Boundary condition for variable u, x component = NON_UNIFORM_DIRICHLET, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0
+set Boundary condition for variable u, y component = DIRICHLET: 0.0, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0
 
-set Boundary condition for variable P = DIRICHLET: 1.0, DIRICHLET: 0.0, NATURAL, NATURAL
+set Boundary condition for variable P = NATURAL
 
 set Boundary condition for variable psi = NATURAL
 
@@ -75,8 +75,8 @@ set Boundary condition for variable psi = NATURAL
 # where [symmetry] is ISOTROPIC, TRANSVERSE, ORTHOTROPIC, or ANISOTROPIC.
 
 #Reynolds number
-set Model constant ReynoldsInitial = 1.0, DOUBLE
-set Model constant ReynoldsFinal = 1.0, DOUBLE
+set Model constant ReynoldsInitial = 0.1, DOUBLE
+set Model constant ReynoldsFinal = 0.1, DOUBLE
 
 #Psi regularization value
 set Model constant psiReg = 1e-5, DOUBLE
@@ -108,9 +108,9 @@ set Maximum nonlinear solver iterations = 100
 
 subsection Nonlinear solver parameters: P
     set Tolerance type = ABSOLUTE_SOLUTION_CHANGE
-    set Tolerance value = 1.0e-4
-    #set Use backtracking line search damping = false
-    #set Constant damping value = 0.3
+    set Tolerance value = 1.0e-5
+    set Use backtracking line search damping = true
+    set Constant damping value = 0.3
     #set Use Laplace's equation to determine the initial guess = true
 end
 
@@ -126,7 +126,7 @@ set Output condition = EQUAL_SPACING
 set Number of outputs = 10
 
 # The number of time steps between updates being printed to the screen
-set Skip print steps = 1
+set Skip print steps = 10
 
 # =================================================================================
 # Set the checkpoint/restart parameters
