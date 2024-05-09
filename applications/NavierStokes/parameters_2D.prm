@@ -22,7 +22,7 @@ set Subdivisions X = 1
 set Subdivisions Y = 1
 set Subdivisions Z = 1
 
-set Refine factor = 6
+set Refine factor = 4
 
 # Set the polynomial degree of the element (allowed values: 1, 2, or 3)
 set Element degree = 2
@@ -36,7 +36,6 @@ set Time step = 1.0e-5
 # The simulation ends when either the number of time steps is reached or the
 # simulation time is reached.
 set Number of time steps = 1000
-set Number of time steps = 1000000
 
 # =================================================================================
 # Set the boundary conditions
@@ -89,7 +88,6 @@ set Boundary condition for variable P = NATURAL
 #Reynolds number
 set Model constant ReynoldsInitial = 1.0, DOUBLE
 set Model constant ReynoldsFinal = 1.0, DOUBLE
-set Model constant ReynoldsFinal = 1000.0, DOUBLE
 
 #What increment to switch from normal to fractional methods
 set Model constant switchToFractional = 10, INT
@@ -119,11 +117,10 @@ set Output condition = EQUAL_SPACING
 
 # Number of times the program outputs the fields (total number for "EQUAL_SPACING"
 # and "LOG_SPACING", number per decade for "N_PER_DECADE", ignored for "LIST")
-set Number of outputs = 0
+set Number of outputs = 10
 
 # The number of time steps between updates being printed to the screen
 set Skip print steps = 100
-set Skip print steps = 10000
 
 # =================================================================================
 # Set the checkpoint/restart parameters
