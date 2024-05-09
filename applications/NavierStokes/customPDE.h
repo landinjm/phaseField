@@ -55,10 +55,6 @@ private:
 
 	double reynolds_i = userInputs.get_model_constant_double("ReynoldsInitial");
     double reynolds_f = userInputs.get_model_constant_double("ReynoldsFinal");
-    int switchFractional = userInputs.get_model_constant_int("switchToFractional");
-
-    //Change var type
-    unsigned int switchToFractional = switchFractional;
 
     //Scaling reynolds number
     double Re = reynolds_i;
