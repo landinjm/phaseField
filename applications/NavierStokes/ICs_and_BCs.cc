@@ -33,6 +33,14 @@ void customPDE<dim,degree>::setInitialCondition(const dealii::Point<dim> &p, con
     if (index == 1){
         scalar_IC = 0.0;
     }
+    //Pressure old
+    if (index == 2){
+        scalar_IC = 0.0;
+    }
+    //Continuity
+    if (index == 3){
+        scalar_IC = 0.0;
+    }
     //Misc
     else{
         scalar_IC = 0.0;

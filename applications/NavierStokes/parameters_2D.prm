@@ -57,24 +57,13 @@ set Number of time steps = 10
 # 1.5 on the top and bottom for variable 'n' in 2D
 # set Boundary condition for variable n = NATURAL, NATURAL, DIRICHLET: 1.5, DIRICHLET: 1.5
 
-
-#These are the boundary conditions for Couette flow
-#set Boundary condition for variable u, x component = NATURAL, NATURAL, DIRICHLET: 0.0, DIRICHLET: 1.0
-#set Boundary condition for variable u, y component = NATURAL, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0
-
-#set Boundary condition for variable P = DIRICHLET: 0.0, DIRICHLET: 0.0, NATURAL, NATURAL
-
 #Boundary conditions for pipe flow / Poisueille flow
 set Boundary condition for variable u, x component = NON_UNIFORM_DIRICHLET, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0
 set Boundary condition for variable u, y component = DIRICHLET: 0.0, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0
 
 set Boundary condition for variable P = NATURAL
-
-#These are the boundary conditions for Cavity flow
-#set Boundary condition for variable u, x component = DIRICHLET: 0.0, DIRICHLET: 0.0, DIRICHLET: 0.0, DIRICHLET: 1.0
-#set Boundary condition for variable u, y component = DIRICHLET: 0.0, DIRICHLET: 0.0, DIRICHLET: 0.0, DIRICHLET: 0.0
-
-#set Boundary condition for variable P = NATURAL
+set Boundary condition for variable p_old = NATURAL
+set Boundary condition for variable divU = NATURAL
 
 # =================================================================================
 # Set the model constants
@@ -88,6 +77,12 @@ set Boundary condition for variable P = NATURAL
 #Reynolds number
 set Model constant ReynoldsInitial = 1.0, DOUBLE
 set Model constant ReynoldsFinal = 1.0, DOUBLE
+
+#Parameter for incremental pressure-correction scheme
+set Model constant alpha = 0.0, DOUBLE
+
+#Parameter for rotational incremental scheme
+set Model constant beta = 0.0, DOUBLE
 
 # =================================================================================
 # Set the linear solver parameters
@@ -117,7 +112,7 @@ set Output condition = EQUAL_SPACING
 set Number of outputs = 10
 
 # The number of time steps between updates being printed to the screen
-set Skip print steps = 100
+set Skip print steps = 1
 
 # =================================================================================
 # Set the checkpoint/restart parameters

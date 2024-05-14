@@ -19,7 +19,7 @@ void variableAttributeLoader::loadVariableAttributes(){
 	set_variable_type				(0,VECTOR);
 	set_variable_equation_type		(0,EXPLICIT_TIME_DEPENDENT);
 
-    set_dependencies_value_term_RHS(0, "u,grad(u),grad(P)");
+    set_dependencies_value_term_RHS(0, "u,grad(u),grad(P),grad(p_old),grad(divU)");
     set_dependencies_gradient_term_RHS(0, "grad(u)");
 
 	// Variable 1 - pressure
@@ -28,9 +28,25 @@ void variableAttributeLoader::loadVariableAttributes(){
 	set_variable_equation_type		(1,TIME_INDEPENDENT);
 
     set_dependencies_value_term_RHS(1, "");
-    set_dependencies_gradient_term_RHS(1, "grad(P),u");
+    set_dependencies_gradient_term_RHS(1, "grad(P),u,grad(p_old),grad(divU)");
 	set_dependencies_value_term_LHS(1, "");
     set_dependencies_gradient_term_LHS(1, "grad(change(P))");
+
+	// Variable 2 - the previous pressure field
+	set_variable_name				(2,"p_old");
+	set_variable_type				(2,SCALAR);
+	set_variable_equation_type		(2,EXPLICIT_TIME_DEPENDENT);
+
+    set_dependencies_value_term_RHS(2, "P, p_old");
+    set_dependencies_gradient_term_RHS(2, "");
+
+	// Variable 3 - the mass conservation
+	set_variable_name				(3,"divU");
+	set_variable_type				(3,SCALAR);
+	set_variable_equation_type		(3,EXPLICIT_TIME_DEPENDENT);
+
+    set_dependencies_value_term_RHS(3, "");
+    set_dependencies_gradient_term_RHS(3, "u");
 
 }
 
@@ -52,13 +68,20 @@ void customPDE<dim,degree>::explicitEquationRHS(variableContainer<dim,degree,dea
 	//Grab derivative model variable
 	vectorvalueType u = variable_list.get_vector_value(0);
 	vectorgradType ux = variable_list.get_vector_gradient(0);
+	scalarvalueType P = variable_list.get_scalar_value(1);
 	scalargradType Px = variable_list.get_scalar_gradient(1);
+	scalarvalueType p_old = variable_list.get_scalar_value(2);
+	scalargradType px_old = variable_list.get_scalar_gradient(2);
+	scalargradType divUx = variable_list.get_scalar_gradient(3);
 
 	//Initialize submission terms
 	vectorvalueType eq_u;
 	eq_u = eq_u*constV(0.0);
 	vectorgradType eqx_u;
 	eqx_u = eqx_u*constV(0.0);
+	scalarvalueType eq_p_old = p_old;
+	scalargradType eqx_divU;
+	eqx_divU = eqx_divU*constV(0.0);
 
 	//Step one of the Chorin projection
 	if(!ChorinSwitch){
@@ -70,19 +93,23 @@ void customPDE<dim,degree>::explicitEquationRHS(variableContainer<dim,degree,dea
 			}
 		}
 
-		eq_u = u-constV(userInputs.dtValue)*advecTerm;
+		eq_u = u-constV(userInputs.dtValue)*(advecTerm+constV(alpha)*px_old);
 		eqx_u = constV(-userInputs.dtValue/Re)*ux;
+		eq_p_old = P;
+		eqx_divU = -u;
 	}
 
 	//Step three of the Chorin projection
 	if(ChorinSwitch == true){
 		//Setting the expressions for the terms in the governing equations
-		eq_u = u-constV(userInputs.dtValue)*Px;
+		eq_u = u-constV(userInputs.dtValue)*(Px-constV(alpha)*px_old+constV(beta/Re)*divUx);
 	}
 
 	//Submitting the terms for the governing equations
 	variable_list.set_vector_value_term_RHS(0,eq_u);
 	variable_list.set_vector_gradient_term_RHS(0,eqx_u);
+	variable_list.set_scalar_value_term_RHS(2,eq_p_old);
+	variable_list.set_scalar_gradient_term_RHS(3,eqx_divU);
 }
 
 // =============================================================================================
@@ -104,14 +131,17 @@ void customPDE<dim,degree>::nonExplicitEquationRHS(variableContainer<dim,degree,
 	//Grab derivative model variable
 	vectorvalueType u = variable_list.get_vector_value(0);
 	scalargradType Px = variable_list.get_scalar_gradient(1);
+	scalargradType px_old = variable_list.get_scalar_gradient(2);
+	scalargradType divUx = variable_list.get_scalar_gradient(3);
 
 	//Initialize submission terms
 	scalarvalueType eq_P = constV(0.0);
 	scalargradType eqx_P;
 	eqx_P = eqx_P*constV(0.0);
 
-	eqx_P = constV(1.0/userInputs.dtValue)*u-Px;
+	eqx_P = constV(1.0/userInputs.dtValue)*u+constV(alpha)*px_old-constV(beta/Re)*divUx-Px;
 
+	//this->pcout << "Grad Pressure: " << Px << std::endl;
 	//Submitting the terms for the governing equations
 	variable_list.set_scalar_value_term_RHS(1,eq_P);
 	variable_list.set_scalar_gradient_term_RHS(1,eqx_P);
