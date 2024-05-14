@@ -1,4 +1,5 @@
 #include "../../include/matrixFreePDE.h"
+#include <deal.II/grid/grid_tools.h>
 
 template <int dim, int degree>
 class customPDE: public MatrixFreePDE<dim,degree>
@@ -57,12 +58,19 @@ private:
     double reynolds_f = userInputs.get_model_constant_double("ReynoldsFinal");
     double alpha = userInputs.get_model_constant_double("alpha");
     double beta = userInputs.get_model_constant_double("beta");
-
+    double delta0 = userInputs.get_model_constant_double("delta0");
+    
     //Scaling reynolds number
     double Re = reynolds_i;
 
     //This bool acts as a switch to indicate what Chorin projection step is being calculating
     bool ChorinSwitch;
+
+    //Minimum cell diameter
+    double h;
+
+    //Stabilization parameter
+    double delta;
 
 	// ================================================================
 
@@ -73,6 +81,7 @@ private:
 // =================================================================================
 
 #include <deal.II/lac/solver_cg.h>
+#include <deal.II/grid/grid_tools.h>
 
 template <int dim, int degree>
 void customPDE<dim,degree>::solveIncrement(bool skip_time_dependent)
@@ -83,9 +92,14 @@ void customPDE<dim,degree>::solveIncrement(bool skip_time_dependent)
     Timer time;
     char buffer[200];
 
+    //Finding minimum element length
+    if (skip_time_dependent){
+        h = GridTools::minimal_cell_diameter(this->triangulation);
+        delta = delta0*h*h;
+    }
+
     //Scale reynolds number
     Re = reynolds_i + (reynolds_f-reynolds_i)*this->currentIncrement/userInputs.totalIncrements;
-    this->pcout << Re << std::endl;
 
     //Set ChorinSwitch to false so steps 1 and 2 may occur
     ChorinSwitch = false;
@@ -400,49 +414,59 @@ void customPDE<dim,degree>::solveIncrement(bool skip_time_dependent)
     }
     
     //Special methods for pressure correction in Chorin projection method
-    unsigned int fieldIndex = 0;
-    this->currentFieldIndex = fieldIndex; // Used in computeLHS()
-    
-    //Parabolic (first order derivatives in time) fields
-    if (this->fields[fieldIndex].pdetype==EXPLICIT_TIME_DEPENDENT && userInputs.var_name[fieldIndex] == "u" && !skip_time_dependent){
-        
-        //Set ChorinSwitch to true so steps 3 may occur
-        ChorinSwitch = true;
+    for(unsigned int fieldIndex=0; fieldIndex<this->fields.size(); fieldIndex++){
+        this->currentFieldIndex = fieldIndex; // Used in computeLHS()
 
-        // Get the RHS of the new explicit equations
-        this->computeExplicitRHS();
-
-        //Set ChorinSwitch to false so steps 1 and 2 may occur
-        ChorinSwitch = false;
-
-        // Explicit-time step each DOF
-        this->updateExplicitSolution(fieldIndex);
-
-        // Set the Dirichlet values
-        if (this->has_Dirichlet_BCs){
-            this->constraintsDirichletSet[fieldIndex]->distribute(*this->solutionSet[fieldIndex]);
+        //Here are the allowed fields that we recalulate
+        bool skipLoop = true;
+        if (userInputs.var_name[fieldIndex] == "u" || userInputs.var_name[fieldIndex] == "pi"){
+            skipLoop = false;
         }
-        //computing_timer.enter_subsection("matrixFreePDE: updateExplicitGhosts");
-        this->solutionSet[fieldIndex]->update_ghost_values();
-        //computing_timer.exit_subsection("matrixFreePDE: updateExplicitGhosts");
-        
-        // Print update to screen and confirm that solution isn't nan
-        if (this->currentIncrement%userInputs.skip_print_steps==0){
-            double solution_L2_norm = this->solutionSet[fieldIndex]->l2_norm();
+        if (skipLoop){
+            continue;
+        }
+
+        //Parabolic (first order derivatives in time) fields
+        if (this->fields[fieldIndex].pdetype==EXPLICIT_TIME_DEPENDENT && !skip_time_dependent){
             
-            snprintf(buffer, sizeof(buffer), "field '%2s' [explicit solve]: current solution: %12.6e, current residual:%12.6e\n", \
-                    this->fields[fieldIndex].name.c_str(),                \
-                    solution_L2_norm,            \
-                    this->residualSet[fieldIndex]->l2_norm());
-            this->pcout<<buffer;
-            
-            if (!numbers::is_finite(solution_L2_norm)){
-                snprintf(buffer, sizeof(buffer), "ERROR: field '%s' solution is NAN. exiting.\n\n",
-                        this->fields[fieldIndex].name.c_str());
-                this->pcout<<buffer;
-                exit(-1);
+            //Set ChorinSwitch to true so steps 3 may occur
+            ChorinSwitch = true;
+
+            // Get the RHS of the new explicit equations
+            this->computeExplicitRHS();
+
+            //Set ChorinSwitch to false so steps 1 and 2 may occur
+            ChorinSwitch = false;
+
+            // Explicit-time step each DOF
+            this->updateExplicitSolution(fieldIndex);
+
+            // Set the Dirichlet values
+            if (this->has_Dirichlet_BCs){
+                this->constraintsDirichletSet[fieldIndex]->distribute(*this->solutionSet[fieldIndex]);
             }
+            //computing_timer.enter_subsection("matrixFreePDE: updateExplicitGhosts");
+            this->solutionSet[fieldIndex]->update_ghost_values();
+            //computing_timer.exit_subsection("matrixFreePDE: updateExplicitGhosts");
             
+            // Print update to screen and confirm that solution isn't nan
+            if (this->currentIncrement%userInputs.skip_print_steps==0){
+                double solution_L2_norm = this->solutionSet[fieldIndex]->l2_norm();
+                
+                snprintf(buffer, sizeof(buffer), "field '%2s' [explicit solve]: current solution: %12.6e, current residual:%12.6e\n", \
+                        this->fields[fieldIndex].name.c_str(),                \
+                        solution_L2_norm,            \
+                        this->residualSet[fieldIndex]->l2_norm());
+                this->pcout<<buffer;
+                
+                if (!numbers::is_finite(solution_L2_norm)){
+                    snprintf(buffer, sizeof(buffer), "ERROR: field '%s' solution is NAN. exiting.\n\n",
+                            this->fields[fieldIndex].name.c_str());
+                    this->pcout<<buffer;
+                    exit(-1);
+                }
+                
+            }
         }
     }
 
