@@ -66,10 +66,10 @@ set Number of time steps = 10
 set Boundary condition for variable u, x component = NON_UNIFORM_DIRICHLET,NATURAL,DIRICHLET: 0.0,DIRICHLET: 0.0
 set Boundary condition for variable u, y component = NON_UNIFORM_DIRICHLET,NATURAL,DIRICHLET: 0.0,DIRICHLET: 0.0
 
-set Boundary condition for variable pi, x component = DIRICHLET: 0.0
-set Boundary condition for variable pi, y component = DIRICHLET: 0.0
+set Boundary condition for variable pi, x component = NATURAL
+set Boundary condition for variable pi, y component = NATURAL
 
-set Boundary condition for variable P = NATURAL
+set Boundary condition for variable P = DIRICHLET: 0.0,NATURAL,NATURAL,NATURAL
 set Boundary condition for variable p_old = NATURAL
 set Boundary condition for variable divU = NATURAL
 

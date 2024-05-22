@@ -26,8 +26,8 @@ void customPDE<dim,degree>::setInitialCondition(const dealii::Point<dim> &p, con
             }*/
         }
 
-        double adjustedx = p[0];
-        double adjustedy = p[1];
+        double adjustedx = p[0]-0.5;
+        double adjustedy = p[1]-0.5;
 
         double nu = 1.0/Re;
         double lambda = 0.5*nu-std::sqrt(0.25*nu*nu+4.0*M_PI*M_PI);
@@ -102,8 +102,8 @@ void customPDE<dim,degree>::setNonUniformDirichletBCs(const dealii::Point<dim> &
                 vector_BC(0) = 0.0;
             }*/
 
-            double adjustedx = p[0];
-            double adjustedy = p[1];
+            double adjustedx = p[0]-0.5;
+            double adjustedy = p[1]-0.5;
 
             double nu = 1.0/Re;
             double lambda = 0.5*nu-std::sqrt(0.25*nu*nu+4.0*M_PI*M_PI);
