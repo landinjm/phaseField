@@ -59,6 +59,7 @@ private:
     double alpha = userInputs.get_model_constant_double("alpha");
     double beta = userInputs.get_model_constant_double("beta");
     double delta0 = userInputs.get_model_constant_double("delta0");
+    double tau = userInputs.get_model_constant_double("tau");
     
     //Scaling reynolds number
     double Re = reynolds_i;
@@ -128,6 +129,12 @@ void customPDE<dim,degree>::solveIncrement(bool skip_time_dependent)
                 this->constraintsDirichletSet[fieldIndex]->distribute(*this->solutionSet[fieldIndex]);
             }
 
+            //If we are calculated u* apply dirichlet BCs = 0
+            //Currently, uses a dummy variable to initialize BCs correctly
+            if (userInputs.var_name[fieldIndex] == "u"){
+                this->constraintsDirichletSet[4]->distribute(*this->solutionSet[fieldIndex]);
+            }
+
             this->solutionSet[fieldIndex]->update_ghost_values();
             
             // Print update to screen and confirm that solution isn't nan
@@ -154,7 +161,7 @@ void customPDE<dim,degree>::solveIncrement(bool skip_time_dependent)
     
     // Now, update the non-explicit variables
     // For the time being, this is just the elliptic equations, but implicit parabolic and auxilary equations should also be here
-    if (this->hasNonExplicitEquation && !skip_time_dependent){
+    if (this->hasNonExplicitEquation){
         
         bool nonlinear_it_converged = false;
         unsigned int nonlinear_it_index = 0;

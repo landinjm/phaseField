@@ -28,7 +28,7 @@ void variableAttributeLoader::loadVariableAttributes(){
 	set_variable_equation_type		(1,TIME_INDEPENDENT);
 
     set_dependencies_value_term_RHS(1, "");
-    set_dependencies_gradient_term_RHS(1, "grad(P),u,grad(p_old),grad(divU),pi");
+    set_dependencies_gradient_term_RHS(1, "grad(P),u,grad(u),grad(p_old),grad(divU),pi");
 	set_dependencies_value_term_LHS(1, "");
     set_dependencies_gradient_term_LHS(1, "grad(change(P))");
 
@@ -84,8 +84,7 @@ void customPDE<dim,degree>::explicitEquationRHS(variableContainer<dim,degree,dea
 	vectorvalueType pi = variable_list.get_vector_value(4);
 
 	//Initialize submission terms
-	vectorvalueType eq_u;
-	eq_u = eq_u*constV(0.0);
+	vectorvalueType eq_u = u;
 	vectorgradType eqx_u;
 	eqx_u = eqx_u*constV(0.0);
 	scalarvalueType eq_p_old = p_old;
@@ -103,7 +102,14 @@ void customPDE<dim,degree>::explicitEquationRHS(variableContainer<dim,degree,dea
 			}
 		}
 
-		eq_u = u-constV(userInputs.dtValue)*(advecTerm+constV(alpha)*px_old);
+		//forcing term
+		vectorvalueType forceTerm;
+		for(unsigned int i=0; i<dim; i++){
+			forceTerm[i] = 0.0;
+			//if(i==1){forceTerm=-0.0;}
+		}
+
+		eq_u = u-constV(userInputs.dtValue)*(advecTerm-forceTerm+constV(alpha)*px_old);
 		eqx_u = constV(-userInputs.dtValue/Re)*ux;
 		eq_p_old = P;
 		eqx_divU = -u;
@@ -142,6 +148,7 @@ void customPDE<dim,degree>::nonExplicitEquationRHS(variableContainer<dim,degree,
 
 	//Grab derivative model variable
 	vectorvalueType u = variable_list.get_vector_value(0);
+	vectorgradType ux = variable_list.get_vector_gradient(0);
 	scalargradType Px = variable_list.get_scalar_gradient(1);
 	scalargradType px_old = variable_list.get_scalar_gradient(2);
 	scalargradType divUx = variable_list.get_scalar_gradient(3);
@@ -159,6 +166,15 @@ void customPDE<dim,degree>::nonExplicitEquationRHS(variableContainer<dim,degree,
 	eqx_P += constV(alpha)*px_old;
 	//rotational incremental scheme
 	eqx_P += -constV(beta/Re)*divUx;
+
+	//pspg
+	vectorvalueType advecTerm;
+	for(unsigned int i=0; i<dim; i++){
+		for(unsigned int j=0; j<dim; j++){
+			advecTerm[i] += u[j]*ux[i][j];
+		}
+	}
+	eqx_P += -tau*advecTerm;
 
 	//Submitting the terms for the governing equations
 	variable_list.set_scalar_gradient_term_RHS(1,eqx_P);

@@ -22,7 +22,7 @@ set Subdivisions X = 1
 set Subdivisions Y = 1
 set Subdivisions Z = 1
 
-set Refine factor = 3
+set Refine factor = 4
 
 # Set the polynomial degree of the element (allowed values: 1, 2, or 3)
 set Element degree = 2
@@ -31,7 +31,7 @@ set Element degree = 2
 # Set the time step parameters
 # =================================================================================
 # The size of the time step
-set Time step = 4.0e-4 #This works well for Re=1.0
+set Time step = 1.0e-4 #This works well for Re=1.0
 #set Time step = 1.0e-3
 
 # The simulation ends when either the number of time steps is reached or the
@@ -66,8 +66,8 @@ set Number of time steps = 1000
 set Boundary condition for variable u, x component = NON_UNIFORM_DIRICHLET,NATURAL,DIRICHLET: 0.0,DIRICHLET: 0.0
 set Boundary condition for variable u, y component = DIRICHLET: 0.0,NATURAL,DIRICHLET: 0.0,DIRICHLET: 0.0
 
-set Boundary condition for variable pi, x component = NATURAL
-set Boundary condition for variable pi, y component = NATURAL
+set Boundary condition for variable pi, x component = DIRICHLET: 0.0
+set Boundary condition for variable pi, y component = DIRICHLET: 0.0
 
 set Boundary condition for variable P = NATURAL
 set Boundary condition for variable p_old = NATURAL
@@ -93,7 +93,10 @@ set Model constant alpha = 0.0, DOUBLE
 set Model constant beta = 0.0, DOUBLE
 
 #Stabilization parameter prefactor
-set Model constant delta0 = 1.0, DOUBLE
+set Model constant delta0 = 0.0, DOUBLE
+
+#PSPG factor
+set Model constant tau = 0.0, DOUBLE
 
 # =================================================================================
 # Set the linear solver parameters
@@ -105,7 +108,7 @@ subsection Linear solver parameters: P
     set Tolerance type = ABSOLUTE_RESIDUAL
 
     # The tolerance for convergence (L2 norm)
-    set Tolerance value =1.0e-7
+    set Tolerance value =1.0e-5
 
     # The maximum number of linear solver iterations per solve
     set Maximum linear solver iterations = 1000
