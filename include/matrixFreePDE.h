@@ -296,7 +296,8 @@ class MatrixFreePDE:public Subscriptor
   void markBoundaries(parallel::distributed::Triangulation<dim> &) const;
   /** Method for applying Dirichlet boundary conditions.*/
   void applyDirichletBCs();
-
+  /** Method for applying Dirichlet boundary conditions.*/
+  void applynonuniformDirichletBCs();
   /** Method for applying Neumann boundary conditions.*/
   void applyNeumannBCs();
 
