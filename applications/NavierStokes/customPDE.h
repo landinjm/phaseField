@@ -126,6 +126,9 @@ void customPDE<dim,degree>::solveIncrement(bool skip_time_dependent)
 
             // Set the Dirichelet values (hanging node constraints don't need to be distributed every time step, only at output)
             if (this->has_Dirichlet_BCs){
+                //Get nonuniform dirichlet constraints
+                this->applynonuniformDirichletBCs();
+                //Distribute for Uniform or Non-Uniform Dirichlet BCs
                 this->constraintsDirichletSet[fieldIndex]->distribute(*this->solutionSet[fieldIndex]);
             }
 
@@ -346,6 +349,13 @@ void customPDE<dim,degree>::solveIncrement(bool skip_time_dependent)
                         }
                         
                     }
+                    if (this->has_Dirichlet_BCs){
+                        //Get nonuniform dirichlet constraints
+                        this->applynonuniformDirichletBCs();
+                        //Distribute for Uniform or Non-Uniform Dirichlet BCs
+                        this->constraintsDirichletSet[fieldIndex]->distribute(*this->solutionSet[fieldIndex]);
+                    }
+                    this->solutionSet[fieldIndex]->update_ghost_values();
                 }
                 else if (this->fields[fieldIndex].pdetype == AUXILIARY){
                     
@@ -365,7 +375,12 @@ void customPDE<dim,degree>::solveIncrement(bool skip_time_dependent)
                         this->updateExplicitSolution(fieldIndex);
                         
                         // Set the Dirichelet values (hanging node constraints don't need to be distributed every time step, only at output)
-                        this->constraintsDirichletSet[fieldIndex]->distribute(*this->solutionSet[fieldIndex]);
+                        if (this->has_Dirichlet_BCs){
+                            //Get nonuniform dirichlet constraints
+                            this->applynonuniformDirichletBCs();
+                            //Distribute for Uniform or Non-Uniform Dirichlet BCs
+                            this->constraintsDirichletSet[fieldIndex]->distribute(*this->solutionSet[fieldIndex]);
+                        }
                         this->solutionSet[fieldIndex]->update_ghost_values();
                         
                         // Print update to screen
@@ -450,6 +465,9 @@ void customPDE<dim,degree>::solveIncrement(bool skip_time_dependent)
 
             // Set the Dirichlet values
             if (this->has_Dirichlet_BCs){
+                //Get nonuniform dirichlet constraints
+                this->applynonuniformDirichletBCs();
+                //Distribute for Uniform or Non-Uniform Dirichlet BCs
                 this->constraintsDirichletSet[fieldIndex]->distribute(*this->solutionSet[fieldIndex]);
             }
             //computing_timer.enter_subsection("matrixFreePDE: updateExplicitGhosts");
