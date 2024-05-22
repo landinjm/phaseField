@@ -8,8 +8,8 @@ set Number of dimensions = 2
 # (Domain size Z ignored in 2D)
 # =================================================================================
 # Each axes spans from zero to the specified length
-set Domain size X = 1
-set Domain size Y = 1
+set Domain size X = 1.5
+set Domain size Y = 2
 set Domain size Z = 1
 
 # =================================================================================
@@ -36,7 +36,7 @@ set Time step = 1.0e-4 #This works well for Re=1.0
 
 # The simulation ends when either the number of time steps is reached or the
 # simulation time is reached.
-set Number of time steps = 1000
+set Number of time steps = 10
 
 # =================================================================================
 # Set the boundary conditions
@@ -64,7 +64,7 @@ set Number of time steps = 1000
 
 #Boundary conditions for pipe flow
 set Boundary condition for variable u, x component = NON_UNIFORM_DIRICHLET,NATURAL,DIRICHLET: 0.0,DIRICHLET: 0.0
-set Boundary condition for variable u, y component = DIRICHLET: 0.0,NATURAL,DIRICHLET: 0.0,DIRICHLET: 0.0
+set Boundary condition for variable u, y component = NON_UNIFORM_DIRICHLET,NATURAL,DIRICHLET: 0.0,DIRICHLET: 0.0
 
 set Boundary condition for variable pi, x component = DIRICHLET: 0.0
 set Boundary condition for variable pi, y component = DIRICHLET: 0.0

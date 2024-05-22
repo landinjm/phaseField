@@ -25,6 +25,18 @@ void customPDE<dim,degree>::setInitialCondition(const dealii::Point<dim> &p, con
                 vector_IC(d) = MaxFlow*(1.0-4.0*(normalizedPos-0.5)*(normalizedPos-0.5));
             }*/
         }
+
+        double adjustedx = p[0];
+        double adjustedy = p[1];
+
+        double nu = 1.0/Re;
+        double lambda = 0.5*nu-std::sqrt(0.25*nu*nu+4.0*M_PI*M_PI);
+        double xponent = std::exp(lambda*adjustedx);
+        double u = 1.0 - xponent*std::cos(2*M_PI*adjustedy);
+        double v = lambda/(2*M_PI)*xponent*std::sin(2*M_PI*adjustedy);
+
+        vector_IC(0) = u;
+        vector_IC(1) = v;
         
         /*double center[3] = {0.0, 0.5, 0.5};
         double dist = 0.0;
@@ -74,17 +86,33 @@ void customPDE<dim,degree>::setNonUniformDirichletBCs(const dealii::Point<dim> &
     // (i.e. left = 0, right = 1, bottom = 2, top = 3, front = 4, back = 5).
 
     if(index == 0){
+        //Time scaling
+        double timeFactor = std::exp(-1.0/time);
+
         if(direction == 0){
-            double MaxFlow = 1.0;
+            /*double MaxFlow = 1.0;
             double stepheight = 0.5;
             double normalizedPos = p[1]/userInputs.domain_size[1];
+            MaxFlow = MaxFlow*timeFactor;
             if(p[1]/userInputs.domain_size[1] >= stepheight){
                 double b = std::abs(1.0/(0.5*stepheight-0.5));
                 vector_BC(0) = MaxFlow*(1.0-b*b*(normalizedPos-0.5-0.5*stepheight)*(normalizedPos-0.5-0.5*stepheight));
             }
             else{
                 vector_BC(0) = 0.0;
-            }
+            }*/
+
+            double adjustedx = p[0];
+            double adjustedy = p[1];
+
+            double nu = 1.0/Re;
+            double lambda = 0.5*nu-std::sqrt(0.25*nu*nu+4.0*M_PI*M_PI);
+            double xponent = std::exp(lambda*adjustedx);
+            double u = 1.0 - xponent*std::cos(2*M_PI*adjustedy);
+            double v = lambda/(2*M_PI)*xponent*std::sin(2*M_PI*adjustedy);
+
+            vector_BC(0) = u;
+            vector_BC(1) = v;
             
         }
         if(direction == 3){
