@@ -132,7 +132,7 @@ void customPDE<dim,degree>::solveIncrement(bool skip_time_dependent)
                 this->constraintsDirichletSet[fieldIndex]->distribute(*this->solutionSet[fieldIndex]);
             }
 
-            //If we are calculated u* apply dirichlet BCs = 0
+            //If we are calculating u* apply dirichlet BCs = 0
             //Currently, uses a dummy variable to initialize BCs correctly
             if (userInputs.var_name[fieldIndex] == "u"){
                 this->constraintsDirichletSet[4]->distribute(*this->solutionSet[fieldIndex]);
@@ -436,6 +436,16 @@ void customPDE<dim,degree>::solveIncrement(bool skip_time_dependent)
     }
     
     //Special methods for pressure correction in Chorin projection method
+
+    //Set ChorinSwitch to true so steps 3 may occur
+    ChorinSwitch = true;
+
+    // Get the RHS of the new explicit equations
+    this->computeExplicitRHS();
+
+    //Set ChorinSwitch to false so steps 1 and 2 may occur
+    ChorinSwitch = false;
+
     for(unsigned int fieldIndex=0; fieldIndex<this->fields.size(); fieldIndex++){
         this->currentFieldIndex = fieldIndex; // Used in computeLHS()
 
@@ -450,15 +460,6 @@ void customPDE<dim,degree>::solveIncrement(bool skip_time_dependent)
 
         //Parabolic (first order derivatives in time) fields
         if (this->fields[fieldIndex].pdetype==EXPLICIT_TIME_DEPENDENT && !skip_time_dependent){
-            
-            //Set ChorinSwitch to true so steps 3 may occur
-            ChorinSwitch = true;
-
-            // Get the RHS of the new explicit equations
-            this->computeExplicitRHS();
-
-            //Set ChorinSwitch to false so steps 1 and 2 may occur
-            ChorinSwitch = false;
 
             // Explicit-time step each DOF
             this->updateExplicitSolution(fieldIndex);
