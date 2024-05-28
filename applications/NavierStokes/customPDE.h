@@ -441,7 +441,9 @@ void customPDE<dim,degree>::solveIncrement(bool skip_time_dependent)
     ChorinSwitch = true;
 
     // Get the RHS of the new explicit equations
-    this->computeExplicitRHS();
+    if (this->hasExplicitEquation && !skip_time_dependent){
+        this->computeExplicitRHS();
+    }
 
     //Set ChorinSwitch to false so steps 1 and 2 may occur
     ChorinSwitch = false;
