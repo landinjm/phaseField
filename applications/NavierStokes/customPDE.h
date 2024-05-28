@@ -125,7 +125,7 @@ void customPDE<dim,degree>::solveIncrement(bool skip_time_dependent)
             this->updateExplicitSolution(fieldIndex);
 
             // Set the Dirichelet values (hanging node constraints don't need to be distributed every time step, only at output)
-            if (this->has_Dirichlet_BCs){
+            if (this->has_Dirichlet_BCs && userInputs.var_name[fieldIndex] != "u"){
                 //Get nonuniform dirichlet constraints
                 this->applynonuniformDirichletBCs();
                 //Distribute for Uniform or Non-Uniform Dirichlet BCs
@@ -134,9 +134,9 @@ void customPDE<dim,degree>::solveIncrement(bool skip_time_dependent)
 
             //If we are calculating u* apply dirichlet BCs = 0
             //Currently, uses a dummy variable to initialize BCs correctly
-            if (userInputs.var_name[fieldIndex] == "u"){
+            /*if (userInputs.var_name[fieldIndex] == "u"){
                 this->constraintsDirichletSet[4]->distribute(*this->solutionSet[fieldIndex]);
-            }
+            }*/
 
             this->solutionSet[fieldIndex]->update_ghost_values();
             
