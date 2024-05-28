@@ -9,6 +9,22 @@ void MatrixFreePDE<dim,degree>::outputResults() {
   //log time
   computing_timer.enter_subsection("matrixFreePDE: output");
 
+  //find indices of first occuring scalar & vector field
+  unsigned int scalarField = 0;
+  bool foundScalar = false;
+  unsigned int vectorField = 0;
+  bool foundVector = false;
+  for(unsigned int fieldIndex=0; fieldIndex<fields.size(); fieldIndex++){
+    if(fields[fieldIndex].type==SCALAR && !foundScalar){
+        scalarField = fieldIndex;
+        foundScalar = true;
+    }
+    else if(fields[fieldIndex].type==VECTOR && !foundVector){
+        vectorField = fieldIndex;
+        foundVector = true;
+    }
+  }
+
   //create DataOut object
   DataOut<dim> data_out;
 
@@ -37,15 +53,15 @@ void MatrixFreePDE<dim,degree>::outputResults() {
 	  for(unsigned int fieldIndex=0; fieldIndex<postProcessedSet.size(); fieldIndex++){
 		  for (unsigned int dof=0; dof<postProcessedSet[fieldIndex]->local_size(); ++dof){
 #else
-          unsigned int invM_size = invMscalar.locally_owned_size();
-          for(unsigned int fieldIndex=0; fieldIndex<postProcessedSet.size(); fieldIndex++){
-                  for (unsigned int dof=0; dof<postProcessedSet[fieldIndex]->locally_owned_size(); ++dof){
+      unsigned int invM_size = invMscalar.locally_owned_size();
+      for(unsigned int fieldIndex=0; fieldIndex<postProcessedSet.size(); fieldIndex++){
+          for (unsigned int dof=0; dof<postProcessedSet[fieldIndex]->locally_owned_size(); ++dof){
 #endif
 			  postProcessedSet[fieldIndex]->local_element(dof)=			\
-					  invMscalar.local_element(dof%invM_size)*postProcessedSet[fieldIndex]->local_element(dof);
+                invMscalar.local_element(dof%invM_size)*postProcessedSet[fieldIndex]->local_element(dof);
 
 		  }
-		  constraintsOtherSet[0]->distribute(*postProcessedSet[fieldIndex]);
+		  constraintsOtherSet[scalarField]->distribute(*postProcessedSet[fieldIndex]);
 		  postProcessedSet[fieldIndex]->update_ghost_values();
 	  }
 
@@ -92,7 +108,7 @@ void MatrixFreePDE<dim,degree>::outputResults() {
 			  std::vector<DataComponentInterpretation::DataComponentInterpretation> dataType(components,DataComponentInterpretation::component_is_scalar);
 			  std::vector<std::string> solutionNames (components, userInputs.pp_var_name[fieldIndex].c_str());
 			  //add field to data_out
-			  data_out.add_data_vector(*dofHandlersSet[0], *postProcessedSet[fieldIndex], solutionNames, dataType);
+			  data_out.add_data_vector(*dofHandlersSet[scalarField], *postProcessedSet[fieldIndex], solutionNames, dataType);
 		  }
 		  else {
 			  components = dim;
@@ -100,7 +116,7 @@ void MatrixFreePDE<dim,degree>::outputResults() {
 			  std::vector<std::string> solutionNames (components, userInputs.pp_var_name[fieldIndex].c_str());
 			  //add field to data_out
 			  //data_out.add_data_vector(*vector_dofHandler, *postProcessedSet[fieldIndex], solutionNames, dataType);
-			  data_out.add_data_vector(*dofHandlersSet[0], *postProcessedSet[fieldIndex], solutionNames, dataType);
+			  data_out.add_data_vector(*dofHandlersSet[vectorField], *postProcessedSet[fieldIndex], solutionNames, dataType);
 		  }
 	  }
   }
