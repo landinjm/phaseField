@@ -41,7 +41,7 @@ void variableAttributeLoader::loadVariableAttributes()
     set_dependencies_value_term_RHS(2, "phi,grad(phi),xi");
     set_dependencies_gradient_term_RHS(2, "");
 
-    // Variable 3 - the velocity vector
+    // Variable 3
     set_variable_name(3, "xi");
     set_variable_type(3, SCALAR);
     set_variable_equation_type(3, AUXILIARY);
@@ -135,10 +135,6 @@ void customPDE<dim, degree>::explicitEquationRHS(variableContainer<dim, degree, 
         eq_u = u + constV(userInputs.dtValue) * (dphiU - advecTerm - phiU - hcorr);
         eqx_u = constV(-userInputs.dtValue * nu) * (ux - idk);
 
-        if (this->currentIncrement <= switchToFractional) {
-            eq_u -= constV(userInputs.dtValue / rho) * Px;
-        }
-
         eq_phi = phi + constV(userInputs.dtValue) * dphidt;
         eq_theta = theta + constV(0.5 * userInputs.dtValue) * (dphidt + Tadvec);
         eqx_theta = -constV(D * userInputs.dtValue) * thetax;
@@ -148,9 +144,6 @@ void customPDE<dim, degree>::explicitEquationRHS(variableContainer<dim, degree, 
     if (ChorinSwitch) {
         // Setting the expressions for the terms in the governing equations
         eq_u = u - constV(userInputs.dtValue / rho) * Px;
-        if (this->currentIncrement <= switchToFractional) {
-            eq_u = u;
-        }
     }
 
     // Submitting the terms for the governing equations
@@ -217,17 +210,11 @@ void customPDE<dim, degree>::nonExplicitEquationRHS(variableContainer<dim, degre
 
     // Set the pressure poisson solve RHS
     scalarvalueType eq_P = constV(0.0);
-    vectorvalueType eqx_P = -Px;
+    for(unsigned int i=0; i<dim; i++){
+		eq_P += -constV(rho/userInputs.dtValue)*ux[i][i];
+	}
+    scalargradType eqx_P = -Px;
 
-    if (this->currentIncrement <= switchToFractional) {
-        for (unsigned int i = 0; i < dim; i++) {
-            for (unsigned int j = 0; j < dim; j++) {
-                eq_P += constV(rho) * ux[i][j] * ux[j][i];
-            }
-        }
-    } else {
-        eqx_P += constV(rho / userInputs.dtValue) * u;
-    }
     variable_list.set_scalar_value_term_RHS(1, eq_P);
     variable_list.set_scalar_gradient_term_RHS(1, eqx_P);
     variable_list.set_scalar_value_term_RHS(3, eq_xi);

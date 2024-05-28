@@ -15,7 +15,7 @@ void customPDE<dim, degree>::setInitialCondition(const dealii::Point<dim>& p, co
     // The initial condition is a set of overlapping circles/spheres defined
     // by a hyperbolic tangent function. The center of each circle/sphere is
     // given by "center" and its radius is given by "radius".
-    double center[3] = { 0.5, 0.5, 0.0 };
+    double center[3] = { 0.5, 0.0, 0.0 };
     scalar_IC = 0;
     double dist = 0.0;
     double rad = 10.0;
@@ -29,11 +29,11 @@ void customPDE<dim, degree>::setInitialCondition(const dealii::Point<dim>& p, co
     if (index == 0) {
         for (unsigned int d = 0; d < dim; d++) {
             vector_IC(d) = 0.0;
-            if (d == 0){
+            /*if (d == 0){
                 double height = 1.0;
                 double normalizedPos = p[1]/userInputs.domain_size[1];
                 vector_IC(d) = height*(1.0-4.0*(normalizedPos-0.5)*(normalizedPos-0.5));
-            }
+            }*/
         }
     }
     // Pressure
@@ -73,9 +73,17 @@ void customPDE<dim, degree>::setNonUniformDirichletBCs(const dealii::Point<dim>&
 
     if(index == 0){
         if(direction == 0){
-            double height = 1.0;
+            double MaxFlow = 1.0;
+            double stepheight = 0.0;
             double normalizedPos = p[1]/userInputs.domain_size[1];
-            vector_BC(direction) = height*(1.0-4.0*(normalizedPos-0.5)*(normalizedPos-0.5));
+            //MaxFlow = MaxFlow*timeFactor;
+            if(p[1]/userInputs.domain_size[1] >= stepheight){
+                double b = std::abs(1.0/(0.5*stepheight-0.5));
+                vector_BC(0) = MaxFlow*(1.0-b*b*(normalizedPos-0.5-0.5*stepheight)*(normalizedPos-0.5-0.5*stepheight));
+            }
+            else{
+                vector_BC(0) = 0.0;
+            }
         }
     }
 
