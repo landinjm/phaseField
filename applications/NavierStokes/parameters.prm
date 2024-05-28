@@ -1,7 +1,7 @@
 # =================================================================================
 # Set the number of dimensions (2 or 3 for a 2D or 3D calculation)
 # =================================================================================
-set Number of dimensions = 3
+set Number of dimensions = 2
 
 # =================================================================================
 # Set the length of the domain in all three dimensions
@@ -25,17 +25,18 @@ set Subdivisions Z = 1
 set Refine factor = 4
 
 # Set the polynomial degree of the element (allowed values: 1, 2, or 3)
-set Element degree = 1
+set Element degree = 2
 
 # =================================================================================
 # Set the time step parameters
 # =================================================================================
 # The size of the time step
-set Time step = 1.0e-4
+set Time step = 1.0e-4 #This works well for Re=1.0
+#set Time step = 1.0e-3
 
 # The simulation ends when either the number of time steps is reached or the
 # simulation time is reached.
-set Number of time steps = 100
+set Number of time steps = 10
 
 # =================================================================================
 # Set the boundary conditions
@@ -57,27 +58,20 @@ set Number of time steps = 100
 # 1.5 on the top and bottom for variable 'n' in 2D
 # set Boundary condition for variable n = NATURAL, NATURAL, DIRICHLET: 1.5, DIRICHLET: 1.5
 
+#Boundary conditions for cavity flow
+#set Boundary condition for variable u, x component = DIRICHLET: 0.0,DIRICHLET: 0.0,DIRICHLET: 0.0,NON_UNIFORM_DIRICHLET
+#set Boundary condition for variable u, y component = DIRICHLET: 0.0
 
-#These are the boundary conditions for Couette flow
-#set Boundary condition for variable u, x component = NATURAL, NATURAL, DIRICHLET: 0.0, DIRICHLET: 1.0, PERIODIC, PERIODIC
-#set Boundary condition for variable u, y component = NATURAL, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0, PERIODIC, PERIODIC
-#set Boundary condition for variable u, z component = NATURAL, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0, PERIODIC, PERIODIC
+#Boundary conditions for pipe flow
+set Boundary condition for variable u, x component = NON_UNIFORM_DIRICHLET,NATURAL,DIRICHLET: 0.0,DIRICHLET: 0.0
+set Boundary condition for variable u, y component = DIRICHLET: 0.0,NATURAL,DIRICHLET: 0.0,DIRICHLET: 0.0
 
-#set Boundary condition for variable P = DIRICHLET: 0.0, DIRICHLET: 0.0, NATURAL, NATURAL, PERIODIC, PERIODIC
+set Boundary condition for variable pi, x component = NATURAL
+set Boundary condition for variable pi, y component = NATURAL
 
-#Boundary conditions for pipe flow / Poisueille flow
-#set Boundary condition for variable u, x component = NATURAL, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0, PERIODIC, PERIODIC
-#set Boundary condition for variable u, y component = NATURAL, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0, PERIODIC, PERIODIC
-#set Boundary condition for variable u, z component = NATURAL, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0, PERIODIC, PERIODIC
-
-#set Boundary condition for variable P = DIRICHLET: 1.0, DIRICHLET: 0.0, NATURAL, NATURAL, PERIODIC, PERIODIC
-
-#These are the boundary conditions for Cavity flow
-set Boundary condition for variable u, x component = DIRICHLET: 0.0, DIRICHLET: 0.0, DIRICHLET: 0.0, DIRICHLET: 1.0, PERIODIC, PERIODIC
-set Boundary condition for variable u, y component = DIRICHLET: 0.0, DIRICHLET: 0.0, DIRICHLET: 0.0, DIRICHLET: 0.0, PERIODIC, PERIODIC
-set Boundary condition for variable u, z component = DIRICHLET: 0.0, DIRICHLET: 0.0, DIRICHLET: 0.0, DIRICHLET: 0.0, PERIODIC, PERIODIC
-
-set Boundary condition for variable P = NATURAL, NATURAL, NATURAL, DIRICHLET: 0.0, PERIODIC, PERIODIC
+set Boundary condition for variable P = NATURAL,DIRICHLET: 0.0,NATURAL,NATURAL
+set Boundary condition for variable p_old = NATURAL
+set Boundary condition for variable divU = NATURAL
 
 # =================================================================================
 # Set the model constants
@@ -88,14 +82,21 @@ set Boundary condition for variable P = NATURAL, NATURAL, NATURAL, DIRICHLET: 0.
 # options currently are DOUBLE, INT, BOOL, TENSOR, and [symmetry] ELASTIC CONSTANTS
 # where [symmetry] is ISOTROPIC, TRANSVERSE, ORTHOTROPIC, or ANISOTROPIC.
 
-#Fluid density
-set Model constant rho = 1.0, DOUBLE
+#Reynolds number
+set Model constant ReynoldsInitial = 1.0, DOUBLE
+set Model constant ReynoldsFinal = 1.0, DOUBLE
 
-#Fluid viscosity
-set Model constant nu = 1.0, DOUBLE
+#Parameter for incremental pressure-correction scheme
+set Model constant alpha = 0.0, DOUBLE
 
-#What increment to switch from normal to fractional methods
-set Model constant switchToFractional = 10, INT
+#Parameter for rotational incremental scheme
+set Model constant beta = 0.0, DOUBLE
+
+#Stabilization parameter prefactor
+set Model constant delta0 = 0.0, DOUBLE
+
+#PSPG factor
+set Model constant tau = 0.0, DOUBLE
 
 # =================================================================================
 # Set the linear solver parameters
@@ -107,7 +108,7 @@ subsection Linear solver parameters: P
     set Tolerance type = ABSOLUTE_RESIDUAL
 
     # The tolerance for convergence (L2 norm)
-    set Tolerance value =1.0e-5
+    set Tolerance value =1.0e-8
 
     # The maximum number of linear solver iterations per solve
     set Maximum linear solver iterations = 1000
