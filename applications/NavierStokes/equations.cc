@@ -27,7 +27,7 @@ void variableAttributeLoader::loadVariableAttributes(){
 	set_variable_type				(1,SCALAR);
 	set_variable_equation_type		(1,TIME_INDEPENDENT);
 
-    set_dependencies_value_term_RHS(1, "");
+    set_dependencies_value_term_RHS(1, "grad(u)");
     set_dependencies_gradient_term_RHS(1, "grad(P),u,grad(u),grad(p_old),grad(divU),pi");
 	set_dependencies_value_term_LHS(1, "");
     set_dependencies_gradient_term_LHS(1, "grad(change(P))");
@@ -155,11 +155,15 @@ void customPDE<dim,degree>::nonExplicitEquationRHS(variableContainer<dim,degree,
 	vectorvalueType pi = variable_list.get_vector_value(4);
 
 	//Initialize submission terms
+	scalarvalueType eq_P = constV(0.0);
 	scalargradType eqx_P;
 	eqx_P = eqx_P*constV(0.0);
 
 	//Continuity equation
-	eqx_P = constV(1.0/userInputs.dtValue)*u-Px;
+	for(unsigned int i=0; i<dim; i++){
+		eq_P += -constV(1.0/userInputs.dtValue)*ux[i][i];
+	}
+	eqx_P = -Px;
 	//pressure stabilization
 	eqx_P += constV(delta/userInputs.dtValue)*(pi-Px);
 	//incremental pressure-correction scheme
@@ -177,6 +181,7 @@ void customPDE<dim,degree>::nonExplicitEquationRHS(variableContainer<dim,degree,
 	eqx_P += -tau*advecTerm;
 
 	//Submitting the terms for the governing equations
+	variable_list.set_scalar_value_term_RHS(1,eq_P);
 	variable_list.set_scalar_gradient_term_RHS(1,eqx_P);
 }
 
