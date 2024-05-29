@@ -136,7 +136,7 @@ void customPDE<dim, degree>::explicitEquationRHS(variableContainer<dim, degree, 
         eqx_u = constV(-userInputs.dtValue * nu) * (ux - idk);
 
         eq_phi = phi + constV(userInputs.dtValue) * dphidt;
-        eq_theta = theta + constV(0.5 * userInputs.dtValue) * (dphidt + Tadvec);
+        eq_theta = theta + constV(0.5 * userInputs.dtValue) * (dphidt - Tadvec);
         eqx_theta = -constV(D * userInputs.dtValue) * thetax;
     }
 
@@ -172,7 +172,6 @@ void customPDE<dim, degree>::nonExplicitEquationRHS(variableContainer<dim, degre
 {
 
     // Grab the values of the fields
-    vectorvalueType u = variable_list.get_vector_value(0);
     vectorgradType ux = variable_list.get_vector_gradient(0);
     scalargradType Px = variable_list.get_scalar_gradient(1);
 
