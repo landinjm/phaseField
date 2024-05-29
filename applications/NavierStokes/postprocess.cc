@@ -10,14 +10,32 @@
 
 void variableAttributeLoader::loadPostProcessorVariableAttributes(){
 
-	/*// Variable 0
-	set_variable_name				(0,"divU");
+	// Variable 0
+	set_variable_name				(0,"l2normPressure");
 	set_variable_type				(0,SCALAR);
 
-	set_dependencies_value_term_RHS(0, "");
-	set_dependencies_gradient_term_RHS(0, "u");
+	set_dependencies_value_term_RHS(0, "P");
+	set_dependencies_gradient_term_RHS(0, "");
 
-	set_output_integral         	(0,true);*/
+	set_output_integral         	(0,true);
+
+	// Variable 1
+	set_variable_name				(1,"l2normXvelocity");
+	set_variable_type				(1,SCALAR);
+
+	set_dependencies_value_term_RHS(1, "u");
+	set_dependencies_gradient_term_RHS(1, "");
+
+	set_output_integral         	(1,true);
+
+	// Variable 2
+	set_variable_name				(2,"l2normYvelocity");
+	set_variable_type				(2,SCALAR);
+
+	set_dependencies_value_term_RHS(2, "u");
+	set_dependencies_gradient_term_RHS(2, "");
+
+	set_output_integral         	(2,true);
 
 }
 
@@ -37,7 +55,33 @@ void customPDE<dim,degree>::postProcessedFields(const variableContainer<dim,degr
 				variableContainer<dim,degree,dealii::VectorizedArray<double> > & pp_variable_list,
 												const dealii::Point<dim, dealii::VectorizedArray<double> > q_point_loc) const {
 
-	//scalargradType u = variable_list.get_vector_value(0);
-	//pp_variable_list.set_scalar_gradient_term_RHS(0,-u);
+	vectorvalueType u = variable_list.get_vector_value(0);
+	scalarvalueType P = variable_list.get_scalar_value(1);
+
+	scalarvalueType adjustedx = q_point_loc[0]-constV(0.5);
+	scalarvalueType adjustedy = q_point_loc[1]-constV(0.5);
+
+	scalarvalueType lambda = constV(0.5*(Re-std::sqrt(Re*Re+16.0*M_PI*M_PI)));
+	scalarvalueType xponent = std::exp(lambda*adjustedx);
+
+	scalarvalueType pressure = constV(0.5) - constV(0.5)*xponent*xponent;
+
+	scalarvalueType xvelocity = constV(1.0) - xponent*std::cos(constV(2.0*M_PI)*adjustedy);
+	scalarvalueType yvelocity = lambda/constV(2.0*M_PI)*xponent*std::sin(constV(2.0*M_PI)*adjustedy);
+
+	//Note for some reason PRISMS-PF freaks out when the dirichlet is set to something other
+	//than 0. This parameter allows for tuning based on analytical pressure solution.
+	scalarvalueType maxX = constV(userInputs.domain_size[0]-0.5);
+	scalarvalueType temp = std::exp(lambda*maxX);
+	pressure -= constV(0.5) - constV(0.5)*temp*temp;
+
+	//Calculating l2norm
+	pressure = std::pow(P-pressure,2.0);
+	xvelocity = std::pow(u[0]-xvelocity,2.0);
+	yvelocity = std::pow(u[1]-yvelocity,2.0);
+
+	pp_variable_list.set_scalar_value_term_RHS(0,pressure);
+	pp_variable_list.set_scalar_value_term_RHS(1,xvelocity);
+	pp_variable_list.set_scalar_value_term_RHS(2,yvelocity);
 
 }

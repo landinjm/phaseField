@@ -8,7 +8,7 @@ set Number of dimensions = 2
 # (Domain size Z ignored in 2D)
 # =================================================================================
 # Each axes spans from zero to the specified length
-set Domain size X = 1
+set Domain size X = 1.5
 set Domain size Y = 1
 set Domain size Z = 1
 
@@ -31,12 +31,12 @@ set Element degree = 2
 # Set the time step parameters
 # =================================================================================
 # The size of the time step
-set Time step = 1.0e-4 #This works well for Re=1.0
+set Time step = 6.0e-4 #This works well for Re=1.0
 #set Time step = 1.0e-3
 
 # The simulation ends when either the number of time steps is reached or the
 # simulation time is reached.
-set Number of time steps = 10
+set Number of time steps = 5000
 
 # =================================================================================
 # Set the boundary conditions
@@ -66,6 +66,10 @@ set Number of time steps = 10
 set Boundary condition for variable u, x component = NON_UNIFORM_DIRICHLET,NATURAL,DIRICHLET: 0.0,DIRICHLET: 0.0
 set Boundary condition for variable u, y component = DIRICHLET: 0.0,NATURAL,DIRICHLET: 0.0,DIRICHLET: 0.0
 
+#Boundary conditions for kovasznay flow
+set Boundary condition for variable u, x component = NON_UNIFORM_DIRICHLET,NATURAL,NON_UNIFORM_DIRICHLET,NON_UNIFORM_DIRICHLET
+set Boundary condition for variable u, y component = NON_UNIFORM_DIRICHLET,NATURAL,NON_UNIFORM_DIRICHLET,NON_UNIFORM_DIRICHLET
+
 set Boundary condition for variable pi, x component = NATURAL
 set Boundary condition for variable pi, y component = NATURAL
 
@@ -83,8 +87,8 @@ set Boundary condition for variable divU = NATURAL
 # where [symmetry] is ISOTROPIC, TRANSVERSE, ORTHOTROPIC, or ANISOTROPIC.
 
 #Reynolds number
-set Model constant ReynoldsInitial = 1.0, DOUBLE
-set Model constant ReynoldsFinal = 1.0, DOUBLE
+set Model constant ReynoldsInitial = 50.0, DOUBLE
+set Model constant ReynoldsFinal = 50.0, DOUBLE
 
 #Parameter for incremental pressure-correction scheme
 set Model constant alpha = 0.0, DOUBLE
@@ -123,10 +127,10 @@ set Output condition = EQUAL_SPACING
 
 # Number of times the program outputs the fields (total number for "EQUAL_SPACING"
 # and "LOG_SPACING", number per decade for "N_PER_DECADE", ignored for "LIST")
-set Number of outputs = 10
+set Number of outputs = 20
 
 # The number of time steps between updates being printed to the screen
-set Skip print steps = 1
+set Skip print steps = 100
 
 # =================================================================================
 # Set the checkpoint/restart parameters

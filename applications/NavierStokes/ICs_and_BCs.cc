@@ -25,18 +25,6 @@ void customPDE<dim,degree>::setInitialCondition(const dealii::Point<dim> &p, con
                 vector_IC(d) = MaxFlow*(1.0-4.0*(normalizedPos-0.5)*(normalizedPos-0.5));
             }*/
         }
-
-        /*double adjustedx = p[0]-0.5;
-        double adjustedy = p[1]-0.5;
-
-        double nu = 1.0/Re;
-        double lambda = 0.5*nu-std::sqrt(0.25*nu*nu+4.0*M_PI*M_PI);
-        double xponent = std::exp(lambda*adjustedx);
-        double u = 1.0 - xponent*std::cos(2*M_PI*adjustedy);
-        double v = lambda/(2*M_PI)*xponent*std::sin(2*M_PI*adjustedy);
-
-        vector_IC(0) = u;
-        vector_IC(1) = v;*/
         
         /*double center[3] = {0.0, 0.5, 0.5};
         double dist = 0.0;
@@ -89,8 +77,19 @@ void customPDE<dim,degree>::setNonUniformDirichletBCs(const dealii::Point<dim> &
         //Time scaling
         double timeFactor = std::exp(-1.0/time);
 
+        double adjustedx = p[0]-0.5;
+        double adjustedy = p[1]-0.5;
+
+        double lambda = 0.5*(Re-std::sqrt(Re*Re+16.0*M_PI*M_PI));
+        double xponent = std::exp(lambda*adjustedx);
+        double u = 1.0 - xponent*std::cos(2.0*M_PI*adjustedy);
+        double v = lambda/(2.0*M_PI)*xponent*std::sin(2.0*M_PI*adjustedy);
+
+        vector_BC(0) = u;
+        vector_BC(1) = v;
+
         if(direction == 0){
-            double MaxFlow = 1.0;
+            /*double MaxFlow = 1.0;
             double stepheight = 0.0;
             double normalizedPos = p[1]/userInputs.domain_size[1];
             //MaxFlow = MaxFlow*timeFactor;
@@ -100,23 +99,11 @@ void customPDE<dim,degree>::setNonUniformDirichletBCs(const dealii::Point<dim> &
             }
             else{
                 vector_BC(0) = 0.0;
-            }
-
-            /*double adjustedx = p[0]-0.5;
-            double adjustedy = p[1]-0.5;
-
-            double nu = 1.0/Re;
-            double lambda = 0.5*nu-std::sqrt(0.25*nu*nu+4.0*M_PI*M_PI);
-            double xponent = std::exp(lambda*adjustedx);
-            double u = 1.0 - xponent*std::cos(2*M_PI*adjustedy);
-            double v = lambda/(2*M_PI)*xponent*std::sin(2*M_PI*adjustedy);
-
-            vector_BC(0) = u;
-            vector_BC(1) = v;*/
+            }*/
             
         }
         if(direction == 3){
-            double x0 = 0.1*userInputs.domain_size[1];
+            /*double x0 = 0.1*userInputs.domain_size[1];
             if(p[0] <= x0){
                 vector_BC(0) = 1.0 - 0.25*(1.0-std::cos(M_PI*(x0-p[0])/x0))*(1.0-std::cos(M_PI*(x0-p[0])/x0));
             }
@@ -126,7 +113,7 @@ void customPDE<dim,degree>::setNonUniformDirichletBCs(const dealii::Point<dim> &
             }
             else{
                 vector_BC(0) = 1.0 - 0.25*(1.0-std::cos(M_PI*(p[0]-(1.0-x0))/x0))*(1.0-std::cos(M_PI*(p[0]-(1.0-x0))/x0));
-            }
+            }*/
             
         }
     }
