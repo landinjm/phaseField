@@ -15,10 +15,10 @@ void customPDE<dim, degree>::setInitialCondition(const dealii::Point<dim>& p, co
     // The initial condition is a set of overlapping circles/spheres defined
     // by a hyperbolic tangent function. The center of each circle/sphere is
     // given by "center" and its radius is given by "radius".
-    double center[3] = { 0.5, 0.0, 0.0 };
+    double center[3] = { 0.5, 0.5, 0.0 };
     scalar_IC = 0;
     double dist = 0.0;
-    double rad = 10.0;
+    double rad = 5.0;
     for (unsigned int dir = 0; dir < dim; dir++) {
         dist += (p[dir] - center[dir] * userInputs.domain_size[dir]) * (p[dir] - center[dir] * userInputs.domain_size[dir]);
     }
