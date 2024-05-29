@@ -9,11 +9,27 @@ void  MatrixFreePDE<dim,degree>::computeIntegral(double& integratedField, int in
 	const unsigned int   n_q_points    = quadrature_formula.size();
 	std::vector<double> cVal(n_q_points);
 
+	//find indices of first occuring scalar & vector field
+	unsigned int scalarField = 0;
+	bool foundScalar = false;
+	unsigned int vectorField = 0;
+	bool foundVector = false;
+	for(unsigned int fieldIndex=0; fieldIndex<fields.size(); fieldIndex++){
+		if(fields[fieldIndex].type==SCALAR && !foundScalar){
+			scalarField = fieldIndex;
+			foundScalar = true;
+		}
+		else if(fields[fieldIndex].type==VECTOR && !foundVector){
+			vectorField = fieldIndex;
+			foundVector = true;
+		}
+	}
+
 	// constraintsDirichletSet[index]->distribute(*variableSet[index]);
 	// constraintsOtherSet[index]->distribute(*variableSet[index]);
 	// variableSet[index]->update_ghost_values();
 
-	typename DoFHandler<dim>::active_cell_iterator cell= this->dofHandlersSet[0]->begin_active(), endc = this->dofHandlersSet[0]->end();
+	typename DoFHandler<dim>::active_cell_iterator cell= this->dofHandlersSet[scalarField]->begin_active(), endc = this->dofHandlersSet[scalarField]->end();
 
 	double value = 0.0;
 
