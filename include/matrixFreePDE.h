@@ -194,10 +194,9 @@ protected:
      *Refer to deal.ii documentation of MatrixFree<dim> class for details.
      */
     MatrixFree<dim, double> matrixFreeObject;
-    /*Vector to store the inverse of the mass matrix diagonal for scalar fields. Due to the choice of spectral elements with Guass-Lobatto quadrature, the mass matrix is diagonal.*/
-    vectorType invMscalar;
-    /*Vector to store the inverse of the mass matrix diagonal for vector fields. Due to the choice of spectral elements with Guass-Lobatto quadrature, the mass matrix is diagonal.*/
-    vectorType invMvector;
+    /*Vector to store the inverse of the mass matrix diagonal for scalar and vector fields. Due to the choice of spectral elements with Guass-Lobatto quadrature, the mass matrix is diagonal.*/
+    vectorType invMscalar, invMvector;
+
     /*Vector to store the solution increment. This is a temporary vector used during implicit solves of the Elliptic fields.*/
     vectorType dU_vector, dU_scalar;
 
