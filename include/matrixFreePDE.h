@@ -36,6 +36,7 @@
 
 // PRISMS headers
 #include "SimplifiedGrainRepresentation.h"
+#include "adaptiveRefinement.h"
 #include "fields.h"
 #include "nucleus.h"
 #include "userInputParameters.h"
@@ -213,6 +214,7 @@ protected:
     void applyBCs(unsigned int fieldIndex);
 
     /*AMR methods*/
+    adaptiveRefinement<dim, degree> RefineAdaptively;
     /**
      * Method that actually changes the triangulation based on refine/coarsen flags set previously.
      */
