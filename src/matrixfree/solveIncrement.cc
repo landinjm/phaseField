@@ -27,7 +27,7 @@ void MatrixFreePDE<dim, degree>::solveIncrement(bool skip_time_dependent)
 
             updateExplicitSolution(fieldIndex);
 
-            //Apply Boundary conditions
+            // Apply Boundary conditions
             applyBCs(fieldIndex);
 
             // Print update to screen and confirm that solution isn't nan
@@ -218,8 +218,8 @@ void MatrixFreePDE<dim, degree>::solveIncrement(bool skip_time_dependent)
                             }
                         }
                     }
-                    
-                    //Apply Boundary conditions
+
+                    // Apply Boundary conditions
                     applyBCs(fieldIndex);
 
                 } else if (fields[fieldIndex].pdetype == AUXILIARY) {
@@ -237,7 +237,7 @@ void MatrixFreePDE<dim, degree>::solveIncrement(bool skip_time_dependent)
 
                         updateExplicitSolution(fieldIndex);
 
-                        //Apply Boundary conditions
+                        // Apply Boundary conditions
                         applyBCs(fieldIndex);
 
                         // Print update to screen

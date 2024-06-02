@@ -56,9 +56,8 @@ private:
     std::vector<DoFHandler<dim>*>& dofHandlersSet_nonconst;
 
     std::vector<const AffineConstraints<double>*>& constraintsDirichletSet;
-    
-    std::vector<const AffineConstraints<double>*>& constraintsOtherSet;
 
+    std::vector<const AffineConstraints<double>*>& constraintsOtherSet;
 };
 
 template <int dim, int degree>

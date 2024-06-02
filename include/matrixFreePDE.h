@@ -215,7 +215,7 @@ protected:
 
     /*AMR methods*/
     adaptiveRefinement<dim, degree> RefineAdaptively;
-    
+
     /*Method to compute the right hand side (RHS) residual vectors*/
     void computeExplicitRHS();
     void computeNonexplicitRHS();

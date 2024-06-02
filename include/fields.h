@@ -62,11 +62,10 @@ Field<dim>::Field(fieldType _type, PDEType _pdetype, std::string _name)
     }
     }
 
-    //Default assignment of BCs
+    // Default assignment of BCs
     hasDirichletBCs = false;
     hasnonuniformDirichletBCs = false;
     hasNeumannBCs = false;
-
 }
 
 #endif
