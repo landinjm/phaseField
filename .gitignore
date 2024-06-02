@@ -1,3 +1,7 @@
+#vscode
+.vscode/
+tests/unit_tests/*.json
+
 # Compiled Object files
 *.slo
 *.lo
