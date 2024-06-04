@@ -28,9 +28,9 @@ void variableAttributeLoader::loadVariableAttributes()
     set_variable_type(1, SCALAR);
     set_variable_equation_type(1, TIME_INDEPENDENT);
 
-    set_dependencies_value_term_RHS(1, "grad(u)");
+    set_dependencies_value_term_RHS(1, "grad(u),grad(P),phi,grad(phi)");
     set_dependencies_gradient_term_RHS(1, "grad(P)");
-    set_dependencies_value_term_LHS(1, "");
+    set_dependencies_value_term_LHS(1, "phi,grad(phi),grad(change(P))");
     set_dependencies_gradient_term_LHS(1, "grad(change(P))");
 
     // Variable 2 - the order parameter
@@ -128,8 +128,8 @@ void customPDE<dim, degree>::nonExplicitEquationRHS(variableContainer<dim, degre
     // Grab the values of the fields
     vectorgradType ux = variable_list.get_vector_gradient(0);
     scalargradType Px = variable_list.get_scalar_gradient(1);
-	//scalarvalueType phi = variable_list.get_scalar_value(2);
-    //scalargradType phix = variable_list.get_scalar_gradient(2);
+	scalarvalueType phi = variable_list.get_scalar_value(2);
+    scalargradType phix = variable_list.get_scalar_gradient(2);
 
     // Set the pressure poisson solve RHS
     scalarvalueType eq_P = constV(0.0);
@@ -139,7 +139,7 @@ void customPDE<dim, degree>::nonExplicitEquationRHS(variableContainer<dim, degre
     scalargradType eqx_P = -Px;
 
 	//Add the SBM term
-	//eq_P += Px * phix / (phi + constV(reg));
+	eq_P += Px * phix / (phi + constV(reg));
 
     variable_list.set_scalar_value_term_RHS(1, eq_P);
     variable_list.set_scalar_gradient_term_RHS(1, eqx_P);
@@ -167,17 +167,21 @@ void customPDE<dim, degree>::equationLHS(variableContainer<dim, degree, dealii::
     // --- Getting the values and derivatives of the model variables ---
 	//scalarvalueType DP = variable_list.get_change_in_scalar_value(1);
     scalargradType DPx = variable_list.get_change_in_scalar_gradient(1);
-	/*scalarvalueType phi = variable_list.get_scalar_value(2);
+	scalarvalueType phi = variable_list.get_scalar_value(2);
     scalargradType phix = variable_list.get_scalar_gradient(2);
-	scalargradType Px = variable_list.get_scalar_gradient(1);
-	scalarhessType Pxx = variable_list.get_scalar_hessian(1);
+	//scalargradType Px = variable_list.get_scalar_gradient(1);
+	//scalarhessType Pxx = variable_list.get_scalar_hessian(1);
 
-	scalarvalueType SBMterm = constV(0.0);
-	for(unsigned int i=0; i<dim; i++){
+    scalarvalueType eq_lh_P = - phix * DPx / (phi + constV(reg));
+    scalargradType eqx_lh_P = DPx;
+    
+	//scalarvalueType SBMterm = constV(0.0);
+	/*for(unsigned int i=0; i<dim; i++){
 		SBMterm -= phix[i]*Pxx[i][i]/(phi*Px[i]+constV(reg));
-	}
+	}*/
+    
 
     // --- Submitting the terms for the governing equations ---
-	variable_list.set_scalar_value_term_LHS(1, DP*SBMterm);*/
-    variable_list.set_scalar_gradient_term_LHS(1, DPx);
+	variable_list.set_scalar_value_term_LHS(1, eq_lh_P);
+    variable_list.set_scalar_gradient_term_LHS(1, eqx_lh_P);
 }
