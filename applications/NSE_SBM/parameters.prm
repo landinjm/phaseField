@@ -67,7 +67,7 @@ set Time step = 4.0e-2
 
 # The simulation ends when either the number of time steps is reached or the
 # simulation time is reached.
-set Number of time steps = 10
+set Number of time steps = 10000
 
 # =================================================================================
 # Set the boundary conditions
@@ -135,15 +135,15 @@ end
 # Set the nonlinear solver parameters
 # =================================================================================
 
-set Maximum nonlinear solver iterations = 30
+#set Maximum nonlinear solver iterations = 30
 
-subsection Nonlinear solver parameters: P
-    set Tolerance type = ABSOLUTE_SOLUTION_CHANGE
-    set Tolerance value = 1.0e-4
-    set Use backtracking line search damping = true
-    set Backtracking step size modifier = 0.5
-    set Backtracking residual decrease coefficient = 1.0
-end
+#subsection Nonlinear solver parameters: P
+    #set Tolerance type = ABSOLUTE_SOLUTION_CHANGE
+    #set Tolerance value = 1.0e-4
+    #set Use backtracking line search damping = true
+    #set Backtracking step size modifier = 0.5
+    #set Backtracking residual decrease coefficient = 1.0
+#end
 
 # =================================================================================
 # Set the output parameters
