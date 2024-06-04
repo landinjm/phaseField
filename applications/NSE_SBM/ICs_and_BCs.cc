@@ -3,7 +3,8 @@
 // ===========================================================================
 
 template <int dim, int degree>
-void customPDE<dim,degree>::setInitialCondition(const dealii::Point<dim> &p, const unsigned int index, double & scalar_IC, dealii::Vector<double> & vector_IC){
+void customPDE<dim, degree>::setInitialCondition(const dealii::Point<dim>& p, const unsigned int index, double& scalar_IC, dealii::Vector<double>& vector_IC)
+{
     // ---------------------------------------------------------------------
     // ENTER THE INITIAL CONDITIONS HERE
     // ---------------------------------------------------------------------
@@ -14,51 +15,42 @@ void customPDE<dim,degree>::setInitialCondition(const dealii::Point<dim> &p, con
     // The initial condition is a set of overlapping circles/spheres defined
     // by a hyperbolic tangent function. The center of each circle/sphere is
     // given by "center" and its radius is given by "radius".
+    double center[3] = { 7.0, 2.5, 0.0 };
+    double ellipseAxes[3] = { 1.0, 1.5, 1.0}; 
+    scalar_IC = 0;
+    double dist = 0.0;
+    double rad = 1.0;
+    for (unsigned int dir = 0; dir < dim; dir++) {
+        dist += (p[dir] - center[dir]) * (p[dir] - center[dir]) / ellipseAxes[dir] / ellipseAxes[dir];
+    }
+    dist = std::sqrt(dist);
+    double particle = 0.5 * (1.0 - std::tanh((dist - rad) / (W * std::sqrt(2))));
 
-    //Velocity
-    if(index == 0){
-        for(unsigned int d=0; d<dim; d++){ 
+    // Velocity
+    if (index == 0) {
+        for (unsigned int d = 0; d < dim; d++) {
             vector_IC(d) = 0.0;
+            /*if (d == 0){
+                double height = 1.0;
+                double normalizedPos = p[1]/userInputs.domain_size[1];
+                vector_IC(d) = height*(1.0-4.0*(normalizedPos-0.5)*(normalizedPos-0.5));
+            }*/
         }
-        
-        /*double center[3] = {0.0, 0.5, 0.5};
-        double dist = 0.0;
-        for (unsigned int dir = 0; dir < dim; dir++){
-            dist += (p[dir]-center[dir]*userInputs.domain_size[dir])*(p[dir]-center[dir]*userInputs.domain_size[dir]);
-        }
-        dist = std::sqrt(dist);
-        vector_IC(0) = 0.5*(1.0-tanh((dist-0.2)/0.1));*/
     }
-    //Pressure
-    if(index == 1){
+    // Pressure
+    else if (index == 1) {
         scalar_IC = 0.0;
     }
-    //SBM
-    if(index == 2){
-        //SBM profile
-        double rad = 0.25*userInputs.domain_size[1];
-        double Width = 0.05*userInputs.domain_size[1];
-        double WallCenter[3] = {0.33*userInputs.domain_size[0], 0.5*userInputs.domain_size[1], 0.0};
-        double Wdist = 0.0;
-        //2D rotation matrix for point
-        for (unsigned int dir = 0; dir < 2; dir++){
-        double distTemp = 1.0;
-            for (unsigned int i = 0; i < 2; i++){
-                distTemp = distTemp*std::abs(p[dir]-WallCenter[dir]);
-            }
-            Wdist += distTemp;
-        }
-        Wdist = std::sqrt(Wdist);
-        double wallOrder = 0.5*(1.0-tanh((Wdist-rad)/(Width)));
-        wallOrder = 1.0 - wallOrder;
+    // Solid-liquid Order
+    else if (index == 2) {
+        scalar_IC = 1.0 - particle;
+        //scalar_IC = - 1.0;
+    }
+    // Dimensionless Temperature
+    else {
+        scalar_IC = 0.0;
+    }
 
-        scalar_IC = wallOrder;
-    }
-    //Misc
-    else{
-        scalar_IC = 0.0;
-    }
-   
     // ---------------------------------------------------------------------
 }
 
@@ -67,7 +59,7 @@ void customPDE<dim,degree>::setInitialCondition(const dealii::Point<dim> &p, con
 // ===========================================================================
 
 template <int dim, int degree>
-void customPDE<dim,degree>::setNonUniformDirichletBCs(const dealii::Point<dim> &p, const unsigned int index, const unsigned int direction, const double time, double & scalar_BC, dealii::Vector<double> & vector_BC)
+void customPDE<dim, degree>::setNonUniformDirichletBCs(const dealii::Point<dim>& p, const unsigned int index, const unsigned int direction, const double time, double& scalar_BC, dealii::Vector<double>& vector_BC)
 {
     // --------------------------------------------------------------------------
     // ENTER THE NON-UNIFORM DIRICHLET BOUNDARY CONDITIONS HERE
@@ -83,12 +75,19 @@ void customPDE<dim,degree>::setNonUniformDirichletBCs(const dealii::Point<dim> &
 
     if(index == 0){
         if(direction == 0){
-            double MaxFlow = 1.0;
+            double MaxFlow = 0.009;
+            double stepheight = 0.0;
             double normalizedPos = p[1]/userInputs.domain_size[1];
-            vector_BC(direction) = MaxFlow*(1.0-4.0*(normalizedPos-0.5)*(normalizedPos-0.5));
+            //MaxFlow = MaxFlow*timeFactor;
+            if(p[1]/userInputs.domain_size[1] >= stepheight){
+                double b = std::abs(1.0/(0.5*stepheight-0.5));
+                vector_BC(0) = MaxFlow*(1.0-b*b*(normalizedPos-0.5-0.5*stepheight)*(normalizedPos-0.5-0.5*stepheight));
+            }
+            else{
+                vector_BC(0) = 0.0;
+            }
         }
     }
 
     // -------------------------------------------------------------------------
-
 }

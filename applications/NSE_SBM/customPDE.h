@@ -1,74 +1,70 @@
 #include "../../include/matrixFreePDE.h"
 
 template <int dim, int degree>
-class customPDE: public MatrixFreePDE<dim,degree>
-{
+class customPDE : public MatrixFreePDE<dim, degree> {
 public:
     // Constructor
-    customPDE(userInputParameters<dim> _userInputs): MatrixFreePDE<dim,degree>(_userInputs) , userInputs(_userInputs) {};
+    customPDE(userInputParameters<dim> _userInputs)
+        : MatrixFreePDE<dim, degree>(_userInputs)
+        , userInputs(_userInputs) { };
 
     // Function to set the initial conditions (in ICs_and_BCs.h)
-    void setInitialCondition(const dealii::Point<dim> &p, const unsigned int index, double & scalar_IC, dealii::Vector<double> & vector_IC);
+    void setInitialCondition(const dealii::Point<dim>& p, const unsigned int index, double& scalar_IC, dealii::Vector<double>& vector_IC);
 
     // Function to set the non-uniform Dirichlet boundary conditions (in ICs_and_BCs.h)
-    void setNonUniformDirichletBCs(const dealii::Point<dim> &p, const unsigned int index, const unsigned int direction, const double time, double & scalar_BC, dealii::Vector<double> & vector_BC);
+    void setNonUniformDirichletBCs(const dealii::Point<dim>& p, const unsigned int index, const unsigned int direction, const double time, double& scalar_BC, dealii::Vector<double>& vector_BC);
 
 private:
-	#include "../../include/typeDefs.h"
+#include "../../include/typeDefs.h"
 
-	const userInputParameters<dim> userInputs;
+    const userInputParameters<dim> userInputs;
 
-	// Function to set the RHS of the governing equations for explicit time dependent equations (in equations.h)
-    void explicitEquationRHS(variableContainer<dim,degree,dealii::VectorizedArray<double> > & variable_list,
-					 dealii::Point<dim, dealii::VectorizedArray<double> > q_point_loc) const;
+    // Function to set the RHS of the governing equations for explicit time dependent equations (in equations.h)
+    void explicitEquationRHS(variableContainer<dim, degree, dealii::VectorizedArray<double>>& variable_list,
+        dealii::Point<dim, dealii::VectorizedArray<double>> q_point_loc) const;
 
     // Function to set the RHS of the governing equations for all other equations (in equations.h)
-    void nonExplicitEquationRHS(variableContainer<dim,degree,dealii::VectorizedArray<double> > & variable_list,
-					 dealii::Point<dim, dealii::VectorizedArray<double> > q_point_loc) const;
+    void nonExplicitEquationRHS(variableContainer<dim, degree, dealii::VectorizedArray<double>>& variable_list,
+        dealii::Point<dim, dealii::VectorizedArray<double>> q_point_loc) const;
 
-	// Function to set the LHS of the governing equations (in equations.h)
-	void equationLHS(variableContainer<dim,degree,dealii::VectorizedArray<double> > & variable_list,
-					 dealii::Point<dim, dealii::VectorizedArray<double> > q_point_loc) const;
+    // Function to set the LHS of the governing equations (in equations.h)
+    void equationLHS(variableContainer<dim, degree, dealii::VectorizedArray<double>>& variable_list,
+        dealii::Point<dim, dealii::VectorizedArray<double>> q_point_loc) const;
 
-	// Function to set postprocessing expressions (in postprocess.h)
-	#ifdef POSTPROCESS_FILE_EXISTS
-	void postProcessedFields(const variableContainer<dim,degree,dealii::VectorizedArray<double> > & variable_list,
-					variableContainer<dim,degree,dealii::VectorizedArray<double> > & pp_variable_list,
-					const dealii::Point<dim, dealii::VectorizedArray<double> > q_point_loc) const;
-	#endif
+// Function to set postprocessing expressions (in postprocess.h)
+#ifdef POSTPROCESS_FILE_EXISTS
+    void postProcessedFields(const variableContainer<dim, degree, dealii::VectorizedArray<double>>& variable_list,
+        variableContainer<dim, degree, dealii::VectorizedArray<double>>& pp_variable_list,
+        const dealii::Point<dim, dealii::VectorizedArray<double>> q_point_loc) const;
+#endif
 
-	// Function to set the nucleation probability (in nucleation.h)
-	#ifdef NUCLEATION_FILE_EXISTS
-	double getNucleationProbability(variableValueContainer variable_value, double dV) const;
-	#endif
+// Function to set the nucleation probability (in nucleation.h)
+#ifdef NUCLEATION_FILE_EXISTS
+    double getNucleationProbability(variableValueContainer variable_value, double dV) const;
+#endif
 
-	// ================================================================
-	// Methods specific to this subclass
-	// ================================================================
+    // ================================================================
+    // Methods specific to this subclass
+    // ================================================================
 
-	// Function to override solveIncrement from ../../src/matrixfree/solveIncrement.cc
+    // Function to override solveIncrement from ../../src/matrixfree/solveIncrement.cc
     void solveIncrement(bool skip_time_dependent);
 
-	// ================================================================
-	// Model constants specific to this subclass
-	// ================================================================
+    // ================================================================
+    // Model constants specific to this subclass
+    // ================================================================
 
-	double reynolds_i = userInputs.get_model_constant_double("ReynoldsInitial");
-    double reynolds_f = userInputs.get_model_constant_double("ReynoldsFinal");
-    int switchFractional = userInputs.get_model_constant_int("switchToFractional");
-	double psiReg = userInputs.get_model_constant_double("psiReg");
+    double nu = userInputs.get_model_constant_double("nu");
+    double rho = userInputs.get_model_constant_double("rho");
+    double W = userInputs.get_model_constant_double("W");
+    double reg = userInputs.get_model_constant_double("reg");
 
-    //Change var type
-    unsigned int switchToFractional = switchFractional;
-
-    //Scaling reynolds number
-    double Re = reynolds_i;
-
-    //This bool acts as a switch to indicate what Chorin projection step is being calculating
+    // This bool acts as a switch to indicate what Chorin projection step is being calculating
     bool ChorinSwitch;
 
-	// ================================================================
+    double gravity[3] = {0.0, -0.001, 0.0};
 
+    // ================================================================
 };
 
 // =================================================================================
@@ -85,10 +81,6 @@ void customPDE<dim,degree>::solveIncrement(bool skip_time_dependent)
     this->computing_timer.enter_subsection("matrixFreePDE: solveIncrements");
     Timer time;
     char buffer[200];
-
-    //Scale reynolds number
-    Re = reynolds_i + (reynolds_f-reynolds_i)*this->currentIncrement/userInputs.totalIncrements;
-    this->pcout << Re << std::endl;
 
     //Set ChorinSwitch to false so steps 1 and 2 may occur
     ChorinSwitch = false;
@@ -113,7 +105,10 @@ void customPDE<dim,degree>::solveIncrement(bool skip_time_dependent)
             this->updateExplicitSolution(fieldIndex);
 
             // Set the Dirichelet values (hanging node constraints don't need to be distributed every time step, only at output)
-            if (this->has_Dirichlet_BCs){
+            if (this->has_Dirichlet_BCs && userInputs.var_name[fieldIndex] != "u"){
+                //Get nonuniform dirichlet constraints
+                this->applynonuniformDirichletBCs();
+                //Distribute for Uniform or Non-Uniform Dirichlet BCs
                 this->constraintsDirichletSet[fieldIndex]->distribute(*this->solutionSet[fieldIndex]);
             }
 
@@ -143,7 +138,7 @@ void customPDE<dim,degree>::solveIncrement(bool skip_time_dependent)
     
     // Now, update the non-explicit variables
     // For the time being, this is just the elliptic equations, but implicit parabolic and auxilary equations should also be here
-    if (this->hasNonExplicitEquation && !skip_time_dependent){
+    if (this->hasNonExplicitEquation){
         
         bool nonlinear_it_converged = false;
         unsigned int nonlinear_it_index = 0;
@@ -328,6 +323,13 @@ void customPDE<dim,degree>::solveIncrement(bool skip_time_dependent)
                         }
                         
                     }
+                    if (this->has_Dirichlet_BCs){
+                        //Get nonuniform dirichlet constraints
+                        this->applynonuniformDirichletBCs();
+                        //Distribute for Uniform or Non-Uniform Dirichlet BCs
+                        this->constraintsDirichletSet[fieldIndex]->distribute(*this->solutionSet[fieldIndex]);
+                    }
+                    this->solutionSet[fieldIndex]->update_ghost_values();
                 }
                 else if (this->fields[fieldIndex].pdetype == AUXILIARY){
                     
@@ -347,7 +349,12 @@ void customPDE<dim,degree>::solveIncrement(bool skip_time_dependent)
                         this->updateExplicitSolution(fieldIndex);
                         
                         // Set the Dirichelet values (hanging node constraints don't need to be distributed every time step, only at output)
-                        this->constraintsDirichletSet[fieldIndex]->distribute(*this->solutionSet[fieldIndex]);
+                        if (this->has_Dirichlet_BCs){
+                            //Get nonuniform dirichlet constraints
+                            this->applynonuniformDirichletBCs();
+                            //Distribute for Uniform or Non-Uniform Dirichlet BCs
+                            this->constraintsDirichletSet[fieldIndex]->distribute(*this->solutionSet[fieldIndex]);
+                        }
                         this->solutionSet[fieldIndex]->update_ghost_values();
                         
                         // Print update to screen
@@ -403,49 +410,65 @@ void customPDE<dim,degree>::solveIncrement(bool skip_time_dependent)
     }
     
     //Special methods for pressure correction in Chorin projection method
-    unsigned int fieldIndex = 0;
-    this->currentFieldIndex = fieldIndex; // Used in computeLHS()
-    
-    //Parabolic (first order derivatives in time) fields
-    if (this->fields[fieldIndex].pdetype==EXPLICIT_TIME_DEPENDENT && userInputs.var_name[fieldIndex] == "u" && !skip_time_dependent){
-        
-        //Set ChorinSwitch to true so steps 3 may occur
-        ChorinSwitch = true;
 
-        // Get the RHS of the new explicit equations
+    //Set ChorinSwitch to true so steps 3 may occur
+    ChorinSwitch = true;
+
+    // Get the RHS of the new explicit equations
+    if (this->hasExplicitEquation && !skip_time_dependent){
         this->computeExplicitRHS();
+    }
 
-        //Set ChorinSwitch to false so steps 1 and 2 may occur
-        ChorinSwitch = false;
+    //Set ChorinSwitch to false so steps 1 and 2 may occur
+    ChorinSwitch = false;
 
-        // Explicit-time step each DOF
-        this->updateExplicitSolution(fieldIndex);
+    for(unsigned int fieldIndex=0; fieldIndex<this->fields.size(); fieldIndex++){
+        this->currentFieldIndex = fieldIndex; // Used in computeLHS()
 
-        // Set the Dirichlet values
-        if (this->has_Dirichlet_BCs){
-            this->constraintsDirichletSet[fieldIndex]->distribute(*this->solutionSet[fieldIndex]);
+        //Here are the allowed fields that we recalulate
+        bool skipLoop = true;
+        if (userInputs.var_name[fieldIndex] == "u" || userInputs.var_name[fieldIndex] == "pi"){
+            skipLoop = false;
         }
-        //computing_timer.enter_subsection("matrixFreePDE: updateExplicitGhosts");
-        this->solutionSet[fieldIndex]->update_ghost_values();
-        //computing_timer.exit_subsection("matrixFreePDE: updateExplicitGhosts");
-        
-        // Print update to screen and confirm that solution isn't nan
-        if (this->currentIncrement%userInputs.skip_print_steps==0){
-            double solution_L2_norm = this->solutionSet[fieldIndex]->l2_norm();
-            
-            snprintf(buffer, sizeof(buffer), "field '%2s' [explicit solve]: current solution: %12.6e, current residual:%12.6e\n", \
-                    this->fields[fieldIndex].name.c_str(),                \
-                    solution_L2_norm,            \
-                    this->residualSet[fieldIndex]->l2_norm());
-            this->pcout<<buffer;
-            
-            if (!numbers::is_finite(solution_L2_norm)){
-                snprintf(buffer, sizeof(buffer), "ERROR: field '%s' solution is NAN. exiting.\n\n",
-                        this->fields[fieldIndex].name.c_str());
-                this->pcout<<buffer;
-                exit(-1);
+        if (skipLoop){
+            continue;
+        }
+
+        //Parabolic (first order derivatives in time) fields
+        if (this->fields[fieldIndex].pdetype==EXPLICIT_TIME_DEPENDENT && !skip_time_dependent){
+
+            // Explicit-time step each DOF
+            this->updateExplicitSolution(fieldIndex);
+
+            // Set the Dirichlet values
+            if (this->has_Dirichlet_BCs){
+                //Get nonuniform dirichlet constraints
+                this->applynonuniformDirichletBCs();
+                //Distribute for Uniform or Non-Uniform Dirichlet BCs
+                this->constraintsDirichletSet[fieldIndex]->distribute(*this->solutionSet[fieldIndex]);
             }
+            //computing_timer.enter_subsection("matrixFreePDE: updateExplicitGhosts");
+            this->solutionSet[fieldIndex]->update_ghost_values();
+            //computing_timer.exit_subsection("matrixFreePDE: updateExplicitGhosts");
             
+            // Print update to screen and confirm that solution isn't nan
+            if (this->currentIncrement%userInputs.skip_print_steps==0){
+                double solution_L2_norm = this->solutionSet[fieldIndex]->l2_norm();
+                
+                snprintf(buffer, sizeof(buffer), "field '%2s' [explicit solve]: current solution: %12.6e, current residual:%12.6e\n", \
+                        this->fields[fieldIndex].name.c_str(),                \
+                        solution_L2_norm,            \
+                        this->residualSet[fieldIndex]->l2_norm());
+                this->pcout<<buffer;
+                
+                if (!numbers::is_finite(solution_L2_norm)){
+                    snprintf(buffer, sizeof(buffer), "ERROR: field '%s' solution is NAN. exiting.\n\n",
+                            this->fields[fieldIndex].name.c_str());
+                    this->pcout<<buffer;
+                    exit(-1);
+                }
+                
+            }
         }
     }
 
