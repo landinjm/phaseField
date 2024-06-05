@@ -63,11 +63,11 @@ end
 # Set the time step parameters
 # =================================================================================
 # The size of the time step
-set Time step = 4.0e-3
+set Time step = 2.0e-1
 
 # The simulation ends when either the number of time steps is reached or the
 # simulation time is reached.
-set Number of time steps = 1000
+set Number of time steps = 10000
 
 # =================================================================================
 # Set the boundary conditions
@@ -113,7 +113,7 @@ set Model constant rho = 100.0, DOUBLE
 set Model constant W = 0.25, DOUBLE
 
 #Regularization value
-set Model constant reg = 1e-3, DOUBLE
+set Model constant reg = 1e-7, DOUBLE
 
 # =================================================================================
 # Set the linear solver parameters
