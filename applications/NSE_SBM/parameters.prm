@@ -113,7 +113,7 @@ set Model constant rho = 100.0, DOUBLE
 set Model constant W = 0.25, DOUBLE
 
 #Regularization value
-set Model constant reg = 1e-7, DOUBLE
+set Model constant reg = 1e-6, DOUBLE
 
 # =================================================================================
 # Set the linear solver parameters
@@ -125,7 +125,7 @@ subsection Linear solver parameters: P
     set Tolerance type = ABSOLUTE_RESIDUAL
 
     # The tolerance for convergence (L2 norm)
-    set Tolerance value =1.0e-5
+    set Tolerance value = 1.0e-4
 
     # The maximum number of linear solver iterations per solve
     set Maximum linear solver iterations = 1000
@@ -140,7 +140,7 @@ set Output condition = EQUAL_SPACING
 
 # Number of times the program outputs the fields (total number for "EQUAL_SPACING"
 # and "LOG_SPACING", number per decade for "N_PER_DECADE", ignored for "LIST")
-set Number of outputs = 10
+set Number of outputs = 1
 
 # The number of time steps between updates being printed to the screen
 set Skip print steps = 1
