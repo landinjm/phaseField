@@ -125,25 +125,11 @@ subsection Linear solver parameters: P
     set Tolerance type = ABSOLUTE_RESIDUAL
 
     # The tolerance for convergence (L2 norm)
-    set Tolerance value =1.0e-4
+    set Tolerance value =1.0e-5
 
     # The maximum number of linear solver iterations per solve
     set Maximum linear solver iterations = 1000
 end
-
-# =================================================================================
-# Set the nonlinear solver parameters
-# =================================================================================
-
-#set Maximum nonlinear solver iterations = 30
-
-#subsection Nonlinear solver parameters: P
-    #set Tolerance type = ABSOLUTE_SOLUTION_CHANGE
-    #set Tolerance value = 1.0e-4
-    #set Use backtracking line search damping = true
-    #set Backtracking step size modifier = 0.5
-    #set Backtracking residual decrease coefficient = 1.0
-#end
 
 # =================================================================================
 # Set the output parameters
