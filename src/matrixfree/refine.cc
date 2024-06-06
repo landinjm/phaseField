@@ -192,9 +192,10 @@ if(foundScalar){
 			unsigned int current_level = t_cell->level();
 
 			if ( (mark_refine && current_level < userInputs.max_refinement_level) ){
+				cell->clear_coarsen_flag();
 				cell->set_refine_flag();
 			}
-			else if (!mark_refine && current_level > userInputs.min_refinement_level) {
+			else if (!mark_refine && current_level > userInputs.min_refinement_level && !cell->refine_flag_set()) {
 				cell->set_coarsen_flag();
 			}
 
