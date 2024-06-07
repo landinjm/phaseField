@@ -117,30 +117,51 @@ void adaptiveRefinement<dim, degree>::adaptiveRefineCriterion()
         update_flags = update_values | update_gradients;
     }
 
-    FEValues<dim> fe_values(*FESet[userInputs.refinement_criteria[0].variable_index], quadrature, update_flags);
-
-    std::vector<double> values(num_quad_points);
-    std::vector<double> gradient_magnitudes(num_quad_points);
-    std::vector<dealii::Tensor<1, dim, double>> gradients(num_quad_points);
-
-    typename DoFHandler<dim>::active_cell_iterator cell = dofHandlersSet_nonconst[userInputs.refinement_criteria[0].variable_index]->begin_active(), endc = dofHandlersSet_nonconst[userInputs.refinement_criteria[0].variable_index]->end();
-
-    typename parallel::distributed::Triangulation<dim>::active_cell_iterator t_cell = triangulation.begin_active();
-
     for (auto it = userInputs.refinement_criteria.begin(); it != userInputs.refinement_criteria.end(); ++it) {
+        
+        FEValues<dim> fe_values(*FESet[it->variable_index], quadrature, update_flags);
+
+        std::vector<double> values(num_quad_points);
+        std::vector<double> gradient_magnitudes(num_quad_points);
+
+        std::vector<dealii::Vector<double>> values_vector(num_quad_points, dealii::Vector<double>(dim));
+        dealii::Vector<double> gradient_magnitude_components(dim);
+        std::vector<dealii::Tensor<1, dim, double>> gradients(num_quad_points);
+	    std::vector<std::vector<dealii::Tensor<1,dim,double>>> gradients_vector(num_quad_points, std::vector<dealii::Tensor<1,dim,double>>(dim));
+
+        typename DoFHandler<dim>::active_cell_iterator cell = dofHandlersSet_nonconst[it->variable_index]->begin_active(), endc = dofHandlersSet_nonconst[it->variable_index]->end();
+
+        typename parallel::distributed::Triangulation<dim>::active_cell_iterator t_cell = triangulation.begin_active();
+
         //Loop through locally owned cells
         for (; cell != endc; ++cell) {
             if (cell->is_locally_owned()) {
                 fe_values.reinit(cell);
 
-                if (need_value) {
+                if (need_value && userInputs.var_type[it->variable_index] == SCALAR) {
                     fe_values.get_function_values(*solutionSet[it->variable_index], values);
+
+                } else if (need_value && userInputs.var_type[it->variable_index] == VECTOR) {
+                    fe_values.get_function_values(*solutionSet[it->variable_index], values_vector);
+
+                    for (unsigned int q_point=0; q_point<num_quad_points; ++q_point){
+                        values.at(q_point) = values_vector.at(q_point).l2_norm();
+                    }
                 }
-                if (need_gradient) {
+                if (need_gradient && userInputs.var_type[it->variable_index] == SCALAR) {
                     fe_values.get_function_gradients(*solutionSet[it->variable_index], gradients);
 
                     for (unsigned int q_point = 0; q_point < num_quad_points; ++q_point) {
                         gradient_magnitudes.at(q_point) = gradients.at(q_point).norm();
+                    }
+                } else if (need_gradient && userInputs.var_type[it->variable_index] == VECTOR) {
+                    fe_values.get_function_gradients(*solutionSet[it->variable_index], gradients_vector);
+
+                    for (unsigned int q_point=0; q_point<num_quad_points; ++q_point){
+                        for (unsigned int d = 0; d<dim; ++d){
+                            gradient_magnitude_components[d] = gradients_vector.at(q_point).at(d).norm();
+                        }
+                        gradient_magnitudes.at(q_point) = gradient_magnitude_components.l2_norm();
                     }
                 }
 
@@ -164,9 +185,10 @@ void adaptiveRefinement<dim, degree>::adaptiveRefineCriterion()
                 // limit the maximal and minimal refinement depth of the mesh
                 unsigned int current_level = t_cell->level();
 
-                if ((mark_refine && current_level < userInputs.max_refinement_level)) {
+                if (mark_refine && current_level < userInputs.max_refinement_level) {
+                    cell->clear_coarsen_flag();
                     cell->set_refine_flag();
-                } else if (!mark_refine && current_level > userInputs.min_refinement_level) {
+                } else if (!mark_refine && current_level > userInputs.min_refinement_level && !cell->refine_flag_set() && !cell->coarsen_flag_set()) {
                     cell->set_coarsen_flag();
                 }
             }
