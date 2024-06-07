@@ -114,9 +114,6 @@ for(auto it = userInputs.refinement_criteria.begin(); it != userInputs.refinemen
 	}
 }
 
-pcout << "Found Scalar Refinement Criteria = " << std::boolalpha << foundScalar << std::endl;
-pcout << "Found Vector Refinement Criteria = " << std::boolalpha << foundVector << std::endl;
-
 if(foundScalar){
 	FEValues<dim> fe_values (*FESet[scalarField], quadrature, update_flags);
 
@@ -193,6 +190,9 @@ if(foundScalar){
 
 			if ( (mark_refine && current_level < userInputs.max_refinement_level) ){
 				cell->clear_coarsen_flag();
+				cell->set_refine_flag();
+			}
+			else if ( (mark_refine && !cell->refine_flag_set() && foundVector) ){
 				cell->set_refine_flag();
 			}
 			else if (!mark_refine && current_level > userInputs.min_refinement_level && !cell->refine_flag_set()) {
@@ -289,6 +289,9 @@ if(foundVector){
 			if ( (mark_refine && current_level < userInputs.max_refinement_level) ){
 				cell->clear_coarsen_flag();
 				cell->set_refine_flag();
+			}
+			else if (current_level == userInputs.max_refinement_level && cell->refine_flag_set() && foundScalar){
+				cell->clear_refine_flag();
 			}
 			else if (!mark_refine && current_level > userInputs.min_refinement_level && !cell->refine_flag_set()) {
 				cell->set_coarsen_flag();
