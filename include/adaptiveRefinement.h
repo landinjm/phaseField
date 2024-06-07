@@ -98,14 +98,21 @@ void adaptiveRefinement<dim, degree>::adaptiveRefineCriterion()
     QGaussLobatto<dim> quadrature(degree + 1);
     const unsigned int num_quad_points = quadrature.size();
 
-    // Set the correct update flags
+    // Set the correct update flags & grab the indices of the scalar and vector fields if any
     bool need_value = false;
     bool need_gradient = false;
+    unsigned int scalarIndex;
+    unsigned int vectorIndex;
     for (auto it = userInputs.refinement_criteria.begin(); it != userInputs.refinement_criteria.end(); ++it) {
         if (it->criterion_type == VALUE || it->criterion_type == VALUE_AND_GRADIENT) {
             need_value = true;
         } else if (it->criterion_type == GRADIENT || it->criterion_type == VALUE_AND_GRADIENT) {
             need_gradient = true;
+        }
+        if (userInputs.var_type[it->variable_index] == SCALAR) {
+            scalarIndex = it->variable_index;
+        } else if (userInputs.var_type[it->variable_index] == VECTOR) {
+            vectorIndex = it->variable_index;
         }
     }
     dealii::UpdateFlags update_flags;
@@ -117,9 +124,24 @@ void adaptiveRefinement<dim, degree>::adaptiveRefineCriterion()
         update_flags = update_values | update_gradients;
     }
 
+    //Before marking cells for refinement and/or coarsening clear user flags
+    //These user flags are used to mark whether cells have already been flagged for refinement
+    triangulation.clear_user_flags();
+
     for (auto it = userInputs.refinement_criteria.begin(); it != userInputs.refinement_criteria.end(); ++it) {
-        
-        FEValues<dim> fe_values(*FESet[it->variable_index], quadrature, update_flags);
+
+        //Grab the field type
+        unsigned int fieldType = userInputs.var_type[it->variable_index];
+
+        //Assign the representative index of the scalar/vector field
+        unsigned int index;
+        if (fieldType == SCALAR) {
+            index = scalarIndex;
+        } else if (fieldType == VECTOR) {
+            index = vectorIndex;
+        }
+
+        FEValues<dim> fe_values(*FESet[index], quadrature, update_flags);
 
         std::vector<double> values(num_quad_points);
         std::vector<double> gradient_magnitudes(num_quad_points);
@@ -129,7 +151,7 @@ void adaptiveRefinement<dim, degree>::adaptiveRefineCriterion()
         std::vector<dealii::Tensor<1, dim, double>> gradients(num_quad_points);
 	    std::vector<std::vector<dealii::Tensor<1,dim,double>>> gradients_vector(num_quad_points, std::vector<dealii::Tensor<1,dim,double>>(dim));
 
-        typename DoFHandler<dim>::active_cell_iterator cell = dofHandlersSet_nonconst[it->variable_index]->begin_active(), endc = dofHandlersSet_nonconst[it->variable_index]->end();
+        typename DoFHandler<dim>::active_cell_iterator cell = dofHandlersSet_nonconst[index]->begin_active(), endc = dofHandlersSet_nonconst[index]->end();
 
         typename parallel::distributed::Triangulation<dim>::active_cell_iterator t_cell = triangulation.begin_active();
 
@@ -138,23 +160,23 @@ void adaptiveRefinement<dim, degree>::adaptiveRefineCriterion()
             if (cell->is_locally_owned()) {
                 fe_values.reinit(cell);
 
-                if (need_value && userInputs.var_type[it->variable_index] == SCALAR) {
+                if (need_value && fieldType == SCALAR) {
                     fe_values.get_function_values(*solutionSet[it->variable_index], values);
 
-                } else if (need_value && userInputs.var_type[it->variable_index] == VECTOR) {
+                } else if (need_value && fieldType == VECTOR) {
                     fe_values.get_function_values(*solutionSet[it->variable_index], values_vector);
 
                     for (unsigned int q_point=0; q_point<num_quad_points; ++q_point){
                         values.at(q_point) = values_vector.at(q_point).l2_norm();
                     }
                 }
-                if (need_gradient && userInputs.var_type[it->variable_index] == SCALAR) {
+                if (need_gradient && fieldType == SCALAR) {
                     fe_values.get_function_gradients(*solutionSet[it->variable_index], gradients);
 
                     for (unsigned int q_point = 0; q_point < num_quad_points; ++q_point) {
                         gradient_magnitudes.at(q_point) = gradients.at(q_point).norm();
                     }
-                } else if (need_gradient && userInputs.var_type[it->variable_index] == VECTOR) {
+                } else if (need_gradient && fieldType == VECTOR) {
                     fe_values.get_function_gradients(*solutionSet[it->variable_index], gradients_vector);
 
                     for (unsigned int q_point=0; q_point<num_quad_points; ++q_point){
@@ -186,9 +208,13 @@ void adaptiveRefinement<dim, degree>::adaptiveRefineCriterion()
                 unsigned int current_level = t_cell->level();
 
                 if (mark_refine && current_level < userInputs.max_refinement_level) {
+                    cell->set_user_flag();
                     cell->clear_coarsen_flag();
                     cell->set_refine_flag();
-                } else if (!mark_refine && current_level > userInputs.min_refinement_level && !cell->refine_flag_set() && !cell->coarsen_flag_set()) {
+                } else if (mark_refine) {
+                    cell->set_user_flag();
+                    cell->clear_coarsen_flag();
+                } else if (!mark_refine && current_level > userInputs.min_refinement_level && !cell->user_flag_set()) {
                     cell->set_coarsen_flag();
                 }
             }
