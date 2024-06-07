@@ -104,10 +104,10 @@ void adaptiveRefinement<dim, degree>::adaptiveRefineCriterion()
     // Set the correct update flags
     bool need_value = false;
     bool need_gradient = false;
-    for (unsigned int field_index = 0; field_index < userInputs.refinement_criteria.size(); field_index++) {
-        if (userInputs.refinement_criteria[field_index].criterion_type == VALUE || userInputs.refinement_criteria[field_index].criterion_type == VALUE_AND_GRADIENT) {
+    for (auto it = userInputs.refinement_criteria.begin(); it != userInputs.refinement_criteria.end(); ++it) {
+        if (it->criterion_type == VALUE || it->criterion_type == VALUE_AND_GRADIENT) {
             need_value = true;
-        } else if (userInputs.refinement_criteria[field_index].criterion_type == GRADIENT || userInputs.refinement_criteria[field_index].criterion_type == VALUE_AND_GRADIENT) {
+        } else if (it->criterion_type == GRADIENT || it->criterion_type == VALUE_AND_GRADIENT) {
             need_gradient = true;
         }
     }
