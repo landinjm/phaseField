@@ -56,6 +56,14 @@ void variableAttributeLoader::loadVariableAttributes()
 
     set_dependencies_value_term_RHS(4, "u,phi,grad(phi),xi,theta,grad(theta)");
     set_dependencies_gradient_term_RHS(4, "grad(theta)");
+
+    // Variable 5 - the refinement field
+    set_variable_name(5, "refine");
+    set_variable_type(5, SCALAR);
+    set_variable_equation_type(5, EXPLICIT_TIME_DEPENDENT);
+
+    set_dependencies_value_term_RHS(5, "refine,phi,P");
+    set_dependencies_gradient_term_RHS(5, "");
 }
 
 // =============================================================================================
@@ -77,12 +85,14 @@ void customPDE<dim, degree>::explicitEquationRHS(variableContainer<dim, degree, 
     // Grab the values of the fields
     vectorvalueType u = variable_list.get_vector_value(0);
     vectorgradType ux = variable_list.get_vector_gradient(0);
+    scalarvalueType P = variable_list.get_scalar_value(1);
     scalargradType Px = variable_list.get_scalar_gradient(1);
     scalarvalueType phi = variable_list.get_scalar_value(2);
     scalargradType phix = variable_list.get_scalar_gradient(2);
     scalarvalueType xi = variable_list.get_scalar_value(3);
     scalarvalueType theta = variable_list.get_scalar_value(4);
     scalargradType thetax = variable_list.get_scalar_gradient(4);
+    scalarvalueType refine = variable_list.get_scalar_value(5);
 
     // Initialize the submission terms to zero
     // This is necessary to remove any remaining residuals in the projection step
@@ -90,10 +100,11 @@ void customPDE<dim, degree>::explicitEquationRHS(variableContainer<dim, degree, 
     eq_u = eq_u * constV(0.0);
     vectorgradType eqx_u;
     eqx_u = eqx_u * constV(0.0);
-    scalarvalueType eq_phi = constV(0.0);
-    scalarvalueType eq_theta = constV(0.0);
+    scalarvalueType eq_phi = phi;
+    scalarvalueType eq_theta = theta;
     scalargradType eqx_theta;
     eqx_theta = eqx_theta * constV(0.0);
+    scalarvalueType eq_refine = refine;
 
     // Step one of the Chorin projection
     if (!ChorinSwitch) {
@@ -138,6 +149,7 @@ void customPDE<dim, degree>::explicitEquationRHS(variableContainer<dim, degree, 
         eq_phi = phi + constV(userInputs.dtValue) * dphidt;
         eq_theta = theta + constV(0.5 * userInputs.dtValue) * (dphidt - Tadvec);
         eqx_theta = -constV(D * userInputs.dtValue) * thetax;
+        eq_refine = 0.5*(1.0-phi)*std::abs(P);
     }
 
     // Step three of the Chorin projection
@@ -152,6 +164,7 @@ void customPDE<dim, degree>::explicitEquationRHS(variableContainer<dim, degree, 
     variable_list.set_scalar_value_term_RHS(2, eq_phi);
     variable_list.set_scalar_value_term_RHS(4, eq_theta);
     variable_list.set_scalar_gradient_term_RHS(4, eqx_theta);
+    variable_list.set_scalar_value_term_RHS(5, eq_refine);
 }
 
 // =============================================================================================

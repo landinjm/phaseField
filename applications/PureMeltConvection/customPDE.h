@@ -432,7 +432,7 @@ void customPDE<dim,degree>::solveIncrement(bool skip_time_dependent)
 
         //Here are the allowed fields that we recalulate
         bool skipLoop = true;
-        if (userInputs.var_name[fieldIndex] == "u" || userInputs.var_name[fieldIndex] == "pi"){
+        if (userInputs.var_name[fieldIndex] == "u"){
             skipLoop = false;
         }
         if (skipLoop){

@@ -8,8 +8,8 @@ set Number of dimensions = 2
 # (Domain size Z ignored in 2D)
 # =================================================================================
 # Each axes spans from zero to the specified length
-set Domain size X = 100
-set Domain size Y = 100
+set Domain size X = 230.4
+set Domain size Y = 230.4
 set Domain size Z = 100
 
 # =================================================================================
@@ -18,8 +18,8 @@ set Domain size Z = 100
 # The number of elements in each direction is 2^(refineFactor) * subdivisions
 # Subdivisions Z ignored in 2D
 # For optimal performance, use refineFactor primarily to determine the element size
-set Subdivisions X = 1
-set Subdivisions Y = 1
+set Subdivisions X = 3
+set Subdivisions Y = 3
 set Subdivisions Z = 1
 
 set Refine factor = 6
@@ -40,40 +40,34 @@ set Max refinement level = 6
 set Min refinement level = 4
 
 # Set the number of time steps between remeshing operations
-set Steps between remeshing operations = 1
+set Steps between remeshing operations = 100
 # Set the criteria for adapting the mesh
-subsection Refinement criterion: u
-    # Select whether the mesh is refined based on the variable value (VALUE),
-    # its gradient (GRADIENT), or both (VALUE_AND_GRADIENT)
-    set Criterion type = GRADIENT
-    # Set the lower and upper bounds for the value-based refinement window
-    set Gradient magnitude lower bound = 0.1
-end
 subsection Refinement criterion: phi
     # Select whether the mesh is refined based on the variable value (VALUE),
     # its gradient (GRADIENT), or both (VALUE_AND_GRADIENT)
     set Criterion type = VALUE
     # Set the lower and upper bounds for the value-based refinement window
-    set Value lower bound = -0.999
-    set Value upper bound = 0.999
+    set Value lower bound = -0.9999999
+    set Value upper bound = 0.9999
 end
-#subsection Refinement criterion: P
+subsection Refinement criterion: refine
     # Select whether the mesh is refined based on the variable value (VALUE),
     # its gradient (GRADIENT), or both (VALUE_AND_GRADIENT)
-    #set Criterion type = GRADIENT
+    set Criterion type = VALUE
     # Set the lower and upper bounds for the value-based refinement window
-    #set Gradient magnitude lower bound = 100.0
-#end
+    set Value lower bound = 0.05
+    set Value upper bound = 100.0
+end
 
 # =================================================================================
 # Set the time step parameters
 # =================================================================================
 # The size of the time step
-set Time step = 3.0e-3
+set Time step = 1.0e-3
 
 # The simulation ends when either the number of time steps is reached or the
 # simulation time is reached.
-set Number of time steps = 100
+set Number of time steps = 10000
 
 # =================================================================================
 # Set the boundary conditions
@@ -101,6 +95,7 @@ set Boundary condition for variable P = NATURAL,DIRICHLET: 0.0,NATURAL,NATURAL
 set Boundary condition for variable phi = NATURAL
 set Boundary condition for variable xi = NATURAL
 set Boundary condition for variable theta = DIRICHLET: -0.55,NATURAL,NATURAL,NATURAL
+set Boundary condition for variable refine = NATURAL
 
 # =================================================================================
 # Set the model constants
@@ -112,7 +107,7 @@ set Boundary condition for variable theta = DIRICHLET: -0.55,NATURAL,NATURAL,NAT
 # where [symmetry] is ISOTROPIC, TRANSVERSE, ORTHOTROPIC, or ANISOTROPIC.
 
 #Dynamic viscosity
-set Model constant nu = 10.0, DOUBLE
+set Model constant nu = 9.24, DOUBLE
 
 #Fluid density
 set Model constant rho = 0.1, DOUBLE
@@ -142,7 +137,7 @@ set Output condition = EQUAL_SPACING
 
 # Number of times the program outputs the fields (total number for "EQUAL_SPACING"
 # and "LOG_SPACING", number per decade for "N_PER_DECADE", ignored for "LIST")
-set Number of outputs = 50
+set Number of outputs = 100
 
 # The number of time steps between updates being printed to the screen
 set Skip print steps = 10
@@ -159,4 +154,4 @@ set Checkpoint condition = EQUAL_SPACING
 
 # Number of times the creates checkpoints (total number for "EQUAL_SPACING"
 # and "LOG_SPACING", number per decade for "N_PER_DECADE", ignored for "LIST")
-set Number of checkpoints = 0
+set Number of checkpoints = 1
