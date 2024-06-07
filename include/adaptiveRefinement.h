@@ -95,9 +95,6 @@ void adaptiveRefinement<dim, degree>::adaptiveRefine(unsigned int currentIncreme
 template <int dim, int degree>
 void adaptiveRefinement<dim, degree>::adaptiveRefineCriterion()
 {
-    std::vector<std::vector<double>> valuesV;
-    std::vector<std::vector<double>> gradientsV;
-
     QGaussLobatto<dim> quadrature(degree + 1);
     const unsigned int num_quad_points = quadrature.size();
 
@@ -130,58 +127,51 @@ void adaptiveRefinement<dim, degree>::adaptiveRefineCriterion()
 
     typename parallel::distributed::Triangulation<dim>::active_cell_iterator t_cell = triangulation.begin_active();
 
-    for (; cell != endc; ++cell) {
-        if (cell->is_locally_owned()) {
-            fe_values.reinit(cell);
+    for (auto it = userInputs.refinement_criteria.begin(); it != userInputs.refinement_criteria.end(); ++it) {
+        //Loop through locally owned cells
+        for (; cell != endc; ++cell) {
+            if (cell->is_locally_owned()) {
+                fe_values.reinit(cell);
 
-            for (unsigned int field_index = 0; field_index < userInputs.refinement_criteria.size(); field_index++) {
                 if (need_value) {
-                    fe_values.get_function_values(*solutionSet[userInputs.refinement_criteria[field_index].variable_index], values);
-                    valuesV.push_back(values);
+                    fe_values.get_function_values(*solutionSet[it->variable_index], values);
                 }
                 if (need_gradient) {
-                    fe_values.get_function_gradients(*solutionSet[userInputs.refinement_criteria[field_index].variable_index], gradients);
+                    fe_values.get_function_gradients(*solutionSet[it->variable_index], gradients);
 
                     for (unsigned int q_point = 0; q_point < num_quad_points; ++q_point) {
                         gradient_magnitudes.at(q_point) = gradients.at(q_point).norm();
                     }
-
-                    gradientsV.push_back(gradient_magnitudes);
                 }
-            }
 
-            bool mark_refine = false;
+                bool mark_refine = false;
 
-            for (unsigned int q_point = 0; q_point < num_quad_points; ++q_point) {
-                for (unsigned int field_index = 0; field_index < userInputs.refinement_criteria.size(); field_index++) {
-                    if (userInputs.refinement_criteria[field_index].criterion_type == VALUE || userInputs.refinement_criteria[field_index].criterion_type == VALUE_AND_GRADIENT) {
-                        if ((valuesV[field_index][q_point] > userInputs.refinement_criteria[field_index].value_lower_bound) && (valuesV[field_index][q_point] < userInputs.refinement_criteria[field_index].value_upper_bound)) {
+                for (unsigned int q_point = 0; q_point < num_quad_points; ++q_point) {
+                    if (it->criterion_type == VALUE || it->criterion_type == VALUE_AND_GRADIENT) {
+                        if ((values[q_point] > it->value_lower_bound) && (values[q_point] < it->value_upper_bound)) {
                             mark_refine = true;
                             break;
                         }
                     }
-                    if (userInputs.refinement_criteria[field_index].criterion_type == GRADIENT || userInputs.refinement_criteria[field_index].criterion_type == VALUE_AND_GRADIENT) {
-                        if (gradientsV[field_index][q_point] > userInputs.refinement_criteria[field_index].gradient_lower_bound) {
+                    if (it->criterion_type == GRADIENT || it->criterion_type == VALUE_AND_GRADIENT) {
+                        if (gradient_magnitudes[q_point] > it->gradient_lower_bound) {
                             mark_refine = true;
                             break;
                         }
                     }
                 }
+
+                // limit the maximal and minimal refinement depth of the mesh
+                unsigned int current_level = t_cell->level();
+
+                if ((mark_refine && current_level < userInputs.max_refinement_level)) {
+                    cell->set_refine_flag();
+                } else if (!mark_refine && current_level > userInputs.min_refinement_level) {
+                    cell->set_coarsen_flag();
+                }
             }
-
-            valuesV.clear();
-            gradientsV.clear();
-
-            // limit the maximal and minimal refinement depth of the mesh
-            unsigned int current_level = t_cell->level();
-
-            if ((mark_refine && current_level < userInputs.max_refinement_level)) {
-                cell->set_refine_flag();
-            } else if (!mark_refine && current_level > userInputs.min_refinement_level) {
-                cell->set_coarsen_flag();
-            }
+            ++t_cell;
         }
-        ++t_cell;
     }
 }
 
