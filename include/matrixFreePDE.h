@@ -217,6 +217,9 @@ protected:
     /*Method to print outputs*/
     void printOutputs(unsigned int fieldIndex, SolverControl *solver_control = nullptr);
 
+    /*Method for nonlinear solve*/
+    bool nonlinearSolve(unsigned int fieldIndex, unsigned int nonlinear_it_index);
+
     /*AMR methods*/
     adaptiveRefinement<dim, degree> RefineAdaptively;
 
