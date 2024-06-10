@@ -32,20 +32,7 @@ void MatrixFreePDE<dim, degree>::solveIncrement(bool skip_time_dependent)
 
             // Print update to screen and confirm that solution isn't nan
             if (currentIncrement % userInputs.skip_print_steps == 0) {
-                double solution_L2_norm = solutionSet[fieldIndex]->l2_norm();
-
-                snprintf(buffer, sizeof(buffer), "field '%2s' [explicit solve]: current solution: %12.6e, current residual:%12.6e\n",
-                    fields[fieldIndex].name.c_str(),
-                    solution_L2_norm,
-                    residualSet[fieldIndex]->l2_norm());
-                pcout << buffer;
-
-                if (!numbers::is_finite(solution_L2_norm)) {
-                    snprintf(buffer, sizeof(buffer), "ERROR: field '%s' solution is NAN. exiting.\n\n",
-                        fields[fieldIndex].name.c_str());
-                    pcout << buffer;
-                    exit(-1);
-                }
+                printOutputs(fieldIndex);
             }
         }
     }
@@ -72,11 +59,7 @@ void MatrixFreePDE<dim, degree>::solveIncrement(bool skip_time_dependent)
                 if ((fields[fieldIndex].pdetype == IMPLICIT_TIME_DEPENDENT && !skip_time_dependent) || fields[fieldIndex].pdetype == TIME_INDEPENDENT) {
 
                     if (currentIncrement % userInputs.skip_print_steps == 0 && userInputs.var_nonlinear[fieldIndex]) {
-                        snprintf(buffer, sizeof(buffer), "field '%2s' [nonlinear solve]: current solution: %12.6e, current residual:%12.6e\n",
-                            fields[fieldIndex].name.c_str(),
-                            solutionSet[fieldIndex]->l2_norm(),
-                            residualSet[fieldIndex]->l2_norm());
-                        pcout << buffer;
+                        printOutputs(fieldIndex);
                     }
 
                     // apply Dirichlet BC'se
@@ -160,18 +143,7 @@ void MatrixFreePDE<dim, degree>::solveIncrement(bool skip_time_dependent)
                         }
 
                         if (currentIncrement % userInputs.skip_print_steps == 0) {
-                            double dU_norm;
-                            if (fields[fieldIndex].type == SCALAR) {
-                                dU_norm = dU_scalar.l2_norm();
-                            } else {
-                                dU_norm = dU_vector.l2_norm();
-                            }
-                            snprintf(buffer, sizeof(buffer), "field '%2s' [linear solve]: initial residual:%12.6e, current residual:%12.6e, nsteps:%u, tolerance criterion:%12.6e, solution: %12.6e, dU: %12.6e\n",
-                                fields[fieldIndex].name.c_str(),
-                                residualSet[fieldIndex]->l2_norm(),
-                                solver_control.last_value(),
-                                solver_control.last_step(), solver_control.tolerance(), solutionSet[fieldIndex]->l2_norm(), dU_norm);
-                            pcout << buffer;
+                            printOutputs(fieldIndex, &solver_control);
                         }
 
                         // Check to see if this individual variable has converged
@@ -203,18 +175,7 @@ void MatrixFreePDE<dim, degree>::solveIncrement(bool skip_time_dependent)
                             }
 
                             if (currentIncrement % userInputs.skip_print_steps == 0) {
-                                double dU_norm;
-                                if (fields[fieldIndex].type == SCALAR) {
-                                    dU_norm = dU_scalar.l2_norm();
-                                } else {
-                                    dU_norm = dU_vector.l2_norm();
-                                }
-                                snprintf(buffer, sizeof(buffer), "field '%2s' [linear solve]: initial residual:%12.6e, current residual:%12.6e, nsteps:%u, tolerance criterion:%12.6e, solution: %12.6e, dU: %12.6e\n",
-                                    fields[fieldIndex].name.c_str(),
-                                    residualSet[fieldIndex]->l2_norm(),
-                                    solver_control.last_value(),
-                                    solver_control.last_step(), solver_control.tolerance(), solutionSet[fieldIndex]->l2_norm(), dU_norm);
-                                pcout << buffer;
+                                printOutputs(fieldIndex, &solver_control);
                             }
                         }
                     }
@@ -223,66 +184,16 @@ void MatrixFreePDE<dim, degree>::solveIncrement(bool skip_time_dependent)
                     applyBCs(fieldIndex);
 
                 } else if (fields[fieldIndex].pdetype == AUXILIARY) {
+                 
+                    updateExplicitSolution(fieldIndex);
 
-                    if (userInputs.var_nonlinear[fieldIndex] || nonlinear_it_index == 0) {
+                    // Apply Boundary conditions
+                    applyBCs(fieldIndex);
 
-                        // If the equation for this field is nonlinear, save the old solution
-                        if (userInputs.var_nonlinear[fieldIndex]) {
-                            if (fields[fieldIndex].type == SCALAR) {
-                                dU_scalar = *solutionSet[fieldIndex];
-                            } else {
-                                dU_vector = *solutionSet[fieldIndex];
-                            }
-                        }
-
-                        updateExplicitSolution(fieldIndex);
-
-                        // Apply Boundary conditions
-                        applyBCs(fieldIndex);
-
-                        // Print update to screen
-                        if (currentIncrement % userInputs.skip_print_steps == 0) {
-                            snprintf(buffer, sizeof(buffer), "field '%2s' [auxiliary solve]: current solution: %12.6e, current residual:%12.6e\n",
-                                fields[fieldIndex].name.c_str(),
-                                solutionSet[fieldIndex]->l2_norm(),
-                                residualSet[fieldIndex]->l2_norm());
-                            pcout << buffer;
-                        }
-
-                        // Check to see if this individual variable has converged
-                        if (userInputs.var_nonlinear[fieldIndex]) {
-                            if (userInputs.nonlinear_solver_parameters.getToleranceType(fieldIndex) == ABSOLUTE_SOLUTION_CHANGE) {
-
-                                double diff;
-
-                                if (fields[fieldIndex].type == SCALAR) {
-                                    dU_scalar -= *solutionSet[fieldIndex];
-                                    diff = dU_scalar.l2_norm();
-                                } else {
-                                    dU_vector -= *solutionSet[fieldIndex];
-                                    diff = dU_vector.l2_norm();
-                                }
-                                if (currentIncrement % userInputs.skip_print_steps == 0) {
-                                    pcout << "Relative difference between nonlinear iterations: " << diff << " " << nonlinear_it_index << " " << currentIncrement << std::endl;
-                                }
-
-                                if (diff > userInputs.nonlinear_solver_parameters.getToleranceValue(fieldIndex) && nonlinear_it_index < userInputs.nonlinear_solver_parameters.getMaxIterations()) {
-                                    nonlinear_it_converged = false;
-                                }
-
-                            } else {
-                                std::cerr << "PRISMS-PF Error: Nonlinear solver tolerance types other than ABSOLUTE_CHANGE have yet to be implemented." << std::endl;
-                            }
-                        }
+                    // Print update to screen
+                    if (currentIncrement % userInputs.skip_print_steps == 0) {
+                        printOutputs(fieldIndex);
                     }
-                }
-
-                // check if solution is nan
-                if (!numbers::is_finite(solutionSet[fieldIndex]->l2_norm())) {
-                    snprintf(buffer, sizeof(buffer), "ERROR: field '%s' solution is NAN. exiting.\n\n",
-                        fields[fieldIndex].name.c_str());
-                    pcout << buffer;
-                    exit(-1);
                 }
             }
 
@@ -295,6 +206,64 @@ void MatrixFreePDE<dim, degree>::solveIncrement(bool skip_time_dependent)
     }
     // log time
     computing_timer.leave_subsection("matrixFreePDE: solveIncrements");
+}
+
+// Print outputs of solution & residual set
+template <int dim, int degree>
+void MatrixFreePDE<dim, degree>::printOutputs(unsigned int fieldIndex, SolverControl *solver_control)
+{
+    //Character limit for output buffer
+    char buffer[200];
+
+    double solution_L2_norm = solutionSet[fieldIndex]->l2_norm();
+    double residual_L2_norm = residualSet[fieldIndex]->l2_norm();
+
+    if (fields[fieldIndex].pdetype == EXPLICIT_TIME_DEPENDENT) {
+        snprintf(buffer, sizeof(buffer), "field '%2s' [explicit solve]: current solution: %12.6e, current residual:%12.6e\n",
+            fields[fieldIndex].name.c_str(),
+            solution_L2_norm,
+            residual_L2_norm);
+    }
+    else if (fields[fieldIndex].pdetype == IMPLICIT_TIME_DEPENDENT || fields[fieldIndex].pdetype == TIME_INDEPENDENT) {
+        if (userInputs.var_nonlinear[fieldIndex]) {
+            snprintf(buffer, sizeof(buffer), "field '%2s' [nonlinear solve]: current solution: %12.6e, current residual:%12.6e\n",
+                fields[fieldIndex].name.c_str(),
+                solution_L2_norm,
+                residual_L2_norm);
+        }
+        if (solver_control){
+            double dU_norm;
+            if (fields[fieldIndex].type == SCALAR) {
+                dU_norm = dU_scalar.l2_norm();
+            } else {
+                dU_norm = dU_vector.l2_norm();
+            }
+
+            snprintf(buffer, sizeof(buffer), "field '%2s' [linear solve]: initial residual:%12.6e, current residual:%12.6e, nsteps:%u, tolerance criterion:%12.6e, solution: %12.6e, dU: %12.6e\n",
+                fields[fieldIndex].name.c_str(),
+                residual_L2_norm,
+                solver_control->last_value(),
+                solver_control->last_step(),
+                solver_control->tolerance(),
+                solution_L2_norm,
+                dU_norm);
+        }
+    }
+    else if (fields[fieldIndex].pdetype == AUXILIARY) {
+        snprintf(buffer, sizeof(buffer), "field '%2s' [auxiliary solve]: current solution: %12.6e, current residual:%12.6e\n",
+            fields[fieldIndex].name.c_str(),
+            solution_L2_norm,
+            residual_L2_norm);
+    }
+
+    pcout << buffer;
+
+    if (!numbers::is_finite(solution_L2_norm)) {
+        snprintf(buffer, sizeof(buffer), "ERROR: field '%s' solution is NAN. exiting.\n\n",
+            fields[fieldIndex].name.c_str());
+        pcout << buffer;
+        exit(-1);
+    }
 }
 
 // Application of boundary conditions

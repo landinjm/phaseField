@@ -33,6 +33,7 @@
 #include <deal.II/matrix_free/fe_evaluation.h>
 #include <deal.II/matrix_free/matrix_free.h>
 #include <deal.II/numerics/vector_tools.h>
+#include <deal.II/lac/solver_control.h>
 
 // PRISMS headers
 #include "SimplifiedGrainRepresentation.h"
@@ -212,6 +213,9 @@ protected:
 
     /*Method to apply boundary conditions*/
     void applyBCs(unsigned int fieldIndex);
+
+    /*Method to print outputs*/
+    void printOutputs(unsigned int fieldIndex, SolverControl *solver_control = nullptr);
 
     /*AMR methods*/
     adaptiveRefinement<dim, degree> RefineAdaptively;
