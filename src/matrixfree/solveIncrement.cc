@@ -11,34 +11,34 @@ void MatrixFreePDE<dim, degree>::solveIncrement(bool skip_time_dependent)
     // log time
     computing_timer.enter_subsection("matrixFreePDE: solveIncrements");
     Timer time;
-    char buffer[200];
 
-    // Get the RHS of the explicit equations
-    if (hasExplicitEquation && !skip_time_dependent) {
-        computeExplicitRHS();
-    }
+    // Update explicit variables
+    if (!skip_time_dependent) {
+        // Get the RHS of the explicit equations
+        if (hasExplicitEquation) {
+            computeExplicitRHS();
+        }
 
-    // solve for each field
-    for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++) {
-        currentFieldIndex = fieldIndex; // Used in computeLHS()
+        // solve for each field
+        for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++) {
 
-        // Parabolic (first order derivatives in time) fields
-        if (fields[fieldIndex].pdetype == EXPLICIT_TIME_DEPENDENT && !skip_time_dependent) {
+            // Parabolic (first order derivatives in time) fields
+            if (fields[fieldIndex].pdetype == EXPLICIT_TIME_DEPENDENT) {
 
-            updateExplicitSolution(fieldIndex);
+                updateExplicitSolution(fieldIndex);
 
-            // Apply Boundary conditions
-            applyBCs(fieldIndex);
+                // Apply Boundary conditions
+                applyBCs(fieldIndex);
 
-            // Print update to screen and confirm that solution isn't nan
-            if (currentIncrement % userInputs.skip_print_steps == 0) {
-                printOutputs(fieldIndex);
+                // Print update to screen and confirm that solution isn't nan
+                if (currentIncrement % userInputs.skip_print_steps == 0) {
+                    printOutputs(fieldIndex);
+                }
             }
         }
     }
 
     // Now, update the non-explicit variables
-    // For the time being, this is just the elliptic equations, but implicit parabolic and auxilary equations should also be here
     if (hasNonExplicitEquation) {
 
         bool nonlinear_it_converged = false;
@@ -48,9 +48,6 @@ void MatrixFreePDE<dim, degree>::solveIncrement(bool skip_time_dependent)
             nonlinear_it_converged = true; // Set to true here and will be set to false if any variable isn't converged
 
             // Update residualSet for the non-explicitly updated variables
-            // compute_nonexplicit_RHS()
-            // Ideally, I'd just do this for the non-explicit variables, but for now I'll do all of them
-            // this is a little redundant, but hopefully not too terrible
             computeNonexplicitRHS();
 
             for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++) {
