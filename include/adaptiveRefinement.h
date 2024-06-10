@@ -101,18 +101,11 @@ void adaptiveRefinement<dim, degree>::adaptiveRefineCriterion()
     // Set the correct update flags & grab the indices of the scalar and vector fields if any
     bool need_value = false;
     bool need_gradient = false;
-    unsigned int scalarIndex;
-    unsigned int vectorIndex;
     for (auto it = userInputs.refinement_criteria.begin(); it != userInputs.refinement_criteria.end(); ++it) {
         if (it->criterion_type == VALUE || it->criterion_type == VALUE_AND_GRADIENT) {
             need_value = true;
         } else if (it->criterion_type == GRADIENT || it->criterion_type == VALUE_AND_GRADIENT) {
             need_gradient = true;
-        }
-        if (userInputs.var_type[it->variable_index] == SCALAR) {
-            scalarIndex = it->variable_index;
-        } else if (userInputs.var_type[it->variable_index] == VECTOR) {
-            vectorIndex = it->variable_index;
         }
     }
     dealii::UpdateFlags update_flags;
@@ -133,13 +126,8 @@ void adaptiveRefinement<dim, degree>::adaptiveRefineCriterion()
         //Grab the field type
         unsigned int fieldType = userInputs.var_type[it->variable_index];
 
-        //Assign the representative index of the scalar/vector field
-        unsigned int index;
-        if (fieldType == SCALAR) {
-            index = scalarIndex;
-        } else if (fieldType == VECTOR) {
-            index = vectorIndex;
-        }
+        //Grab the field index
+        unsigned int index = it->variable_index;
 
         FEValues<dim> fe_values(*FESet[index], quadrature, update_flags);
 
