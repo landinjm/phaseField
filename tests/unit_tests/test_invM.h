@@ -24,7 +24,7 @@ public:
     };
     ~testInvM()
     {
-        this->matrixFreeObject.clear();
+        this->Discretization.matrixFreeObject.clear();
     };
 
     double invMNormscalar;
