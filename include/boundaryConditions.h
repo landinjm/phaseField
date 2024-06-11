@@ -3,6 +3,10 @@
 
 #include <deal.II/lac/affine_constraints.h>
 #include <deal.II/lac/la_parallel_vector.h>
+#include <deal.II/lac/affine_constraints.h>
+#include <deal.II/dofs/dof_tools.h>
+#include <deal.II/dofs/dof_handler.h>
+#include <deal.II/grid/grid_tools.h>
 
 #include "userInputParameters.h"
 #include "discretization.h"
@@ -33,6 +37,10 @@ public:
 
     /*Method for applying Neumann boundary conditions.*/
     void applyNeumannBCs(dealii::LinearAlgebra::distributed::Vector<double>&, unsigned int&);
+
+    /*Method for applying Periodic boundary conditions*/
+    void setPeriodicity();
+    void setPeriodicityConstraints(AffineConstraints<double>&, const DoFHandler<dim>&, unsigned int&) const;
     
 private:
     /*User inputs*/
@@ -107,6 +115,54 @@ void boundaryConditions<dim, degree>::applyNeumannBCs(dealii::LinearAlgebra::dis
             }
         }
     }
+}
+
+template <int dim, int degree>
+void boundaryConditions<dim, degree>::setPeriodicity()
+{
+    std::vector<GridTools::PeriodicFacePair<typename parallel::distributed::Triangulation<dim>::cell_iterator>> periodicity_vector;
+    for (int i = 0; i < dim; ++i) {
+        bool periodic_pair = false;
+        for (unsigned int field_num = 0; field_num < userInputs.BC_list.size(); field_num++) {
+            if (userInputs.BC_list[field_num].var_BC_type[2 * i] == PERIODIC) {
+                periodic_pair = true;
+            }
+        }
+        if (periodic_pair == true) {
+            GridTools::collect_periodic_faces(Discretization.triangulation, /*b_id1*/ 2 * i, /*b_id2*/ 2 * i + 1,
+                /*direction*/ i, periodicity_vector);
+        }
+    }
+
+    Discretization.triangulation.add_periodicity(periodicity_vector);
+    //pcout << "periodic facepairs: " << periodicity_vector.size() << std::endl;
+}
+
+template <int dim, int degree>
+void boundaryConditions<dim, degree>::setPeriodicityConstraints(AffineConstraints<double>& constraints, const DoFHandler<dim>& dof_handler, unsigned int& currentFieldIndex) const
+{
+    // First, get the variable index of the current field
+    unsigned int starting_BC_list_index = 0;
+    for (unsigned int i = 0; i < currentFieldIndex; i++) {
+        if (userInputs.var_type[i] == SCALAR) {
+            starting_BC_list_index++;
+        } else {
+            starting_BC_list_index += dim;
+        }
+    }
+
+    std::vector<GridTools::PeriodicFacePair<typename DoFHandler<dim>::cell_iterator>> periodicity_vector;
+    for (int i = 0; i < dim; ++i) {
+        if (userInputs.BC_list[starting_BC_list_index].var_BC_type[2 * i] == PERIODIC) {
+            GridTools::collect_periodic_faces(dof_handler, /*b_id1*/ 2 * i, /*b_id2*/ 2 * i + 1,
+                /*direction*/ i, periodicity_vector);
+        }
+    }
+#if (DEAL_II_VERSION_MAJOR == 9 && DEAL_II_VERSION_MINOR >= 4)
+    DoFTools::make_periodicity_constraints<dim, dim>(periodicity_vector, constraints);
+#else
+    DoFTools::make_periodicity_constraints<DoFHandler<dim>>(periodicity_vector, constraints);
+#endif
 }
 
 #endif

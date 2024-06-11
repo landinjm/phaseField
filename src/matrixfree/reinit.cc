@@ -55,7 +55,7 @@ void MatrixFreePDE<dim, degree>::reinit()
         setRigidBodyModeConstraints(rigidBodyModeComponents, constraintsOther, dof_handler);
 
         // Get constraints for periodic BCs
-        setPeriodicityConstraints(constraintsOther, dof_handler);
+        BCs.setPeriodicityConstraints(*constraintsOther, *dof_handler, currentFieldIndex);
 
         // Get constraints for Dirichlet BCs
         applyDirichletBCs();

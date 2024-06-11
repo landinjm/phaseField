@@ -250,9 +250,6 @@ protected:
     
     void applyDirichletBCs();
 
-    // Methods to apply periodic BCs
-    void setPeriodicity();
-    void setPeriodicityConstraints(AffineConstraints<double>*, const DoFHandler<dim>*) const;
     void getComponentsWithRigidBodyModes(std::vector<int>&) const;
     void setRigidBodyModeConstraints(const std::vector<int>, AffineConstraints<double>*, const DoFHandler<dim>*) const;
 

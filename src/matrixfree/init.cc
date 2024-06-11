@@ -18,7 +18,7 @@ void MatrixFreePDE<dim, degree>::init()
     Discretization.makeTriangulation(Discretization.triangulation);
 
     // Set which (if any) faces of the triangulation are periodic
-    setPeriodicity();
+    BCs.setPeriodicity();
 
     // If resuming from a checkpoint, load the refined triangulation, otherwise refine globally per the parameters.in file
     if (userInputs.resume_from_checkpoint) {
@@ -138,7 +138,7 @@ void MatrixFreePDE<dim, degree>::init()
         // setRigidBodyModeConstraints(rigidBodyModeComponents,constraintsOther,dof_handler);
 
         // Get constraints for periodic BCs
-        setPeriodicityConstraints(constraintsOther, dof_handler);
+        BCs.setPeriodicityConstraints(*constraintsOther, *dof_handler, currentFieldIndex);
 
         // Check if Dirichlet BCs are used
         for (unsigned int i = 0; i < userInputs.BC_list.size(); i++) {
