@@ -95,7 +95,7 @@ void MatrixFreePDE<dim, degree>::applyInitialConditions()
 
         // Now locate all of the grains and create simplified representations of them
         QGaussLobatto<dim> quadrature2(degree + 1);
-        FloodFiller<dim, degree> flood_filler(*FESet.at(scalar_field_index), quadrature2);
+        FloodFiller<dim, degree> flood_filler(*Discretization.FESet.at(scalar_field_index), quadrature2);
 
         pcout << "Locating the grains...\n";
         std::vector<GrainSet<dim>> grain_sets;
@@ -104,7 +104,7 @@ void MatrixFreePDE<dim, degree>::applyInitialConditions()
 
             std::vector<GrainSet<dim>> grain_sets_single_id;
 
-            flood_filler.calcGrainSets(*FESet.at(scalar_field_index), *dofHandlersSet_nonconst.at(scalar_field_index), &grain_index_field, (double)id - userInputs.order_parameter_threshold, (double)id + userInputs.order_parameter_threshold, 0, grain_sets_single_id);
+            flood_filler.calcGrainSets(*Discretization.FESet.at(scalar_field_index), *dofHandlersSet_nonconst.at(scalar_field_index), &grain_index_field, (double)id - userInputs.order_parameter_threshold, (double)id + userInputs.order_parameter_threshold, 0, grain_sets_single_id);
 
             for (unsigned int g = 0; g < grain_sets_single_id.size(); g++) {
                 grain_sets_single_id.at(g).setGrainIndex(id);
@@ -149,7 +149,7 @@ void MatrixFreePDE<dim, degree>::applyInitialConditions()
 
         pcout << "Placing the grains in their new order parameters...\n";
         OrderParameterRemapper<dim> order_parameter_remapper;
-        order_parameter_remapper.remap_from_index_field(simplified_grain_representations, &grain_index_field, solutionSet, *dofHandlersSet_nonconst.at(scalar_field_index), FESet.at(scalar_field_index)->dofs_per_cell, userInputs.buffer_between_grains);
+        order_parameter_remapper.remap_from_index_field(simplified_grain_representations, &grain_index_field, solutionSet, *dofHandlersSet_nonconst.at(scalar_field_index), Discretization.FESet.at(scalar_field_index)->dofs_per_cell, userInputs.buffer_between_grains);
 
         // Smooth the order parameters according to Fick's 2nd Law
         // In the time cycle below, we evolve the weak form of Eq.: field_i^(n+1)=field_i^(n)+D*dt*Laplacian(field_i^(n))

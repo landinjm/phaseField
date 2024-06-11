@@ -22,7 +22,7 @@ MatrixFreePDE<dim, degree>::MatrixFreePDE(userInputParameters<dim> _userInputs)
     , current_grain_reassignment(0)
     , computing_timer(pcout, TimerOutput::summary, TimerOutput::wall_times)
     , first_integrated_var_output_complete(false)
-    , RefineAdaptively(_userInputs, Discretization.triangulation, fields, solutionSet, soltransSet, FESet, dofHandlersSet_nonconst, constraintsDirichletSet, constraintsOtherSet)
+    , RefineAdaptively(_userInputs, Discretization.triangulation, fields, solutionSet, soltransSet, Discretization.FESet, dofHandlersSet_nonconst, constraintsDirichletSet, constraintsOtherSet)
     , Discretization(_userInputs)
 {
 }
@@ -48,8 +48,8 @@ MatrixFreePDE<dim, degree>::~MatrixFreePDE()
     for (unsigned int iter = 0; iter < dofHandlersSet.size(); iter++) {
         delete dofHandlersSet[iter];
     }
-    for (unsigned int iter = 0; iter < FESet.size(); iter++) {
-        delete FESet[iter];
+    for (unsigned int iter = 0; iter < Discretization.FESet.size(); iter++) {
+        delete Discretization.FESet[iter];
     }
     for (unsigned int iter = 0; iter < solutionSet.size(); iter++) {
         delete solutionSet[iter];

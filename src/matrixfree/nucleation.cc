@@ -96,7 +96,7 @@ void MatrixFreePDE<dim, degree>::getLocalNucleiList(std::vector<nucleus<dim>>& n
 
     // QGauss<dim>  quadrature(degree+1);
     QGaussLobatto<dim> quadrature(degree + 1);
-    FEValues<dim> fe_values(*(FESet[0]), quadrature, update_values | update_quadrature_points | update_JxW_values);
+    FEValues<dim> fe_values(*(Discretization.FESet[0]), quadrature, update_values | update_quadrature_points | update_JxW_values);
     const unsigned int num_quad_points = quadrature.size();
     std::vector<std::vector<double>> var_values(userInputs.nucleation_need_value.size(), std::vector<double>(num_quad_points));
     std::vector<dealii::Point<dim>> q_point_list(num_quad_points);
@@ -253,7 +253,7 @@ void MatrixFreePDE<dim, degree>::safetyCheckNewNuclei(std::vector<nucleus<dim>> 
 {
     // QGauss<dim>  quadrature(degree+1);
     QGaussLobatto<dim> quadrature(degree + 1);
-    FEValues<dim> fe_values(*(FESet[0]), quadrature, update_values | update_quadrature_points | update_JxW_values);
+    FEValues<dim> fe_values(*(Discretization.FESet[0]), quadrature, update_values | update_quadrature_points | update_JxW_values);
     const unsigned int num_quad_points = quadrature.size();
     std::vector<std::vector<double>> op_values(userInputs.nucleating_variable_indices.size(), std::vector<double>(num_quad_points));
     std::vector<dealii::Point<dim>> q_point_list(num_quad_points);
@@ -307,7 +307,7 @@ void MatrixFreePDE<dim, degree>::refineMeshNearNuclei(std::vector<nucleus<dim>> 
 {
     // QGauss<dim>  quadrature(degree+1);
     QGaussLobatto<dim> quadrature(degree + 1);
-    FEValues<dim> fe_values(*(FESet[0]), quadrature, update_values | update_quadrature_points | update_JxW_values);
+    FEValues<dim> fe_values(*(Discretization.FESet[0]), quadrature, update_values | update_quadrature_points | update_JxW_values);
     const unsigned int num_quad_points = quadrature.size();
     std::vector<dealii::Point<dim>> q_point_list(num_quad_points);
 

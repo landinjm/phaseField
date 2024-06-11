@@ -98,7 +98,7 @@ void MatrixFreePDE<dim, degree>::init()
             pcout << "\nmatrixFreePDE.h: unknown field type\n";
             exit(-1);
         }
-        FESet.push_back(fe);
+        Discretization.FESet.push_back(fe);
 
         // distribute DOFs
         DoFHandler<dim>* dof_handler;

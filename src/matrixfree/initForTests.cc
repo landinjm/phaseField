@@ -31,7 +31,7 @@ void MatrixFreePDE<dim, degree>::initForTests(std::vector<Field<dim>> fields)
         } else if (it->type == VECTOR) {
             fe = new FESystem<dim>(FE_Q<dim>(QGaussLobatto<1>(degree + 1)), dim);
         }
-        FESet.push_back(fe);
+        Discretization.FESet.push_back(fe);
 
         // distribute DOFs
         DoFHandler<dim>* dof_handler;

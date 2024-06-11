@@ -24,7 +24,7 @@ void MatrixFreePDE<dim, degree>::reassignGrains()
 
     // Create the simplified grain representations
     QGaussLobatto<dim> quadrature2(degree + 1);
-    FloodFiller<dim, degree> flood_filler(*FESet.at(scalar_field_index), quadrature2);
+    FloodFiller<dim, degree> flood_filler(*Discretization.FESet.at(scalar_field_index), quadrature2);
 
     std::vector<GrainSet<dim>> grain_sets;
 
@@ -35,7 +35,7 @@ void MatrixFreePDE<dim, degree>::reassignGrains()
                 op_list_index++;
 
                 std::vector<GrainSet<dim>> single_OP_grain_sets;
-                flood_filler.calcGrainSets(*FESet.at(scalar_field_index), *dofHandlersSet_nonconst.at(scalar_field_index), solutionSet.at(fieldIndex), userInputs.order_parameter_threshold, 1.0 + userInputs.order_parameter_threshold, fieldIndex, single_OP_grain_sets);
+                flood_filler.calcGrainSets(*Discretization.FESet.at(scalar_field_index), *dofHandlersSet_nonconst.at(scalar_field_index), solutionSet.at(fieldIndex), userInputs.order_parameter_threshold, 1.0 + userInputs.order_parameter_threshold, fieldIndex, single_OP_grain_sets);
 
                 grain_sets.insert(grain_sets.end(), single_OP_grain_sets.begin(), single_OP_grain_sets.end());
             }
@@ -70,7 +70,7 @@ void MatrixFreePDE<dim, degree>::reassignGrains()
     }
 
     OrderParameterRemapper<dim> order_parameter_remapper;
-    order_parameter_remapper.remap(simplified_grain_representations, solutionSet, *dofHandlersSet_nonconst.at(scalar_field_index), FESet.at(scalar_field_index)->dofs_per_cell, userInputs.buffer_between_grains);
+    order_parameter_remapper.remap(simplified_grain_representations, solutionSet, *dofHandlersSet_nonconst.at(scalar_field_index), Discretization.FESet.at(scalar_field_index)->dofs_per_cell, userInputs.buffer_between_grains);
 
     pcout << "Reassigning grains completed." << std::endl
           << std::endl;

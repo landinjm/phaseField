@@ -31,7 +31,7 @@ void MatrixFreePDE<dim, degree>::applyNeumannBCs()
             if (userInputs.BC_list[starting_BC_list_index].var_BC_type[direction] == NEUMANN) {
 
                 typename DoFHandler<dim>::active_cell_iterator cell = dofHandlersSet[0]->begin_active(), endc = dofHandlersSet[0]->end();
-                FESystem<dim>* fe = FESet[currentFieldIndex];
+                FESystem<dim>* fe = Discretization.FESet[currentFieldIndex];
                 QGaussLobatto<dim - 1> face_quadrature_formula(degree + 1);
                 FEFaceValues<dim> fe_face_values(*fe, face_quadrature_formula, update_values | update_JxW_values);
                 const unsigned int n_face_q_points = face_quadrature_formula.size(), dofs_per_cell = fe->dofs_per_cell;

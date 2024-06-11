@@ -19,7 +19,7 @@ void MatrixFreePDE<dim, degree>::reinit()
 
         // create FESystem
         FESystem<dim>* fe;
-        fe = FESet.at(it->index);
+        fe = Discretization.FESet.at(it->index);
 
         // distribute DOFs
         DoFHandler<dim>* dof_handler;
