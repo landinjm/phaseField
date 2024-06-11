@@ -18,7 +18,7 @@ void MatrixFreePDE<dim, degree>::solveIncrement(bool skip_time_dependent)
     }
     // Check if skipping time dependent solves (e.g. initial condition). If so, skip ahead
     if (skip_time_dependent) {
-        goto time_independent;
+        goto nonexplicit;
     }
 
     // Get the RHS of the explicit equations
@@ -42,57 +42,55 @@ void MatrixFreePDE<dim, degree>::solveIncrement(bool skip_time_dependent)
         }
     }
 
-    // Check if there is at least one nonexplicit equation. If not, skip ahead
-    if (!hasNonExplicitEquation) {
-        goto end;
-    }
-
-    time_independent:
     nonexplicit:
-    // Now, update the non-explicit variables
-    for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++) {
-    currentFieldIndex = fieldIndex; // Used in computeLHS()
+        // Check if there is at least one nonexplicit equation. If not, skip ahead
+        if (!hasNonExplicitEquation) {
+            goto end;
+        }
+        // Now, update the non-explicit variables
+        for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++) {
+        currentFieldIndex = fieldIndex; // Used in computeLHS()
 
-        // Update residualSet for the non-explicitly updated variables
-        computeNonexplicitRHS();
+            // Update residualSet for the non-explicitly updated variables
+            computeNonexplicitRHS();
 
-        if ((fields[fieldIndex].pdetype == IMPLICIT_TIME_DEPENDENT && !skip_time_dependent) || fields[fieldIndex].pdetype == TIME_INDEPENDENT) {
-            bool nonlinear_it_converged = false;
-            unsigned int nonlinear_it_index = 0;
+            if ((fields[fieldIndex].pdetype == IMPLICIT_TIME_DEPENDENT && !skip_time_dependent) || fields[fieldIndex].pdetype == TIME_INDEPENDENT) {
+                bool nonlinear_it_converged = false;
+                unsigned int nonlinear_it_index = 0;
 
-            while (!nonlinear_it_converged) {
-                // Update residualSet for the non-explicitly updated variables
-                computeNonexplicitRHS();
+                while (!nonlinear_it_converged) {
+                    // Update residualSet for the non-explicitly updated variables
+                    computeNonexplicitRHS();
 
-                if (currentIncrement % userInputs.skip_print_steps == 0 && userInputs.var_nonlinear[fieldIndex]) {
-                    printOutputs(fieldIndex);
+                    if (currentIncrement % userInputs.skip_print_steps == 0 && userInputs.var_nonlinear[fieldIndex]) {
+                        printOutputs(fieldIndex);
+                    }
+
+                    // This clears the residual where we want to apply Dirichlet BCs, otherwise the solver sees a positive residual
+                    constraintsDirichletSet[fieldIndex]->set_zero(*residualSet[fieldIndex]);
+
+                    // Solve
+                    nonlinear_it_converged = nonlinearSolve(fieldIndex, nonlinear_it_index);
+
+                    // Apply Boundary conditions
+                    applyBCs(fieldIndex);
+
+                    nonlinear_it_index++;
                 }
-
-                // This clears the residual where we want to apply Dirichlet BCs, otherwise the solver sees a positive residual
-                constraintsDirichletSet[fieldIndex]->set_zero(*residualSet[fieldIndex]);
-
-                // Solve
-                nonlinear_it_converged = nonlinearSolve(fieldIndex, nonlinear_it_index);
+            }
+            else if (fields[fieldIndex].pdetype == AUXILIARY) {
+                    
+                updateExplicitSolution(fieldIndex);
 
                 // Apply Boundary conditions
                 applyBCs(fieldIndex);
 
-                nonlinear_it_index++;
+                // Print update to screen
+                if (currentIncrement % userInputs.skip_print_steps == 0) {
+                    printOutputs(fieldIndex);
+                }
             }
         }
-        else if (fields[fieldIndex].pdetype == AUXILIARY) {
-                
-            updateExplicitSolution(fieldIndex);
-
-            // Apply Boundary conditions
-            applyBCs(fieldIndex);
-
-            // Print update to screen
-            if (currentIncrement % userInputs.skip_print_steps == 0) {
-                printOutputs(fieldIndex);
-            }
-        }
-    }
 
     end:
         if (currentIncrement % userInputs.skip_print_steps == 0) {
