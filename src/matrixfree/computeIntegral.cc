@@ -14,7 +14,7 @@ void MatrixFreePDE<dim, degree>::computeIntegral(double& integratedField, int in
     // constraintsOtherSet[index]->distribute(*variableSet[index]);
     // variableSet[index]->update_ghost_values();
 
-    typename DoFHandler<dim>::active_cell_iterator cell = this->dofHandlersSet[0]->begin_active(), endc = this->dofHandlersSet[0]->end();
+    typename DoFHandler<dim>::active_cell_iterator cell = this->Discretization.dofHandlersSet[0]->begin_active(), endc = this->Discretization.dofHandlersSet[0]->end();
 
     double value = 0.0;
 

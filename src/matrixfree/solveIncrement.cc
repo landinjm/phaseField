@@ -292,7 +292,7 @@ void MatrixFreePDE<dim, degree>::applyBCs(unsigned int fieldIndex)
         // Apply non-uniform Dirlichlet_BCs to the current field
         if (fields[fieldIndex].hasnonuniformDirichletBCs) {
             DoFHandler<dim>* dof_handler;
-            dof_handler = dofHandlersSet_nonconst.at(currentFieldIndex);
+            dof_handler = Discretization.dofHandlersSet_nonconst.at(currentFieldIndex);
             IndexSet* locally_relevant_dofs;
             locally_relevant_dofs = locally_relevant_dofsSet_nonconst.at(currentFieldIndex);
             locally_relevant_dofs->clear();

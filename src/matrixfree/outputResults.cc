@@ -22,7 +22,7 @@ void MatrixFreePDE<dim, degree>::outputResults()
             (fields[fieldIndex].type == SCALAR ? DataComponentInterpretation::component_is_scalar : DataComponentInterpretation::component_is_part_of_vector));
         // add field to data_out
         std::vector<std::string> solutionNames(fields[fieldIndex].numComponents, fields[fieldIndex].name.c_str());
-        data_out.add_data_vector(*dofHandlersSet[fieldIndex], *solutionSet[fieldIndex], solutionNames, dataType);
+        data_out.add_data_vector(*Discretization.dofHandlersSet[fieldIndex], *solutionSet[fieldIndex], solutionNames, dataType);
     }
 
     // Test section for outputting postprocessed fields
@@ -88,13 +88,13 @@ void MatrixFreePDE<dim, degree>::outputResults()
                 std::vector<DataComponentInterpretation::DataComponentInterpretation> dataType(components, DataComponentInterpretation::component_is_scalar);
                 std::vector<std::string> solutionNames(components, userInputs.pp_var_name[fieldIndex].c_str());
                 // add field to data_out
-                data_out.add_data_vector(*dofHandlersSet[0], *postProcessedSet[fieldIndex], solutionNames, dataType);
+                data_out.add_data_vector(*Discretization.dofHandlersSet[0], *postProcessedSet[fieldIndex], solutionNames, dataType);
             } else {
                 components = dim;
                 std::vector<DataComponentInterpretation::DataComponentInterpretation> dataType(components, DataComponentInterpretation::component_is_part_of_vector);
                 std::vector<std::string> solutionNames(components, userInputs.pp_var_name[fieldIndex].c_str());
                 // add field to data_out
-                data_out.add_data_vector(*dofHandlersSet[0], *postProcessedSet[fieldIndex], solutionNames, dataType);
+                data_out.add_data_vector(*Discretization.dofHandlersSet[0], *postProcessedSet[fieldIndex], solutionNames, dataType);
             }
         }
     }

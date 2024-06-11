@@ -36,8 +36,8 @@ void MatrixFreePDE<dim, degree>::initForTests(std::vector<Field<dim>> fields)
         // distribute DOFs
         DoFHandler<dim>* dof_handler;
         dof_handler = new DoFHandler<dim>(Discretization.triangulation);
-        dofHandlersSet.push_back(dof_handler);
-        dofHandlersSet_nonconst.push_back(dof_handler);
+        Discretization.dofHandlersSet.push_back(dof_handler);
+        Discretization.dofHandlersSet_nonconst.push_back(dof_handler);
         dof_handler->distribute_dofs(*fe);
 
         // extract locally_relevant_dofs
@@ -66,10 +66,10 @@ void MatrixFreePDE<dim, degree>::initForTests(std::vector<Field<dim>> fields)
     QGaussLobatto<1> quadrature(degree + 1);
     matrixFreeObject.clear();
 #if (DEAL_II_VERSION_MAJOR == 9 && DEAL_II_VERSION_MINOR < 4)
-    matrixFreeObject.reinit(dofHandlersSet, constraintsOtherSet, quadrature, additional_data);
+    matrixFreeObject.reinit(Discretization.dofHandlersSet, constraintsOtherSet, quadrature, additional_data);
 #else
     matrixFreeObject.reinit(MappingFE<dim, dim>(FE_Q<dim>(QGaussLobatto<1>(degree + 1))),
-        dofHandlersSet, constraintsOtherSet, quadrature, additional_data);
+        Discretization.dofHandlersSet, constraintsOtherSet, quadrature, additional_data);
 #endif
     // setup problem vectors
     for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++) {

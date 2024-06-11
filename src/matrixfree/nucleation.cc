@@ -103,7 +103,7 @@ void MatrixFreePDE<dim, degree>::getLocalNucleiList(std::vector<nucleus<dim>>& n
 
     std::vector<dealii::Point<dim>> q_point_list_overlap(num_quad_points);
 
-    typename DoFHandler<dim>::active_cell_iterator di = dofHandlersSet_nonconst[0]->begin_active();
+    typename DoFHandler<dim>::active_cell_iterator di = Discretization.dofHandlersSet_nonconst[0]->begin_active();
 
     // What used to be in nuc_attempt
     double rand_val;
@@ -113,7 +113,7 @@ void MatrixFreePDE<dim, degree>::getLocalNucleiList(std::vector<nucleus<dim>>& n
     std::uniform_real_distribution<> distr(0.0, 1.0);
 
     // Element cycle
-    while (di != this->dofHandlersSet_nonconst[0]->end()) {
+    while (di != this->Discretization.dofHandlersSet_nonconst[0]->end()) {
         if (di->is_locally_owned()) {
             // Obtaining average element concentration by averaging over element's quadrature points
             fe_values.reinit(di);
@@ -263,8 +263,8 @@ void MatrixFreePDE<dim, degree>::safetyCheckNewNuclei(std::vector<nucleus<dim>> 
         bool isClose = false;
 
         // Element cycle
-        typename DoFHandler<dim>::active_cell_iterator di = dofHandlersSet_nonconst[0]->begin_active();
-        while (di != dofHandlersSet_nonconst[0]->end()) {
+        typename DoFHandler<dim>::active_cell_iterator di = Discretization.dofHandlersSet_nonconst[0]->begin_active();
+        while (di != Discretization.dofHandlersSet_nonconst[0]->end()) {
             if (di->is_locally_owned()) {
                 fe_values.reinit(di);
                 for (unsigned int var = 0; var < userInputs.nucleating_variable_indices.size(); var++) {
@@ -318,8 +318,8 @@ void MatrixFreePDE<dim, degree>::refineMeshNearNuclei(std::vector<nucleus<dim>> 
 
     for (unsigned int remesh_index = 0; remesh_index < (userInputs.max_refinement_level - userInputs.min_refinement_level); remesh_index++) {
         ti = Discretization.triangulation.begin_active();
-        di = dofHandlersSet_nonconst[0]->begin_active();
-        while (di != dofHandlersSet_nonconst[0]->end()) {
+        di = Discretization.dofHandlersSet_nonconst[0]->begin_active();
+        while (di != Discretization.dofHandlersSet_nonconst[0]->end()) {
             if (di->is_locally_owned()) {
 
                 bool mark_refine = false;

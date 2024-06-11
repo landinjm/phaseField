@@ -161,14 +161,9 @@ protected:
      */
     std::vector<const AffineConstraints<double>*> constraintsDirichletSet, constraintsOtherSet;
     
-    std::vector<const DoFHandler<dim>*> dofHandlersSet;
-
-    
     std::vector<const IndexSet*> locally_relevant_dofsSet;
     /*Copies of constraintSet elements, but stored as non-const to enable application of constraints.*/
     std::vector<AffineConstraints<double>*> constraintsDirichletSet_nonconst, constraintsOtherSet_nonconst;
-    
-    std::vector<DoFHandler<dim>*> dofHandlersSet_nonconst;
     
     std::vector<IndexSet*> locally_relevant_dofsSet_nonconst;
     /*Vector all the solution vectors in the problem. In a multi-field problem, each primal field has a solution vector associated with it.*/

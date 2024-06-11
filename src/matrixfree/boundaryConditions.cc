@@ -30,7 +30,7 @@ void MatrixFreePDE<dim, degree>::applyNeumannBCs()
         for (unsigned int direction = 0; direction < 2 * dim; direction++) {
             if (userInputs.BC_list[starting_BC_list_index].var_BC_type[direction] == NEUMANN) {
 
-                typename DoFHandler<dim>::active_cell_iterator cell = dofHandlersSet[0]->begin_active(), endc = dofHandlersSet[0]->end();
+                typename DoFHandler<dim>::active_cell_iterator cell = Discretization.dofHandlersSet[0]->begin_active(), endc = Discretization.dofHandlersSet[0]->end();
                 FESystem<dim>* fe = Discretization.FESet[currentFieldIndex];
                 QGaussLobatto<dim - 1> face_quadrature_formula(degree + 1);
                 FEFaceValues<dim> fe_face_values(*fe, face_quadrature_formula, update_values | update_JxW_values);
@@ -86,11 +86,11 @@ void MatrixFreePDE<dim, degree>::applyDirichletBCs()
     if (userInputs.var_type[currentFieldIndex] == SCALAR) {
         for (unsigned int direction = 0; direction < 2 * dim; direction++) {
             if (userInputs.BC_list[starting_BC_list_index].var_BC_type[direction] == DIRICHLET) {
-                VectorTools::interpolate_boundary_values(*dofHandlersSet[currentFieldIndex],
+                VectorTools::interpolate_boundary_values(*Discretization.dofHandlersSet[currentFieldIndex],
                     direction, Functions::ConstantFunction<dim>(userInputs.BC_list[starting_BC_list_index].var_BC_val[direction], 1), *(AffineConstraints<double>*)constraintsDirichletSet[currentFieldIndex]);
 
             } else if (userInputs.BC_list[starting_BC_list_index].var_BC_type[direction] == NON_UNIFORM_DIRICHLET) {
-                VectorTools::interpolate_boundary_values(*dofHandlersSet[currentFieldIndex],
+                VectorTools::interpolate_boundary_values(*Discretization.dofHandlersSet[currentFieldIndex],
                     direction, NonUniformDirichletBC<dim, degree>(currentFieldIndex, direction, currentTime, this), *(AffineConstraints<double>*)constraintsDirichletSet[currentFieldIndex]);
             }
         }
@@ -111,7 +111,7 @@ void MatrixFreePDE<dim, degree>::applyDirichletBCs()
                 }
             }
 
-            VectorTools::interpolate_boundary_values(*dofHandlersSet[currentFieldIndex],
+            VectorTools::interpolate_boundary_values(*Discretization.dofHandlersSet[currentFieldIndex],
                 direction, vectorBCFunction<dim>(BC_values), *(AffineConstraints<double>*)constraintsDirichletSet[currentFieldIndex], mask);
 
             // Mask again, this time for non-uniform Dirichlet BCs
@@ -124,10 +124,10 @@ void MatrixFreePDE<dim, degree>::applyDirichletBCs()
                 }
             }
 
-            // VectorTools::interpolate_boundary_values (*dofHandlersSet[currentFieldIndex],\
+            // VectorTools::interpolate_boundary_values (*Discretization.dofHandlersSet[currentFieldIndex],\
 				//   direction, NonUniformDirichletBC<dim,degree>(currentFieldIndex,direction,currentTime,this), *(AffineConstraints<double>*) \
 				//   constraintsDirichletSet[currentFieldIndex],mask);
-            VectorTools::interpolate_boundary_values(*dofHandlersSet[currentFieldIndex],
+            VectorTools::interpolate_boundary_values(*Discretization.dofHandlersSet[currentFieldIndex],
                 direction, NonUniformDirichletBCVector<dim, degree>(currentFieldIndex, direction, currentTime, this), *(AffineConstraints<double>*)constraintsDirichletSet[currentFieldIndex], mask);
         }
     }

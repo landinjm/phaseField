@@ -102,8 +102,8 @@ void MatrixFreePDE<dim, degree>::init()
         DoFHandler<dim>* dof_handler;
 
         dof_handler = new DoFHandler<dim>(Discretization.triangulation);
-        dofHandlersSet.push_back(dof_handler);
-        dofHandlersSet_nonconst.push_back(dof_handler);
+        Discretization.dofHandlersSet.push_back(dof_handler);
+        Discretization.dofHandlersSet_nonconst.push_back(dof_handler);
 
         dof_handler->distribute_dofs(*fe);
         Discretization.totalDOFs += dof_handler->n_dofs();
@@ -192,10 +192,10 @@ void MatrixFreePDE<dim, degree>::init()
     QGaussLobatto<1> quadrature(degree + 1);
     matrixFreeObject.clear();
 #if (DEAL_II_VERSION_MAJOR == 9 && DEAL_II_VERSION_MINOR < 4)
-    matrixFreeObject.reinit(dofHandlersSet, constraintsOtherSet, quadrature, additional_data);
+    matrixFreeObject.reinit(Discretization.dofHandlersSet, constraintsOtherSet, quadrature, additional_data);
 #else
     matrixFreeObject.reinit(MappingFE<dim, dim>(FE_Q<dim>(QGaussLobatto<1>(degree + 1))),
-        dofHandlersSet, constraintsOtherSet, quadrature, additional_data);
+        Discretization.dofHandlersSet, constraintsOtherSet, quadrature, additional_data);
 #endif
     bool dU_scalar_init = false;
     bool dU_vector_init = false;
@@ -248,7 +248,7 @@ void MatrixFreePDE<dim, degree>::init()
     // Create new solution transfer sets (needed for the "refineGrid" call, might be able to move this elsewhere)
     soltransSet.clear();
     for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++) {
-        soltransSet.push_back(new parallel::distributed::SolutionTransfer<dim, vectorType>(*dofHandlersSet_nonconst[fieldIndex]));
+        soltransSet.push_back(new parallel::distributed::SolutionTransfer<dim, vectorType>(*Discretization.dofHandlersSet_nonconst[fieldIndex]));
     }
 
     // Ghost the solution vectors. Also apply the constraints (if any) on the solution vectors

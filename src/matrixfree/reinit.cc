@@ -23,7 +23,7 @@ void MatrixFreePDE<dim, degree>::reinit()
 
         // distribute DOFs
         DoFHandler<dim>* dof_handler;
-        dof_handler = dofHandlersSet_nonconst.at(it->index);
+        dof_handler = Discretization.dofHandlersSet_nonconst.at(it->index);
 
         dof_handler->distribute_dofs(*fe);
         Discretization.totalDOFs += dof_handler->n_dofs();
@@ -89,10 +89,10 @@ void MatrixFreePDE<dim, degree>::reinit()
     QGaussLobatto<1> quadrature(degree + 1);
     matrixFreeObject.clear();
 #if (DEAL_II_VERSION_MAJOR == 9 && DEAL_II_VERSION_MINOR < 4)
-    matrixFreeObject.reinit(dofHandlersSet, constraintsOtherSet, quadrature, additional_data);
+    matrixFreeObject.reinit(Discretization.dofHandlersSet, constraintsOtherSet, quadrature, additional_data);
 #else
     matrixFreeObject.reinit(MappingFE<dim, dim>(FE_Q<dim>(QGaussLobatto<1>(degree + 1))),
-        dofHandlersSet, constraintsOtherSet, quadrature, additional_data);
+        Discretization.dofHandlersSet, constraintsOtherSet, quadrature, additional_data);
 #endif
     bool dU_scalar_init = false;
     bool dU_vector_init = false;
@@ -144,7 +144,7 @@ void MatrixFreePDE<dim, degree>::reinit()
     // Create new solution transfer sets
     soltransSet.clear();
     for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++) {
-        soltransSet.push_back(new parallel::distributed::SolutionTransfer<dim, vectorType>(*dofHandlersSet_nonconst[fieldIndex]));
+        soltransSet.push_back(new parallel::distributed::SolutionTransfer<dim, vectorType>(*Discretization.dofHandlersSet_nonconst[fieldIndex]));
     }
 
     // If remeshing at the zeroth time step, re-apply initial conditions so the starting values are correct on the refined mesh

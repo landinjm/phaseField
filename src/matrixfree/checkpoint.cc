@@ -58,20 +58,20 @@ void MatrixFreePDE<dim, degree>::save_checkpoint()
 
         // Finally, save the triangulation and the solutionTransfer objects
         if (scalar_var_indices.size() > 0 && vector_var_indices.size() == 0) {
-            parallel::distributed::SolutionTransfer<dim, vectorType> system_trans_scalars(*dofHandlersSet[scalar_var_indices[0]]);
+            parallel::distributed::SolutionTransfer<dim, vectorType> system_trans_scalars(*Discretization.dofHandlersSet[scalar_var_indices[0]]);
             system_trans_scalars.prepare_for_serialization(solSet_transfer_scalars);
 
             Discretization.triangulation.save("restart.mesh");
         } else if (scalar_var_indices.size() == 0 && vector_var_indices.size() > 0) {
-            parallel::distributed::SolutionTransfer<dim, vectorType> system_trans_vectors(*dofHandlersSet[vector_var_indices[0]]);
+            parallel::distributed::SolutionTransfer<dim, vectorType> system_trans_vectors(*Discretization.dofHandlersSet[vector_var_indices[0]]);
             system_trans_vectors.prepare_for_serialization(solSet_transfer_vectors);
 
             Discretization.triangulation.save("restart.mesh");
         } else {
-            parallel::distributed::SolutionTransfer<dim, vectorType> system_trans_scalars(*dofHandlersSet[scalar_var_indices[0]]);
+            parallel::distributed::SolutionTransfer<dim, vectorType> system_trans_scalars(*Discretization.dofHandlersSet[scalar_var_indices[0]]);
             system_trans_scalars.prepare_for_serialization(solSet_transfer_scalars);
 
-            parallel::distributed::SolutionTransfer<dim, vectorType> system_trans_vectors(*dofHandlersSet[vector_var_indices[0]]);
+            parallel::distributed::SolutionTransfer<dim, vectorType> system_trans_vectors(*Discretization.dofHandlersSet[vector_var_indices[0]]);
             system_trans_vectors.prepare_for_serialization(solSet_transfer_vectors);
 
             Discretization.triangulation.save("restart.mesh");
@@ -142,11 +142,11 @@ void MatrixFreePDE<dim, degree>::load_checkpoint_fields()
 
     // Finally, deserialize the fields to the solSet_transfer objects, which contain pointers to solutionSet
     if (scalar_var_indices.size() > 0) {
-        parallel::distributed::SolutionTransfer<dim, vectorType> system_trans_scalars(*dofHandlersSet[scalar_var_indices[0]]);
+        parallel::distributed::SolutionTransfer<dim, vectorType> system_trans_scalars(*Discretization.dofHandlersSet[scalar_var_indices[0]]);
         system_trans_scalars.deserialize(solSet_transfer_scalars);
     }
     if (vector_var_indices.size() > 0) {
-        parallel::distributed::SolutionTransfer<dim, vectorType> system_trans_vectors(*dofHandlersSet[vector_var_indices[0]]);
+        parallel::distributed::SolutionTransfer<dim, vectorType> system_trans_vectors(*Discretization.dofHandlersSet[vector_var_indices[0]]);
         system_trans_vectors.deserialize(solSet_transfer_vectors);
     }
 }

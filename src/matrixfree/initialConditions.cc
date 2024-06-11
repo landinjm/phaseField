@@ -85,7 +85,7 @@ void MatrixFreePDE<dim, degree>::applyInitialConditions()
 
         pcout << "Applying PField initial condition...\n";
 
-        VectorTools::interpolate(*dofHandlersSet[scalar_field_index], InitialConditionPField<dim>(0, id_field), grain_index_field);
+        VectorTools::interpolate(*Discretization.dofHandlersSet[scalar_field_index], InitialConditionPField<dim>(0, id_field), grain_index_field);
 
         grain_index_field.update_ghost_values();
 
@@ -104,7 +104,7 @@ void MatrixFreePDE<dim, degree>::applyInitialConditions()
 
             std::vector<GrainSet<dim>> grain_sets_single_id;
 
-            flood_filler.calcGrainSets(*Discretization.FESet.at(scalar_field_index), *dofHandlersSet_nonconst.at(scalar_field_index), &grain_index_field, (double)id - userInputs.order_parameter_threshold, (double)id + userInputs.order_parameter_threshold, 0, grain_sets_single_id);
+            flood_filler.calcGrainSets(*Discretization.FESet.at(scalar_field_index), *Discretization.dofHandlersSet_nonconst.at(scalar_field_index), &grain_index_field, (double)id - userInputs.order_parameter_threshold, (double)id + userInputs.order_parameter_threshold, 0, grain_sets_single_id);
 
             for (unsigned int g = 0; g < grain_sets_single_id.size(); g++) {
                 grain_sets_single_id.at(g).setGrainIndex(id);
@@ -149,7 +149,7 @@ void MatrixFreePDE<dim, degree>::applyInitialConditions()
 
         pcout << "Placing the grains in their new order parameters...\n";
         OrderParameterRemapper<dim> order_parameter_remapper;
-        order_parameter_remapper.remap_from_index_field(simplified_grain_representations, &grain_index_field, solutionSet, *dofHandlersSet_nonconst.at(scalar_field_index), Discretization.FESet.at(scalar_field_index)->dofs_per_cell, userInputs.buffer_between_grains);
+        order_parameter_remapper.remap_from_index_field(simplified_grain_representations, &grain_index_field, solutionSet, *Discretization.dofHandlersSet_nonconst.at(scalar_field_index), Discretization.FESet.at(scalar_field_index)->dofs_per_cell, userInputs.buffer_between_grains);
 
         // Smooth the order parameters according to Fick's 2nd Law
         // In the time cycle below, we evolve the weak form of Eq.: field_i^(n+1)=field_i^(n)+D*dt*Laplacian(field_i^(n))
@@ -216,9 +216,9 @@ void MatrixFreePDE<dim, degree>::applyInitialConditions()
                 pcout << "Applying non-PField initial condition...\n";
 
                 if (userInputs.var_type[var_index] == SCALAR) {
-                    VectorTools::interpolate(*dofHandlersSet[var_index], InitialCondition<dim, degree>(var_index, userInputs, this), *solutionSet[var_index]);
+                    VectorTools::interpolate(*Discretization.dofHandlersSet[var_index], InitialCondition<dim, degree>(var_index, userInputs, this), *solutionSet[var_index]);
                 } else if (userInputs.var_type[var_index] == VECTOR) {
-                    VectorTools::interpolate(*dofHandlersSet[var_index], InitialConditionVector<dim, degree>(var_index, userInputs, this), *solutionSet[var_index]);
+                    VectorTools::interpolate(*Discretization.dofHandlersSet[var_index], InitialConditionVector<dim, degree>(var_index, userInputs, this), *solutionSet[var_index]);
                 }
             }
 
@@ -245,7 +245,7 @@ void MatrixFreePDE<dim, degree>::applyInitialConditions()
 
                 if (userInputs.var_type[var_index] == SCALAR) {
                     pcout << "Applying PField initial condition...\n";
-                    VectorTools::interpolate(*dofHandlersSet[var_index], InitialConditionPField<dim>(var_index, conc), *solutionSet[var_index]);
+                    VectorTools::interpolate(*Discretization.dofHandlersSet[var_index], InitialConditionPField<dim>(var_index, conc), *solutionSet[var_index]);
                 } else {
                     std::cout << "PRISMS-PF Error: Cannot load vector fields. Loading initial conditions from file is currently limited to scalar fields" << std::endl;
                 }
