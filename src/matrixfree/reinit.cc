@@ -30,7 +30,7 @@ void MatrixFreePDE<dim, degree>::reinit()
 
         // extract locally_relevant_dofs
         IndexSet* locally_relevant_dofs;
-        locally_relevant_dofs = locally_relevant_dofsSet_nonconst.at(it->index);
+        locally_relevant_dofs = Discretization.locally_relevant_dofsSet_nonconst.at(it->index);
 
         locally_relevant_dofs->clear();
         DoFTools::extract_locally_relevant_dofs(*dof_handler, *locally_relevant_dofs);

@@ -36,8 +36,8 @@ MatrixFreePDE<dim, degree>::~MatrixFreePDE()
     // Delete the pointers contained in several member variable vectors
     // The size of each of these must be checked individually in case an exception is thrown
     // as they are being initialized.
-    for (unsigned int iter = 0; iter < locally_relevant_dofsSet.size(); iter++) {
-        delete locally_relevant_dofsSet[iter];
+    for (unsigned int iter = 0; iter < Discretization.locally_relevant_dofsSet.size(); iter++) {
+        delete Discretization.locally_relevant_dofsSet[iter];
     }
     for (unsigned int iter = 0; iter < constraintsDirichletSet.size(); iter++) {
         delete constraintsDirichletSet[iter];

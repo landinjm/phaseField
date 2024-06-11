@@ -294,7 +294,7 @@ void MatrixFreePDE<dim, degree>::applyBCs(unsigned int fieldIndex)
             DoFHandler<dim>* dof_handler;
             dof_handler = Discretization.dofHandlersSet_nonconst.at(currentFieldIndex);
             IndexSet* locally_relevant_dofs;
-            locally_relevant_dofs = locally_relevant_dofsSet_nonconst.at(currentFieldIndex);
+            locally_relevant_dofs = Discretization.locally_relevant_dofsSet_nonconst.at(currentFieldIndex);
             locally_relevant_dofs->clear();
             DoFTools::extract_locally_relevant_dofs(*dof_handler, *locally_relevant_dofs);
             AffineConstraints<double>* constraintsDirichlet;

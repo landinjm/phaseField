@@ -13,7 +13,7 @@
 using namespace dealii;
 
 /**
- * This class deals with adaptive refinement. Add more comments later
+ * This class deals with the discretization. Add more comments later
  */
 template <int dim>
 class discretization {

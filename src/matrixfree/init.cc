@@ -112,8 +112,8 @@ void MatrixFreePDE<dim, degree>::init()
         IndexSet* locally_relevant_dofs;
 
         locally_relevant_dofs = new IndexSet;
-        locally_relevant_dofsSet.push_back(locally_relevant_dofs);
-        locally_relevant_dofsSet_nonconst.push_back(locally_relevant_dofs);
+        Discretization.locally_relevant_dofsSet.push_back(locally_relevant_dofs);
+        Discretization.locally_relevant_dofsSet_nonconst.push_back(locally_relevant_dofs);
 
         locally_relevant_dofs->clear();
         DoFTools::extract_locally_relevant_dofs(*dof_handler, *locally_relevant_dofs);
