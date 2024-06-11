@@ -87,11 +87,11 @@ void MatrixFreePDE<dim, degree>::reinit()
     // additional_data.tasks_block_size = 1; // This improves performance for small runs, not sure about larger runs
     additional_data.mapping_update_flags = (update_values | update_gradients | update_JxW_values | update_quadrature_points);
     QGaussLobatto<1> quadrature(degree + 1);
-    matrixFreeObject.clear();
+    Discretization.matrixFreeObject.clear();
 #if (DEAL_II_VERSION_MAJOR == 9 && DEAL_II_VERSION_MINOR < 4)
-    matrixFreeObject.reinit(Discretization.dofHandlersSet, constraintsOtherSet, quadrature, additional_data);
+    Discretization.matrixFreeObject.reinit(Discretization.dofHandlersSet, constraintsOtherSet, quadrature, additional_data);
 #else
-    matrixFreeObject.reinit(MappingFE<dim, dim>(FE_Q<dim>(QGaussLobatto<1>(degree + 1))),
+    Discretization.matrixFreeObject.reinit(MappingFE<dim, dim>(FE_Q<dim>(QGaussLobatto<1>(degree + 1))),
         Discretization.dofHandlersSet, constraintsOtherSet, quadrature, additional_data);
 #endif
     bool dU_scalar_init = false;
@@ -104,19 +104,19 @@ void MatrixFreePDE<dim, degree>::reinit()
 
         U = solutionSet.at(fieldIndex);
 
-        matrixFreeObject.initialize_dof_vector(*U, fieldIndex);
+        Discretization.matrixFreeObject.initialize_dof_vector(*U, fieldIndex);
         *U = 0;
 
         // Initializing temporary dU vector required for implicit solves of the elliptic equation.
         if (fields[fieldIndex].pdetype == TIME_INDEPENDENT || fields[fieldIndex].pdetype == IMPLICIT_TIME_DEPENDENT || (fields[fieldIndex].pdetype == AUXILIARY && userInputs.var_nonlinear[fieldIndex])) {
             if (fields[fieldIndex].type == SCALAR) {
                 if (dU_scalar_init == false) {
-                    matrixFreeObject.initialize_dof_vector(dU_scalar, fieldIndex);
+                    Discretization.matrixFreeObject.initialize_dof_vector(dU_scalar, fieldIndex);
                     dU_scalar_init = true;
                 }
             } else {
                 if (dU_vector_init == false) {
-                    matrixFreeObject.initialize_dof_vector(dU_vector, fieldIndex);
+                    Discretization.matrixFreeObject.initialize_dof_vector(dU_vector, fieldIndex);
                     dU_vector_init = true;
                 }
             }
@@ -137,7 +137,7 @@ void MatrixFreePDE<dim, degree>::reinit()
 
         // reset residual vector
         vectorType* R = residualSet.at(fieldIndex);
-        matrixFreeObject.initialize_dof_vector(*R, fieldIndex);
+        Discretization.matrixFreeObject.initialize_dof_vector(*R, fieldIndex);
         *R = 0;
     }
 

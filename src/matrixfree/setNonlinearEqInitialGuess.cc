@@ -90,7 +90,7 @@ void MatrixFreePDE<dim, degree>::computeLaplaceRHS(unsigned int fieldIndex)
     computing_timer.enter_subsection("matrixFreePDE: computeLaplaceRHS");
 
     // call to integrate and assemble while clearing residual vecotrs
-    matrixFreeObject.cell_loop(&MatrixFreePDE<dim, degree>::getLaplaceRHS, this, *residualSet[fieldIndex], *solutionSet[fieldIndex], true);
+    Discretization.matrixFreeObject.cell_loop(&MatrixFreePDE<dim, degree>::getLaplaceRHS, this, *residualSet[fieldIndex], *solutionSet[fieldIndex], true);
 
     // end log
     computing_timer.leave_subsection("matrixFreePDE: computeLaplaceRHS");

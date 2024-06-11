@@ -29,7 +29,7 @@ MatrixFreePDE<dim, degree>::MatrixFreePDE(userInputParameters<dim> _userInputs)
 template <int dim, int degree>
 MatrixFreePDE<dim, degree>::~MatrixFreePDE()
 {
-    matrixFreeObject.clear();
+    Discretization.matrixFreeObject.clear();
 
     // Delete the pointers contained in several member variable vectors
     // The size of each of these must be checked individually in case an exception is thrown

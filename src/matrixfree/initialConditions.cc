@@ -67,7 +67,7 @@ void MatrixFreePDE<dim, degree>::applyInitialConditions()
             }
         }
 
-        matrixFreeObject.initialize_dof_vector(grain_index_field, scalar_field_index);
+        Discretization.matrixFreeObject.initialize_dof_vector(grain_index_field, scalar_field_index);
 
         // Declare the PField types and containers
         typedef PRISMS::PField<double*, double, dim> ScalarField;

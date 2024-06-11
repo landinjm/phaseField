@@ -11,14 +11,14 @@ void MatrixFreePDE<dim, degree>::vmult(vectorType& dst, const vectorType& src) c
 
     // create temporary copy of src vector as src2, as vector src is marked const and cannot be changed
     dealii::LinearAlgebra::distributed::Vector<double> src2;
-    matrixFreeObject.initialize_dof_vector(src2, currentFieldIndex);
+    Discretization.matrixFreeObject.initialize_dof_vector(src2, currentFieldIndex);
     src2 = src;
 
     // call cell_loop
     if (!generatingInitialGuess) {
-        matrixFreeObject.cell_loop(&MatrixFreePDE<dim, degree>::getLHS, this, dst, src2, true);
+        Discretization.matrixFreeObject.cell_loop(&MatrixFreePDE<dim, degree>::getLHS, this, dst, src2, true);
     } else {
-        matrixFreeObject.cell_loop(&MatrixFreePDE<dim, degree>::getLaplaceLHS, this, dst, src2, true);
+        Discretization.matrixFreeObject.cell_loop(&MatrixFreePDE<dim, degree>::getLaplaceLHS, this, dst, src2, true);
     }
 
     // Account for Dirichlet BC's

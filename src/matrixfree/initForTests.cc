@@ -64,11 +64,11 @@ void MatrixFreePDE<dim, degree>::initForTests(std::vector<Field<dim>> fields)
     additional_data.tasks_parallel_scheme = MatrixFree<dim, double>::AdditionalData::partition_partition;
     additional_data.mapping_update_flags = (update_values | update_gradients | update_JxW_values | update_quadrature_points);
     QGaussLobatto<1> quadrature(degree + 1);
-    matrixFreeObject.clear();
+    Discretization.matrixFreeObject.clear();
 #if (DEAL_II_VERSION_MAJOR == 9 && DEAL_II_VERSION_MINOR < 4)
-    matrixFreeObject.reinit(Discretization.dofHandlersSet, constraintsOtherSet, quadrature, additional_data);
+    Discretization.matrixFreeObject.reinit(Discretization.dofHandlersSet, constraintsOtherSet, quadrature, additional_data);
 #else
-    matrixFreeObject.reinit(MappingFE<dim, dim>(FE_Q<dim>(QGaussLobatto<1>(degree + 1))),
+    Discretization.matrixFreeObject.reinit(MappingFE<dim, dim>(FE_Q<dim>(QGaussLobatto<1>(degree + 1))),
         Discretization.dofHandlersSet, constraintsOtherSet, quadrature, additional_data);
 #endif
     // setup problem vectors
@@ -78,9 +78,9 @@ void MatrixFreePDE<dim, degree>::initForTests(std::vector<Field<dim>> fields)
         R = new vectorType;
         solutionSet.push_back(U);
         residualSet.push_back(R);
-        matrixFreeObject.initialize_dof_vector(*R, 0);
+        Discretization.matrixFreeObject.initialize_dof_vector(*R, 0);
         *R = 0;
-        matrixFreeObject.initialize_dof_vector(*U, 0);
+        Discretization.matrixFreeObject.initialize_dof_vector(*U, 0);
         *U = 0;
     }
 }

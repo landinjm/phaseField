@@ -43,18 +43,18 @@ void MatrixFreePDE<dim, degree>::computeInvM()
     }
 
     // Initialize invM and clear its values
-    matrixFreeObject.initialize_dof_vector(invMscalar, parabolicScalarFieldIndex);
+    Discretization.matrixFreeObject.initialize_dof_vector(invMscalar, parabolicScalarFieldIndex);
     invMscalar = 0.0;
-    matrixFreeObject.initialize_dof_vector(invMvector, parabolicVectorFieldIndex);
+    Discretization.matrixFreeObject.initialize_dof_vector(invMvector, parabolicVectorFieldIndex);
     invMvector = 0.0;
 
     // Compute mass matrix for the given type of quadrature. Selecting gauss lobatto
     // quadrature points which are suboptimal but give diagonal M
     if (fields[parabolicScalarFieldIndex].type == SCALAR) {
         VectorizedArray<double> one = make_vectorized_array(1.0);
-        FEEvaluation<dim, degree> fe_eval(matrixFreeObject, parabolicScalarFieldIndex);
+        FEEvaluation<dim, degree> fe_eval(Discretization.matrixFreeObject, parabolicScalarFieldIndex);
         const unsigned int n_q_points = fe_eval.n_q_points;
-        for (unsigned int cell = 0; cell < matrixFreeObject.n_cell_batches(); ++cell) {
+        for (unsigned int cell = 0; cell < Discretization.matrixFreeObject.n_cell_batches(); ++cell) {
             fe_eval.reinit(cell);
             for (unsigned int q = 0; q < n_q_points; ++q) {
                 fe_eval.submit_value(one, q);
@@ -69,10 +69,10 @@ void MatrixFreePDE<dim, degree>::computeInvM()
             oneV[i] = 1.0;
         }
 
-        FEEvaluation<dim, degree, degree + 1, dim> fe_eval(matrixFreeObject, parabolicVectorFieldIndex);
+        FEEvaluation<dim, degree, degree + 1, dim> fe_eval(Discretization.matrixFreeObject, parabolicVectorFieldIndex);
 
         const unsigned int n_q_points = fe_eval.n_q_points;
-        for (unsigned int cell = 0; cell < matrixFreeObject.n_cell_batches(); ++cell) {
+        for (unsigned int cell = 0; cell < Discretization.matrixFreeObject.n_cell_batches(); ++cell) {
             fe_eval.reinit(cell);
             for (unsigned int q = 0; q < n_q_points; ++q) {
                 fe_eval.submit_value(oneV, q);

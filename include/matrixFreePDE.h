@@ -171,11 +171,6 @@ protected:
     /*Vector of parallel solution transfer objects. This is used only when adaptive meshing is enabled.*/
     std::vector<parallel::distributed::SolutionTransfer<dim, vectorType>*> soltransSet;
 
-    // matrix free objects
-    /*Object of class MatrixFree<dim>. This is primarily responsible for all the base matrix free functionality of this MatrixFreePDE<dim> class.
-     *Refer to deal.ii documentation of MatrixFree<dim> class for details.
-     */
-    MatrixFree<dim, double> matrixFreeObject;
     /*Vector to store the inverse of the mass matrix diagonal for scalar and vector fields. Due to the choice of spectral elements with Guass-Lobatto quadrature, the mass matrix is diagonal.*/
     vectorType invMscalar, invMvector;
 

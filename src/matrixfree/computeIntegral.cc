@@ -52,7 +52,7 @@ void MatrixFreePDE<dim, degree>::computeIntegralMF(double& integratedField, int 
     integral_index = index;
 
     // call to integrate and assemble
-    matrixFreeObject.cell_loop(&MatrixFreePDE<dim, degree>::getIntegralMF, this, residualSet, variableSet);
+    Discretization.matrixFreeObject.cell_loop(&MatrixFreePDE<dim, degree>::getIntegralMF, this, residualSet, variableSet);
 
     integratedField = Utilities::MPI::sum(integrated_var, MPI_COMM_WORLD);
 

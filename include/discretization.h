@@ -7,6 +7,7 @@
 #include <deal.II/base/point.h>
 #include <deal.II/dofs/dof_handler.h>
 #include <deal.II/base/index_set.h>
+#include <deal.II/matrix_free/matrix_free.h>
 
 #include "userInputParameters.h"
 
@@ -32,7 +33,7 @@ public:
     /*Total degrees of freedom in a problem set.*/
     unsigned int totalDOFs;
 
-    /*Placeholder for quadrature information*/
+    /*Placeholder for quadrature information. This would require a degree addition to the class template*/
 
     /*A vector of all the degree of freedom objects is the problem. A degree of freedom object handles the serial/parallel distribution of the degrees of freedom for all the primal fields in the problem.*/
     std::vector<const DoFHandler<dim>*> dofHandlersSet;
@@ -45,6 +46,9 @@ public:
 
     /*Copies of locally_relevant_dofsSet elements, but stored as non-const.*/
     std::vector<IndexSet*> locally_relevant_dofsSet_nonconst;
+
+    /*Object of class MatrixFree<dim>. This is primarily responsible for all the base matrix free functionality of this MatrixFreePDE<dim> class. Refer to deal.ii documentation of MatrixFree<dim> class for details.*/
+    MatrixFree<dim, double> matrixFreeObject;
 
 private:
     /*User inputs*/
