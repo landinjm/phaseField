@@ -22,6 +22,7 @@ MatrixFreePDE<dim, degree>::MatrixFreePDE(userInputParameters<dim> _userInputs)
     , first_integrated_var_output_complete(false)
     , RefineAdaptively(_userInputs, Discretization.triangulation, fields, solutionSet, soltransSet, Discretization.FESet, Discretization.dofHandlersSet_nonconst, constraintsDirichletSet)
     , Discretization(_userInputs)
+    , BCs(_userInputs)
 {
 }
 

@@ -39,6 +39,7 @@
 #include "SimplifiedGrainRepresentation.h"
 #include "adaptiveRefinement.h"
 #include "discretization.h"
+#include "boundaryConditions.h"
 #include "fields.h"
 #include "nucleus.h"
 #include "userInputParameters.h"
@@ -120,6 +121,15 @@ public:
 protected:
     userInputParameters<dim> userInputs;
 
+    /*Discretization*/
+    discretization<dim> Discretization;
+
+    /*Boundary Conditions*/
+    boundaryConditions<dim, degree> BCs;
+
+    /*AMR methods*/
+    adaptiveRefinement<dim, degree> RefineAdaptively;
+
     // Virtual methods to set the attributes of the primary field variables and the postprocessing field variables
     // virtual void setVariableAttriubutes() = 0;
     // virtual void setPostProcessingVariableAttriubutes(){};
@@ -151,9 +161,6 @@ protected:
      * skipOutputSteps in the parameters file.
      */
     void outputResults();
-
-    //Discretization
-    discretization<dim> Discretization;
 
     /*A vector of all the constraint sets in the problem. A constraint set is a map which holds the mapping between the degrees
      *of freedom and the corresponding degree of freedom constraints.
@@ -193,9 +200,6 @@ protected:
 
     /*Method for nonlinear solve*/
     bool nonlinearSolve(unsigned int fieldIndex, unsigned int nonlinear_it_index);
-
-    /*AMR methods*/
-    adaptiveRefinement<dim, degree> RefineAdaptively;
 
     /*Method to compute the right hand side (RHS) residual vectors*/
     void computeExplicitRHS();
