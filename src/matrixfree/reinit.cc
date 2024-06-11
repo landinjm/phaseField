@@ -11,7 +11,7 @@ void MatrixFreePDE<dim, degree>::reinit()
 
     // setup system
     pcout << "Reinitializing matrix free object\n";
-    totalDOFs = 0;
+    Discretization.totalDOFs = 0;
     for (typename std::vector<Field<dim>>::iterator it = fields.begin(); it != fields.end(); ++it) {
         currentFieldIndex = it->index;
 
@@ -26,7 +26,7 @@ void MatrixFreePDE<dim, degree>::reinit()
         dof_handler = dofHandlersSet_nonconst.at(it->index);
 
         dof_handler->distribute_dofs(*fe);
-        totalDOFs += dof_handler->n_dofs();
+        Discretization.totalDOFs += dof_handler->n_dofs();
 
         // extract locally_relevant_dofs
         IndexSet* locally_relevant_dofs;
@@ -77,7 +77,7 @@ void MatrixFreePDE<dim, degree>::reinit()
             it->name.c_str(), dof_handler->n_dofs(), constraintsDirichlet->n_constraints());
         pcout << buffer;
     }
-    pcout << "total DOF : " << totalDOFs << std::endl;
+    pcout << "total DOF : " << Discretization.totalDOFs << std::endl;
 
     // Setup the matrix free object
     typename MatrixFree<dim, double>::AdditionalData additional_data;

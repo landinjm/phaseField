@@ -314,7 +314,7 @@ void MatrixFreePDE<dim, degree>::refineMeshNearNuclei(std::vector<nucleus<dim>> 
     typename Triangulation<dim>::active_cell_iterator ti;
     typename DoFHandler<dim>::active_cell_iterator di;
 
-    unsigned int numDoF_preremesh = totalDOFs;
+    unsigned int numDoF_preremesh = Discretization.totalDOFs;
 
     for (unsigned int remesh_index = 0; remesh_index < (userInputs.max_refinement_level - userInputs.min_refinement_level); remesh_index++) {
         ti = triangulation.begin_active();
@@ -364,9 +364,9 @@ void MatrixFreePDE<dim, degree>::refineMeshNearNuclei(std::vector<nucleus<dim>> 
         reinit();
 
         // If the mesh hasn't changed from the previous cycle, stop remeshing
-        if (totalDOFs == numDoF_preremesh)
+        if (Discretization.totalDOFs == numDoF_preremesh)
             break;
-        numDoF_preremesh = totalDOFs;
+        numDoF_preremesh = Discretization.totalDOFs;
     }
 }
 

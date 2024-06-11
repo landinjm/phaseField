@@ -15,7 +15,9 @@ void MatrixFreePDE<dim, degree>::init()
 
     pcout << "creating problem mesh...\n";
     // Create the coarse mesh and mark the boundaries
-    makeTriangulation(triangulation);
+    Discretization.makeTriangulation(triangulation);
+    // Mark boundaries for applying the boundary conditions
+    markBoundaries(triangulation);
 
     // Set which (if any) faces of the triangulation are periodic
     setPeriodicity();
@@ -39,7 +41,7 @@ void MatrixFreePDE<dim, degree>::init()
 
     // Setup system
     pcout << "initializing matrix free object\n";
-    totalDOFs = 0;
+    Discretization.totalDOFs = 0;
     for (typename std::vector<Field<dim>>::iterator it = fields.begin(); it != fields.end(); ++it) {
         currentFieldIndex = it->index;
 
@@ -106,7 +108,7 @@ void MatrixFreePDE<dim, degree>::init()
         dofHandlersSet_nonconst.push_back(dof_handler);
 
         dof_handler->distribute_dofs(*fe);
-        totalDOFs += dof_handler->n_dofs();
+        Discretization.totalDOFs += dof_handler->n_dofs();
 
         // Extract locally_relevant_dofs
         IndexSet* locally_relevant_dofs;
@@ -178,7 +180,7 @@ void MatrixFreePDE<dim, degree>::init()
             it->name.c_str(), dof_handler->n_dofs(), constraintsDirichlet->n_constraints());
         pcout << buffer;
     }
-    pcout << "total DOF : " << totalDOFs << std::endl;
+    pcout << "total DOF : " << Discretization.totalDOFs << std::endl;
 
     // Setup the matrix free object
     typename MatrixFree<dim, double>::AdditionalData additional_data;
@@ -262,13 +264,13 @@ void MatrixFreePDE<dim, degree>::init()
     if (!userInputs.resume_from_checkpoint && userInputs.h_adaptivity == true) {
         computing_timer.enter_subsection("matrixFreePDE: AMR");
 
-        unsigned int numDoF_preremesh = totalDOFs;
+        unsigned int numDoF_preremesh = Discretization.totalDOFs;
         for (unsigned int remesh_index = 0; remesh_index < (userInputs.max_refinement_level - userInputs.min_refinement_level); remesh_index++) {
             RefineAdaptively.adaptiveRefine(currentIncrement);
             reinit();
-            if (totalDOFs == numDoF_preremesh)
+            if (Discretization.totalDOFs == numDoF_preremesh)
                 break;
-            numDoF_preremesh = totalDOFs;
+            numDoF_preremesh = Discretization.totalDOFs;
         }
 
         computing_timer.leave_subsection("matrixFreePDE: AMR");
@@ -280,21 +282,6 @@ void MatrixFreePDE<dim, degree>::init()
     }
 
     computing_timer.leave_subsection("matrixFreePDE: initialization");
-}
-
-template <int dim, int degree>
-void MatrixFreePDE<dim, degree>::makeTriangulation(parallel::distributed::Triangulation<dim>& tria) const
-{
-    if (dim == 3) {
-        GridGenerator::subdivided_hyper_rectangle(tria, userInputs.subdivisions, Point<dim>(), Point<dim>(userInputs.domain_size[0], userInputs.domain_size[1], userInputs.domain_size[2]));
-    } else if (dim == 2) {
-        GridGenerator::subdivided_hyper_rectangle(tria, userInputs.subdivisions, Point<dim>(), Point<dim>(userInputs.domain_size[0], userInputs.domain_size[1]));
-    } else {
-        GridGenerator::subdivided_hyper_rectangle(tria, userInputs.subdivisions, Point<dim>(), Point<dim>(userInputs.domain_size[0]));
-    }
-
-    // Mark boundaries for applying the boundary conditions
-    markBoundaries(tria);
 }
 
 #include "../../include/matrixFreePDE_template_instantiations.h"

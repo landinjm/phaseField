@@ -38,6 +38,7 @@
 // PRISMS headers
 #include "SimplifiedGrainRepresentation.h"
 #include "adaptiveRefinement.h"
+#include "discretization.h"
 #include "fields.h"
 #include "nucleus.h"
 #include "userInputParameters.h"
@@ -76,13 +77,8 @@ public:
      */
     MatrixFreePDE(userInputParameters<dim>);
     ~MatrixFreePDE();
-    /**
-     * Initializes the mesh, degrees of freedom, constraints and data structures using the user provided
-     * inputs in the application parameters file.
-     */
+    
     virtual void init();
-
-    virtual void makeTriangulation(parallel::distributed::Triangulation<dim>&) const;
 
     /**
      * Initializes the data structures for enabling unit tests.
@@ -124,8 +120,6 @@ public:
 protected:
     userInputParameters<dim> userInputs;
 
-    unsigned int totalDOFs;
-
     // Virtual methods to set the attributes of the primary field variables and the postprocessing field variables
     // virtual void setVariableAttriubutes() = 0;
     // virtual void setPostProcessingVariableAttriubutes(){};
@@ -158,13 +152,17 @@ protected:
      */
     void outputResults();
 
-    /*Parallel mesh object which holds information about the FE nodes, elements and parallel domain decomposition
-     */
+    //Discreiziationn
+    discretization<dim> Discretization;
+
+    //START_DELETE
     parallel::distributed::Triangulation<dim> triangulation;
-    /*A vector of finite element objects used in a model. For problems with only one primal field,
-     *the size of this vector is one,otherwise the size is the number of primal fields in the problem.
-     */
+    //END_DELETE
+
+    //START_DELETE
     std::vector<FESystem<dim>*> FESet;
+    //END_DELETE
+
     /*A vector of all the constraint sets in the problem. A constraint set is a map which holds the mapping between the degrees
      *of freedom and the corresponding degree of freedom constraints. Currently the type of constraints stored are either
      *Dirichlet boundary conditions or hanging node constraints for adaptive meshes.
