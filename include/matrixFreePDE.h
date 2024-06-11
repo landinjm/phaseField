@@ -115,7 +115,6 @@ public:
     // Initial conditions function
     virtual void setInitialCondition(const dealii::Point<dim>& p, const unsigned int index, double& scalar_IC, dealii::Vector<double>& vector_IC) = 0;
 
-    // Non-uniform boundary conditions function
     virtual void setNonUniformDirichletBCs(const dealii::Point<dim>& p, const unsigned int index, const unsigned int direction, const double time, double& scalar_BC, dealii::Vector<double>& vector_BC) = 0;
 
 protected:
@@ -184,7 +183,6 @@ protected:
     /*Method to compute an explicit timestep*/
     void updateExplicitSolution(unsigned int fieldIndex);
 
-    /*Method to apply boundary conditions*/
     void applyBCs(unsigned int fieldIndex);
 
     /*Method to print outputs*/
@@ -247,14 +245,10 @@ protected:
         const std::vector<vectorType*>& src,
         const std::pair<unsigned int, unsigned int>& cell_range);
 
-    // methods to apply dirichlet BC's
-    /*Map of degrees of freedom to the corresponding Dirichlet boundary conditions, if any.*/
+    
     std::vector<std::map<dealii::types::global_dof_index, double>*> valuesDirichletSet;
-    /** Method for applying Dirichlet boundary conditions.*/
+    
     void applyDirichletBCs();
-
-    /** Method for applying Neumann boundary conditions.*/
-    void applyNeumannBCs();
 
     // Methods to apply periodic BCs
     void setPeriodicity();
