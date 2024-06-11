@@ -79,14 +79,7 @@ void discretization<dim>::makeTriangulation(parallel::distributed::Triangulation
 template <int dim>
 void discretization<dim>::markBoundaries(parallel::distributed::Triangulation<dim>& tria) const
 {
-
-    typename Triangulation<dim>::cell_iterator
-        cell
-        = tria.begin(),
-        endc = tria.end();
-
-    for (; cell != endc; ++cell) {
-
+    for (auto cell = tria.begin(); cell != tria.end(); ++cell) {
         // Mark all of the faces
         for (unsigned int face_number = 0; face_number < GeometryInfo<dim>::faces_per_cell; ++face_number) {
             for (unsigned int i = 0; i < dim; i++) {
