@@ -16,8 +16,6 @@ void MatrixFreePDE<dim, degree>::init()
     pcout << "creating problem mesh...\n";
     // Create the coarse mesh and mark the boundaries
     Discretization.makeTriangulation(Discretization.triangulation);
-    // Mark boundaries for applying the boundary conditions
-    markBoundaries(Discretization.triangulation);
 
     // Set which (if any) faces of the triangulation are periodic
     setPeriodicity();

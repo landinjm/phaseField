@@ -44,7 +44,6 @@ void computeStress(const dealii::Table<2, double>& CIJ, const dealii::Vectorized
 #include "../../src/matrixfree/initForTests.cc"
 #include "../../src/matrixfree/initialConditions.cc"
 #include "../../src/matrixfree/invM.cc"
-#include "../../src/matrixfree/markBoundaries.cc"
 #include "../../src/matrixfree/matrixFreePDE.cc"
 #include "../../src/matrixfree/nucleation.cc"
 #include "../../src/matrixfree/outputResults.cc"
