@@ -30,7 +30,7 @@ void MatrixFreePDE<dim, degree>::solve()
         if (userInputs.outputTimeStepList[currentOutput] == currentIncrement) {
 
             for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++) {
-                constraintsDirichletSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
+                BCs.constraintsDirichletSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
                 RefineAdaptively.constraintsOtherSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
                 solutionSet[fieldIndex]->update_ghost_values();
             }
@@ -89,7 +89,7 @@ void MatrixFreePDE<dim, degree>::solve()
             // Output results to file (on the proper increments)
             if (userInputs.outputTimeStepList[currentOutput] == currentIncrement) {
                 for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++) {
-                    constraintsDirichletSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
+                    BCs.constraintsDirichletSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
                     RefineAdaptively.constraintsOtherSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
                     solutionSet[fieldIndex]->update_ghost_values();
                 }

@@ -10,7 +10,7 @@ void MatrixFreePDE<dim, degree>::computeIntegral(double& integratedField, int in
     const unsigned int n_q_points = quadrature_formula.size();
     std::vector<double> cVal(n_q_points);
 
-    // constraintsDirichletSet[index]->distribute(*variableSet[index]);
+    // BCs.constraintsDirichletSet[index]->distribute(*variableSet[index]);
     // RefineAdaptively.constraintsOtherSet[index]->distribute(*variableSet[index]);
     // variableSet[index]->update_ghost_values();
 

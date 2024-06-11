@@ -20,7 +20,7 @@ void MatrixFreePDE<dim, degree>::updateNucleiList()
                 computing_timer.enter_subsection("matrixFreePDE: nucleation");
                 // Apply constraints
                 for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++) {
-                    constraintsDirichletSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
+                    BCs.constraintsDirichletSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
                     RefineAdaptively.constraintsOtherSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
                     solutionSet[fieldIndex]->update_ghost_values();
                 }

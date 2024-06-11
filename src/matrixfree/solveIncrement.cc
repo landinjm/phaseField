@@ -67,7 +67,7 @@ void MatrixFreePDE<dim, degree>::solveIncrement(bool skip_time_dependent)
                     }
 
                     // This clears the residual where we want to apply Dirichlet BCs, otherwise the solver sees a positive residual
-                    constraintsDirichletSet[fieldIndex]->set_zero(*residualSet[fieldIndex]);
+                    BCs.constraintsDirichletSet[fieldIndex]->set_zero(*residualSet[fieldIndex]);
 
                     // Solve
                     nonlinear_it_converged = nonlinearSolve(fieldIndex, nonlinear_it_index);
@@ -151,7 +151,7 @@ bool MatrixFreePDE<dim, degree>::nonlinearSolve(unsigned int fieldIndex, unsigne
 
                 computeNonexplicitRHS();
 
-                constraintsDirichletSet[fieldIndex]->set_zero(*residualSet[fieldIndex]);
+                BCs.constraintsDirichletSet[fieldIndex]->set_zero(*residualSet[fieldIndex]);
 
                 double residual_new = residualSet[fieldIndex]->l2_norm();
 
@@ -298,14 +298,14 @@ void MatrixFreePDE<dim, degree>::applyBCs(unsigned int fieldIndex)
             locally_relevant_dofs->clear();
             DoFTools::extract_locally_relevant_dofs(*dof_handler, *locally_relevant_dofs);
             AffineConstraints<double>* constraintsDirichlet;
-            constraintsDirichlet = constraintsDirichletSet_nonconst.at(currentFieldIndex);
+            constraintsDirichlet = BCs.constraintsDirichletSet_nonconst.at(currentFieldIndex);
             constraintsDirichlet->clear();
             constraintsDirichlet->reinit(*locally_relevant_dofs);
             applyDirichletBCs();
             constraintsDirichlet->close();
         }
         // Distribute for Uniform or Non-Uniform Dirichlet BCs
-        constraintsDirichletSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
+        BCs.constraintsDirichletSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
     }
     solutionSet[fieldIndex]->update_ghost_values();
 }

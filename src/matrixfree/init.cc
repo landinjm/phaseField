@@ -117,8 +117,8 @@ void MatrixFreePDE<dim, degree>::init()
         AffineConstraints<double>*constraintsDirichlet, *constraintsOther;
 
         constraintsDirichlet = new AffineConstraints<double>;
-        constraintsDirichletSet.push_back(constraintsDirichlet);
-        constraintsDirichletSet_nonconst.push_back(constraintsDirichlet);
+        BCs.constraintsDirichletSet.push_back(constraintsDirichlet);
+        BCs.constraintsDirichletSet_nonconst.push_back(constraintsDirichlet);
         constraintsOther = new AffineConstraints<double>;
         RefineAdaptively.constraintsOtherSet.push_back(constraintsOther);
         RefineAdaptively.constraintsOtherSet_nonconst.push_back(constraintsOther);
@@ -248,7 +248,7 @@ void MatrixFreePDE<dim, degree>::init()
 
     // Ghost the solution vectors. Also apply the constraints (if any) on the solution vectors
     for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++) {
-        constraintsDirichletSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
+        BCs.constraintsDirichletSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
         RefineAdaptively.constraintsOtherSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
         solutionSet[fieldIndex]->update_ghost_values();
     }

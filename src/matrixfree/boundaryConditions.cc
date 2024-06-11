@@ -87,11 +87,11 @@ void MatrixFreePDE<dim, degree>::applyDirichletBCs()
         for (unsigned int direction = 0; direction < 2 * dim; direction++) {
             if (userInputs.BC_list[starting_BC_list_index].var_BC_type[direction] == DIRICHLET) {
                 VectorTools::interpolate_boundary_values(*Discretization.dofHandlersSet[currentFieldIndex],
-                    direction, Functions::ConstantFunction<dim>(userInputs.BC_list[starting_BC_list_index].var_BC_val[direction], 1), *(AffineConstraints<double>*)constraintsDirichletSet[currentFieldIndex]);
+                    direction, Functions::ConstantFunction<dim>(userInputs.BC_list[starting_BC_list_index].var_BC_val[direction], 1), *(AffineConstraints<double>*)BCs.constraintsDirichletSet[currentFieldIndex]);
 
             } else if (userInputs.BC_list[starting_BC_list_index].var_BC_type[direction] == NON_UNIFORM_DIRICHLET) {
                 VectorTools::interpolate_boundary_values(*Discretization.dofHandlersSet[currentFieldIndex],
-                    direction, NonUniformDirichletBC<dim, degree>(currentFieldIndex, direction, currentTime, this), *(AffineConstraints<double>*)constraintsDirichletSet[currentFieldIndex]);
+                    direction, NonUniformDirichletBC<dim, degree>(currentFieldIndex, direction, currentTime, this), *(AffineConstraints<double>*)BCs.constraintsDirichletSet[currentFieldIndex]);
             }
         }
     } else {
@@ -112,7 +112,7 @@ void MatrixFreePDE<dim, degree>::applyDirichletBCs()
             }
 
             VectorTools::interpolate_boundary_values(*Discretization.dofHandlersSet[currentFieldIndex],
-                direction, vectorBCFunction<dim>(BC_values), *(AffineConstraints<double>*)constraintsDirichletSet[currentFieldIndex], mask);
+                direction, vectorBCFunction<dim>(BC_values), *(AffineConstraints<double>*)BCs.constraintsDirichletSet[currentFieldIndex], mask);
 
             // Mask again, this time for non-uniform Dirichlet BCs
             mask.clear();
@@ -126,9 +126,9 @@ void MatrixFreePDE<dim, degree>::applyDirichletBCs()
 
             // VectorTools::interpolate_boundary_values (*Discretization.dofHandlersSet[currentFieldIndex],\
 				//   direction, NonUniformDirichletBC<dim,degree>(currentFieldIndex,direction,currentTime,this), *(AffineConstraints<double>*) \
-				//   constraintsDirichletSet[currentFieldIndex],mask);
+				//   BCs.constraintsDirichletSet[currentFieldIndex],mask);
             VectorTools::interpolate_boundary_values(*Discretization.dofHandlersSet[currentFieldIndex],
-                direction, NonUniformDirichletBCVector<dim, degree>(currentFieldIndex, direction, currentTime, this), *(AffineConstraints<double>*)constraintsDirichletSet[currentFieldIndex], mask);
+                direction, NonUniformDirichletBCVector<dim, degree>(currentFieldIndex, direction, currentTime, this), *(AffineConstraints<double>*)BCs.constraintsDirichletSet[currentFieldIndex], mask);
         }
     }
 }

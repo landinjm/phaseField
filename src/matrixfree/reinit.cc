@@ -38,7 +38,7 @@ void MatrixFreePDE<dim, degree>::reinit()
         // create constraints
         AffineConstraints<double>*constraintsDirichlet, *constraintsOther;
 
-        constraintsDirichlet = constraintsDirichletSet_nonconst.at(it->index);
+        constraintsDirichlet = BCs.constraintsDirichletSet_nonconst.at(it->index);
         constraintsOther = RefineAdaptively.constraintsOtherSet_nonconst.at(it->index);
 
         constraintsDirichlet->clear();
@@ -154,7 +154,7 @@ void MatrixFreePDE<dim, degree>::reinit()
 
     // Ghost the solution vectors. Also apply the Dirichet BC's (if any) on the solution vectors
     for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++) {
-        constraintsDirichletSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
+        BCs.constraintsDirichletSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
         RefineAdaptively.constraintsOtherSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
         solutionSet[fieldIndex]->update_ghost_values();
     }

@@ -22,7 +22,7 @@ void MatrixFreePDE<dim, degree>::vmult(vectorType& dst, const vectorType& src) c
     }
 
     // Account for Dirichlet BC's
-    constraintsDirichletSet[currentFieldIndex]->distribute(dst);
+    BCs.constraintsDirichletSet[currentFieldIndex]->distribute(dst);
 
     // end log
     computing_timer.leave_subsection("matrixFreePDE: computeLHS");
