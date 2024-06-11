@@ -156,10 +156,6 @@ protected:
     discretization<dim> Discretization;
 
     //START_DELETE
-    parallel::distributed::Triangulation<dim> triangulation;
-    //END_DELETE
-
-    //START_DELETE
     std::vector<FESystem<dim>*> FESet;
     //END_DELETE
 

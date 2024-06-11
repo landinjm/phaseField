@@ -61,12 +61,12 @@ void MatrixFreePDE<dim, degree>::save_checkpoint()
             parallel::distributed::SolutionTransfer<dim, vectorType> system_trans_scalars(*dofHandlersSet[scalar_var_indices[0]]);
             system_trans_scalars.prepare_for_serialization(solSet_transfer_scalars);
 
-            triangulation.save("restart.mesh");
+            Discretization.triangulation.save("restart.mesh");
         } else if (scalar_var_indices.size() == 0 && vector_var_indices.size() > 0) {
             parallel::distributed::SolutionTransfer<dim, vectorType> system_trans_vectors(*dofHandlersSet[vector_var_indices[0]]);
             system_trans_vectors.prepare_for_serialization(solSet_transfer_vectors);
 
-            triangulation.save("restart.mesh");
+            Discretization.triangulation.save("restart.mesh");
         } else {
             parallel::distributed::SolutionTransfer<dim, vectorType> system_trans_scalars(*dofHandlersSet[scalar_var_indices[0]]);
             system_trans_scalars.prepare_for_serialization(solSet_transfer_scalars);
@@ -74,7 +74,7 @@ void MatrixFreePDE<dim, degree>::save_checkpoint()
             parallel::distributed::SolutionTransfer<dim, vectorType> system_trans_vectors(*dofHandlersSet[vector_var_indices[0]]);
             system_trans_vectors.prepare_for_serialization(solSet_transfer_vectors);
 
-            triangulation.save("restart.mesh");
+            Discretization.triangulation.save("restart.mesh");
         }
     }
 
@@ -106,7 +106,7 @@ void MatrixFreePDE<dim, degree>::load_checkpoint_triangulation()
           << std::endl;
 
     try {
-        triangulation.load("restart.mesh");
+        Discretization.triangulation.load("restart.mesh");
     } catch (...) {
         AssertThrow(false, ExcMessage("PRISMS-PF Error: Cannot open snapshot mesh file or read the triangulation stored there."));
     }

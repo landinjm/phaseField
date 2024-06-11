@@ -15,11 +15,11 @@ void MatrixFreePDE<dim, degree>::initForTests(std::vector<Field<dim>> fields)
     }
 
     if (dim == 3) {
-        GridGenerator::subdivided_hyper_rectangle(triangulation, subdivisions, Point<dim>(), Point<dim>(1, 1, 1));
+        GridGenerator::subdivided_hyper_rectangle(Discretization.triangulation, subdivisions, Point<dim>(), Point<dim>(1, 1, 1));
     } else if (dim == 2) {
-        GridGenerator::subdivided_hyper_rectangle(triangulation, subdivisions, Point<dim>(), Point<dim>(1, 1));
+        GridGenerator::subdivided_hyper_rectangle(Discretization.triangulation, subdivisions, Point<dim>(), Point<dim>(1, 1));
     } else {
-        GridGenerator::subdivided_hyper_rectangle(triangulation, subdivisions, Point<dim>(), Point<dim>(1));
+        GridGenerator::subdivided_hyper_rectangle(Discretization.triangulation, subdivisions, Point<dim>(), Point<dim>(1));
     }
 
     // setup system
@@ -35,7 +35,7 @@ void MatrixFreePDE<dim, degree>::initForTests(std::vector<Field<dim>> fields)
 
         // distribute DOFs
         DoFHandler<dim>* dof_handler;
-        dof_handler = new DoFHandler<dim>(triangulation);
+        dof_handler = new DoFHandler<dim>(Discretization.triangulation);
         dofHandlersSet.push_back(dof_handler);
         dofHandlersSet_nonconst.push_back(dof_handler);
         dof_handler->distribute_dofs(*fe);

@@ -146,12 +146,12 @@ void MatrixFreePDE<dim, degree>::setPeriodicity()
             }
         }
         if (periodic_pair == true) {
-            GridTools::collect_periodic_faces(triangulation, /*b_id1*/ 2 * i, /*b_id2*/ 2 * i + 1,
+            GridTools::collect_periodic_faces(Discretization.triangulation, /*b_id1*/ 2 * i, /*b_id2*/ 2 * i + 1,
                 /*direction*/ i, periodicity_vector);
         }
     }
 
-    triangulation.add_periodicity(periodicity_vector);
+    Discretization.triangulation.add_periodicity(periodicity_vector);
     pcout << "periodic facepairs: " << periodicity_vector.size() << std::endl;
 }
 

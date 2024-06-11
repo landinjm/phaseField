@@ -157,7 +157,7 @@ void MatrixFreePDE<dim, degree>::applyInitialConditions()
         // double dt_for_smoothing = dealii::GridTools::minimal_cell_diameter(triangulation)/1000.0;
         // NEW selection of dt_for_smoothing based on dt_max=(dx^2)/2*dim*D, where D=1, addording to the von Neumann stability condition
         // We chose dt_for_smoothing=0.25*dt_max
-        double min_dx = dealii::GridTools::minimal_cell_diameter(triangulation) / (1.0 * degree * std::sqrt(1.0 * dim));
+        double min_dx = dealii::GridTools::minimal_cell_diameter(Discretization.triangulation) / (1.0 * degree * std::sqrt(1.0 * dim));
         double dt_for_smoothing = 0.25 * min_dx * min_dx / (1.0 * dim);
 
         op_list_index = 0;

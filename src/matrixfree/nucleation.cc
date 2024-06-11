@@ -317,7 +317,7 @@ void MatrixFreePDE<dim, degree>::refineMeshNearNuclei(std::vector<nucleus<dim>> 
     unsigned int numDoF_preremesh = Discretization.totalDOFs;
 
     for (unsigned int remesh_index = 0; remesh_index < (userInputs.max_refinement_level - userInputs.min_refinement_level); remesh_index++) {
-        ti = triangulation.begin_active();
+        ti = Discretization.triangulation.begin_active();
         di = dofHandlersSet_nonconst[0]->begin_active();
         while (di != dofHandlersSet_nonconst[0]->end()) {
             if (di->is_locally_owned()) {

@@ -15,9 +15,9 @@ void MatrixFreePDE<dim, degree>::init()
 
     pcout << "creating problem mesh...\n";
     // Create the coarse mesh and mark the boundaries
-    Discretization.makeTriangulation(triangulation);
+    Discretization.makeTriangulation(Discretization.triangulation);
     // Mark boundaries for applying the boundary conditions
-    markBoundaries(triangulation);
+    markBoundaries(Discretization.triangulation);
 
     // Set which (if any) faces of the triangulation are periodic
     setPeriodicity();
@@ -27,7 +27,7 @@ void MatrixFreePDE<dim, degree>::init()
         load_checkpoint_triangulation();
     } else {
         // Do the initial global refinement
-        triangulation.refine_global(userInputs.refine_factor);
+        Discretization.triangulation.refine_global(userInputs.refine_factor);
     }
 
     // Write out the size of the computational domain and the total number of elements
@@ -36,7 +36,7 @@ void MatrixFreePDE<dim, degree>::init()
     } else {
         pcout << "problem dimensions: " << userInputs.domain_size[0] << "x" << userInputs.domain_size[1] << "x" << userInputs.domain_size[2] << std::endl;
     }
-    pcout << "number of elements: " << triangulation.n_global_active_cells() << std::endl;
+    pcout << "number of elements: " << Discretization.triangulation.n_global_active_cells() << std::endl;
     pcout << std::endl;
 
     // Setup system
@@ -103,7 +103,7 @@ void MatrixFreePDE<dim, degree>::init()
         // distribute DOFs
         DoFHandler<dim>* dof_handler;
 
-        dof_handler = new DoFHandler<dim>(triangulation);
+        dof_handler = new DoFHandler<dim>(Discretization.triangulation);
         dofHandlersSet.push_back(dof_handler);
         dofHandlersSet_nonconst.push_back(dof_handler);
 
