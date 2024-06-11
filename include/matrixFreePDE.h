@@ -156,13 +156,12 @@ protected:
     discretization<dim> Discretization;
 
     /*A vector of all the constraint sets in the problem. A constraint set is a map which holds the mapping between the degrees
-     *of freedom and the corresponding degree of freedom constraints. Currently the type of constraints stored are either
-     *Dirichlet boundary conditions or hanging node constraints for adaptive meshes.
+     *of freedom and the corresponding degree of freedom constraints.
      */
-    std::vector<const AffineConstraints<double>*> constraintsDirichletSet, constraintsOtherSet;
+    std::vector<const AffineConstraints<double>*> constraintsDirichletSet;
 
     /*Copies of constraintSet elements, but stored as non-const to enable application of constraints.*/
-    std::vector<AffineConstraints<double>*> constraintsDirichletSet_nonconst, constraintsOtherSet_nonconst;
+    std::vector<AffineConstraints<double>*> constraintsDirichletSet_nonconst;
 
     /*Vector all the solution vectors in the problem. In a multi-field problem, each primal field has a solution vector associated with it.*/
     std::vector<vectorType*> solutionSet;

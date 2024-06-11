@@ -51,8 +51,8 @@ void MatrixFreePDE<dim, degree>::initForTests(std::vector<Field<dim>> fields)
         // create constraints
         AffineConstraints<double>* constraintsOther;
         constraintsOther = new AffineConstraints<double>;
-        constraintsOtherSet.push_back(constraintsOther);
-        constraintsOtherSet_nonconst.push_back(constraintsOther);
+        RefineAdaptively.constraintsOtherSet.push_back(constraintsOther);
+        RefineAdaptively.constraintsOtherSet_nonconst.push_back(constraintsOther);
         constraintsOther->clear();
         constraintsOther->reinit(*locally_relevant_dofs);
         DoFTools::make_hanging_node_constraints(*dof_handler, *constraintsOther);
@@ -66,10 +66,10 @@ void MatrixFreePDE<dim, degree>::initForTests(std::vector<Field<dim>> fields)
     QGaussLobatto<1> quadrature(degree + 1);
     Discretization.matrixFreeObject.clear();
 #if (DEAL_II_VERSION_MAJOR == 9 && DEAL_II_VERSION_MINOR < 4)
-    Discretization.matrixFreeObject.reinit(Discretization.dofHandlersSet, constraintsOtherSet, quadrature, additional_data);
+    Discretization.matrixFreeObject.reinit(Discretization.dofHandlersSet, RefineAdaptively.constraintsOtherSet, quadrature, additional_data);
 #else
     Discretization.matrixFreeObject.reinit(MappingFE<dim, dim>(FE_Q<dim>(QGaussLobatto<1>(degree + 1))),
-        Discretization.dofHandlersSet, constraintsOtherSet, quadrature, additional_data);
+        Discretization.dofHandlersSet, RefineAdaptively.constraintsOtherSet, quadrature, additional_data);
 #endif
     // setup problem vectors
     for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++) {

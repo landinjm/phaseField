@@ -11,7 +11,7 @@ void MatrixFreePDE<dim, degree>::computeIntegral(double& integratedField, int in
     std::vector<double> cVal(n_q_points);
 
     // constraintsDirichletSet[index]->distribute(*variableSet[index]);
-    // constraintsOtherSet[index]->distribute(*variableSet[index]);
+    // RefineAdaptively.constraintsOtherSet[index]->distribute(*variableSet[index]);
     // variableSet[index]->update_ghost_values();
 
     typename DoFHandler<dim>::active_cell_iterator cell = this->Discretization.dofHandlersSet[0]->begin_active(), endc = this->Discretization.dofHandlersSet[0]->end();

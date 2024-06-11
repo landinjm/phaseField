@@ -42,7 +42,7 @@ void MatrixFreePDE<dim, degree>::outputResults()
 #endif
                 postProcessedSet[fieldIndex]->local_element(dof) = invMscalar.local_element(dof % invM_size) * postProcessedSet[fieldIndex]->local_element(dof);
             }
-            constraintsOtherSet[0]->distribute(*postProcessedSet[fieldIndex]);
+            RefineAdaptively.constraintsOtherSet[0]->distribute(*postProcessedSet[fieldIndex]);
             postProcessedSet[fieldIndex]->update_ghost_values();
         }
 

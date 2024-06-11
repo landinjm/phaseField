@@ -20,7 +20,7 @@ MatrixFreePDE<dim, degree>::MatrixFreePDE(userInputParameters<dim> _userInputs)
     , current_grain_reassignment(0)
     , computing_timer(pcout, TimerOutput::summary, TimerOutput::wall_times)
     , first_integrated_var_output_complete(false)
-    , RefineAdaptively(_userInputs, Discretization.triangulation, fields, solutionSet, soltransSet, Discretization.FESet, Discretization.dofHandlersSet_nonconst, constraintsDirichletSet, constraintsOtherSet)
+    , RefineAdaptively(_userInputs, Discretization.triangulation, fields, solutionSet, soltransSet, Discretization.FESet, Discretization.dofHandlersSet_nonconst, constraintsDirichletSet)
     , Discretization(_userInputs)
 {
 }

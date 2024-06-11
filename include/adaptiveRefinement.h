@@ -25,22 +25,28 @@ using namespace dealii;
 template <int dim, int degree>
 class adaptiveRefinement {
 public:
-    adaptiveRefinement(const userInputParameters<dim>& _userInputs, parallel::distributed::Triangulation<dim>& _triangulation, std::vector<Field<dim>>& _fields, std::vector<vectorType*>& _solutionSet, std::vector<parallel::distributed::SolutionTransfer<dim, vectorType>*>& _soltransSet, std::vector<FESystem<dim>*>& _FESet, std::vector<DoFHandler<dim>*>& _dofHandlersSet_nonconst, std::vector<const AffineConstraints<double>*>& _constraintsDirichletSet, std::vector<const AffineConstraints<double>*>& _constraintsOtherSet);
+    adaptiveRefinement(const userInputParameters<dim>& _userInputs, parallel::distributed::Triangulation<dim>& _triangulation, std::vector<Field<dim>>& _fields, std::vector<vectorType*>& _solutionSet, std::vector<parallel::distributed::SolutionTransfer<dim, vectorType>*>& _soltransSet, std::vector<FESystem<dim>*>& _FESet, std::vector<DoFHandler<dim>*>& _dofHandlersSet_nonconst, std::vector<const AffineConstraints<double>*>& _constraintsDirichletSet);
 
-    // Adaptive refinement
+    /*Adaptive refinement*/
     void adaptiveRefine(unsigned int _currentIncrement);
 
-    // Method that refines the triangulation
+    /*Method that refines the triangulation*/
     void refineGrid();
 
-    // Current increment
+    /*Current increment*/
     unsigned int currentIncrement;
 
-protected:
+    /*A vector of all the hanging node constraints for adaptive meshes in the problem. A constraint set is a map which holds the mapping between the degrees of freedom and the corresponding degree of freedom constraints.*/
+    std::vector<const AffineConstraints<double>*> constraintsOtherSet;
+
+    /*Copies of constraintSet elements, but stored as non-const to enable application of constraints.*/
+    std::vector<AffineConstraints<double>*> constraintsOtherSet_nonconst;
+
+
+private:
     // Adaptive refinement criterion
     void adaptiveRefineCriterion();
 
-private:
     userInputParameters<dim> userInputs;
 
     parallel::distributed::Triangulation<dim>& triangulation;
@@ -56,12 +62,10 @@ private:
     std::vector<DoFHandler<dim>*>& dofHandlersSet_nonconst;
 
     std::vector<const AffineConstraints<double>*>& constraintsDirichletSet;
-
-    std::vector<const AffineConstraints<double>*>& constraintsOtherSet;
 };
 
 template <int dim, int degree>
-adaptiveRefinement<dim, degree>::adaptiveRefinement(const userInputParameters<dim>& _userInputs, parallel::distributed::Triangulation<dim>& _triangulation, std::vector<Field<dim>>& _fields, std::vector<vectorType*>& _solutionSet, std::vector<parallel::distributed::SolutionTransfer<dim, vectorType>*>& _soltransSet, std::vector<FESystem<dim>*>& _FESet, std::vector<DoFHandler<dim>*>& _dofHandlersSet_nonconst, std::vector<const AffineConstraints<double>*>& _constraintsDirichletSet, std::vector<const AffineConstraints<double>*>& _constraintsOtherSet)
+adaptiveRefinement<dim, degree>::adaptiveRefinement(const userInputParameters<dim>& _userInputs, parallel::distributed::Triangulation<dim>& _triangulation, std::vector<Field<dim>>& _fields, std::vector<vectorType*>& _solutionSet, std::vector<parallel::distributed::SolutionTransfer<dim, vectorType>*>& _soltransSet, std::vector<FESystem<dim>*>& _FESet, std::vector<DoFHandler<dim>*>& _dofHandlersSet_nonconst, std::vector<const AffineConstraints<double>*>& _constraintsDirichletSet)
     : userInputs(_userInputs)
     , triangulation(_triangulation)
     , fields(_fields)
@@ -70,7 +74,6 @@ adaptiveRefinement<dim, degree>::adaptiveRefinement(const userInputParameters<di
     , FESet(_FESet)
     , dofHandlersSet_nonconst(_dofHandlersSet_nonconst)
     , constraintsDirichletSet(_constraintsDirichletSet)
-    , constraintsOtherSet(_constraintsOtherSet)
 {
 }
 

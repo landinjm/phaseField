@@ -21,7 +21,7 @@ void MatrixFreePDE<dim, degree>::updateNucleiList()
                 // Apply constraints
                 for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++) {
                     constraintsDirichletSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
-                    constraintsOtherSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
+                    RefineAdaptively.constraintsOtherSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
                     solutionSet[fieldIndex]->update_ghost_values();
                 }
 

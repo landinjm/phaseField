@@ -120,8 +120,8 @@ void MatrixFreePDE<dim, degree>::init()
         constraintsDirichletSet.push_back(constraintsDirichlet);
         constraintsDirichletSet_nonconst.push_back(constraintsDirichlet);
         constraintsOther = new AffineConstraints<double>;
-        constraintsOtherSet.push_back(constraintsOther);
-        constraintsOtherSet_nonconst.push_back(constraintsOther);
+        RefineAdaptively.constraintsOtherSet.push_back(constraintsOther);
+        RefineAdaptively.constraintsOtherSet_nonconst.push_back(constraintsOther);
         valuesDirichletSet.push_back(new std::map<dealii::types::global_dof_index, double>);
 
         constraintsDirichlet->clear();
@@ -187,10 +187,10 @@ void MatrixFreePDE<dim, degree>::init()
     QGaussLobatto<1> quadrature(degree + 1);
     Discretization.matrixFreeObject.clear();
 #if (DEAL_II_VERSION_MAJOR == 9 && DEAL_II_VERSION_MINOR < 4)
-    Discretization.matrixFreeObject.reinit(Discretization.dofHandlersSet, constraintsOtherSet, quadrature, additional_data);
+    Discretization.matrixFreeObject.reinit(Discretization.dofHandlersSet, RefineAdaptively.constraintsOtherSet, quadrature, additional_data);
 #else
     Discretization.matrixFreeObject.reinit(MappingFE<dim, dim>(FE_Q<dim>(QGaussLobatto<1>(degree + 1))),
-        Discretization.dofHandlersSet, constraintsOtherSet, quadrature, additional_data);
+        Discretization.dofHandlersSet, RefineAdaptively.constraintsOtherSet, quadrature, additional_data);
 #endif
     bool dU_scalar_init = false;
     bool dU_vector_init = false;
@@ -249,7 +249,7 @@ void MatrixFreePDE<dim, degree>::init()
     // Ghost the solution vectors. Also apply the constraints (if any) on the solution vectors
     for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++) {
         constraintsDirichletSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
-        constraintsOtherSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
+        RefineAdaptively.constraintsOtherSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
         solutionSet[fieldIndex]->update_ghost_values();
     }
 

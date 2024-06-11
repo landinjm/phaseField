@@ -39,7 +39,7 @@ void MatrixFreePDE<dim, degree>::reinit()
         AffineConstraints<double>*constraintsDirichlet, *constraintsOther;
 
         constraintsDirichlet = constraintsDirichletSet_nonconst.at(it->index);
-        constraintsOther = constraintsOtherSet_nonconst.at(it->index);
+        constraintsOther = RefineAdaptively.constraintsOtherSet_nonconst.at(it->index);
 
         constraintsDirichlet->clear();
         constraintsDirichlet->reinit(*locally_relevant_dofs);
@@ -89,10 +89,10 @@ void MatrixFreePDE<dim, degree>::reinit()
     QGaussLobatto<1> quadrature(degree + 1);
     Discretization.matrixFreeObject.clear();
 #if (DEAL_II_VERSION_MAJOR == 9 && DEAL_II_VERSION_MINOR < 4)
-    Discretization.matrixFreeObject.reinit(Discretization.dofHandlersSet, constraintsOtherSet, quadrature, additional_data);
+    Discretization.matrixFreeObject.reinit(Discretization.dofHandlersSet, RefineAdaptively.constraintsOtherSet, quadrature, additional_data);
 #else
     Discretization.matrixFreeObject.reinit(MappingFE<dim, dim>(FE_Q<dim>(QGaussLobatto<1>(degree + 1))),
-        Discretization.dofHandlersSet, constraintsOtherSet, quadrature, additional_data);
+        Discretization.dofHandlersSet, RefineAdaptively.constraintsOtherSet, quadrature, additional_data);
 #endif
     bool dU_scalar_init = false;
     bool dU_vector_init = false;
@@ -155,7 +155,7 @@ void MatrixFreePDE<dim, degree>::reinit()
     // Ghost the solution vectors. Also apply the Dirichet BC's (if any) on the solution vectors
     for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++) {
         constraintsDirichletSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
-        constraintsOtherSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
+        RefineAdaptively.constraintsOtherSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
         solutionSet[fieldIndex]->update_ghost_values();
     }
 
