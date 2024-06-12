@@ -134,8 +134,8 @@ void MatrixFreePDE<dim, degree>::init()
 
         // Add a constraint to fix the value at the origin to zero if all BCs are zero-derivative or periodic
         std::vector<int> rigidBodyModeComponents;
-        // getComponentsWithRigidBodyModes(rigidBodyModeComponents);
-        // setRigidBodyModeConstraints(rigidBodyModeComponents,constraintsOther,dof_handler);
+        // BCs.getComponentsWithRigidBodyModes(rigidBodyModeComponents, currentFieldIndex);
+        // BCs.setRigidBodyModeConstraints(rigidBodyModeComponents,constraintsOther,dof_handler);
 
         // Get constraints for periodic BCs
         BCs.setPeriodicityConstraints(*constraintsOther, *dof_handler, currentFieldIndex);

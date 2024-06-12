@@ -250,9 +250,6 @@ protected:
     
     void applyDirichletBCs();
 
-    void getComponentsWithRigidBodyModes(std::vector<int>&) const;
-    void setRigidBodyModeConstraints(const std::vector<int>, AffineConstraints<double>*, const DoFHandler<dim>*) const;
-
     // methods to apply initial conditions
     /*Virtual method to apply initial conditions.  This is usually expected to be provided by the user in IBVP (Initial Boundary Value Problems).*/
 
