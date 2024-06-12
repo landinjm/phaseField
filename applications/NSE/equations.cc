@@ -75,7 +75,7 @@ void customPDE<dim,degree>::explicitEquationRHS(variableContainer<dim,degree,dea
 	//Step three of the Chorin projection
 	if(ChorinSwitch == true){
 		//Setting the expressions for the terms in the governing equations
-		eq_u = u-constV(userInputs.dtValue)*Px;
+		eq_u = u-constV(dtStabilized)*Px;
 	}
 
 	//Submitting the terms for the governing equations
@@ -110,7 +110,7 @@ void customPDE<dim,degree>::nonExplicitEquationRHS(variableContainer<dim,degree,
 
 	//Continuity equation
 	for(unsigned int i=0; i<dim; i++){
-		eq_P += -constV(1.0/userInputs.dtValue)*ux[i][i];
+		eq_P += -constV(1.0/dtStabilized)*ux[i][i];
 	}
 	eqx_P = -Px;
 
