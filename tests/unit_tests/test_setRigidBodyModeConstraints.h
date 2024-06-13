@@ -18,7 +18,7 @@ public:
     void call_setRigidBodyModeConstraints(std::vector<int> rigidBodyModeComponents, unsigned int& num_constraints)
     {
 
-        this->setRigidBodyModeConstraints(rigidBodyModeComponents, this->RefineAdaptively.constraintsOtherSet_nonconst[0], this->Discretization.dofHandlersSet_nonconst[0]);
+        this->BCs.setRigidBodyModeConstraints(rigidBodyModeComponents, this->RefineAdaptively.constraintsOtherSet_nonconst[0], this->Discretization.dofHandlersSet_nonconst[0]);
 
         // Calculate the number of constraints that were set
         num_constraints = this->RefineAdaptively.constraintsOtherSet_nonconst[0]->n_constraints();

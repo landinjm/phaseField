@@ -19,7 +19,7 @@ using namespace dealii;
 template <int dim, int degree>
 class boundaryConditions {
 public:
-    boundaryConditions(const userInputParameters<dim>& _userInputs);
+    boundaryConditions(const userInputParameters<dim>& _userInputs, discretization<dim>& Discretization);
 
     /*A vector of all the constraint sets in the problem. A constraint set is a map which holds the mapping between the degrees of freedom and the corresponding degree of freedom constraints.*/
     std::vector<const AffineConstraints<double>*> constraintsDirichletSet;
@@ -51,14 +51,14 @@ private:
     userInputParameters<dim> userInputs;
 
     /*Discretiziation*/
-    discretization<dim> Discretization;
+    discretization<dim>& DiscretizationRef;
 
 };
 
 template <int dim, int degree>
-boundaryConditions<dim, degree>::boundaryConditions(const userInputParameters<dim>& _userInputs)
+boundaryConditions<dim, degree>::boundaryConditions(const userInputParameters<dim>& _userInputs, discretization<dim>& Discretization)
     : userInputs(_userInputs)
-    , Discretization(_userInputs)
+    , DiscretizationRef(Discretization)
 {
 }
 
@@ -88,7 +88,7 @@ void boundaryConditions<dim, degree>::applyNeumannBCs(dealii::LinearAlgebra::dis
     for (unsigned int direction = 0; direction < 2 * dim; direction++) {
         if (userInputs.BC_list[starting_BC_list_index].var_BC_type[direction] == NEUMANN) {
 
-            FESystem<dim>* fe = Discretization.FESet[currentFieldIndex];
+            FESystem<dim>* fe = DiscretizationRef.FESet[currentFieldIndex];
             QGaussLobatto<dim - 1> face_quadrature_formula(degree + 1);
             FEFaceValues<dim> fe_face_values(*fe, face_quadrature_formula, update_values | update_JxW_values);
             const unsigned int n_face_q_points = face_quadrature_formula.size(), dofs_per_cell = fe->dofs_per_cell;
@@ -96,7 +96,7 @@ void boundaryConditions<dim, degree>::applyNeumannBCs(dealii::LinearAlgebra::dis
             std::vector<types::global_dof_index> local_dof_indices(dofs_per_cell);
 
             // Loop over each face on a boundary
-            for (auto cell = Discretization.dofHandlersSet[0]->begin_active(); cell != Discretization.dofHandlersSet[0]->end(); ++cell) {
+            for (auto cell = DiscretizationRef.dofHandlersSet[0]->begin_active(); cell != DiscretizationRef.dofHandlersSet[0]->end(); ++cell) {
                 for (unsigned int f = 0; f < GeometryInfo<dim>::faces_per_cell; ++f) {
                     if (cell->face(f)->at_boundary()) {
                         if (cell->face(f)->boundary_id() == direction) {
@@ -133,12 +133,12 @@ void boundaryConditions<dim, degree>::setPeriodicity()
             }
         }
         if (periodic_pair == true) {
-            GridTools::collect_periodic_faces(Discretization.triangulation, /*b_id1*/ 2 * i, /*b_id2*/ 2 * i + 1,
+            GridTools::collect_periodic_faces(DiscretizationRef.triangulation, /*b_id1*/ 2 * i, /*b_id2*/ 2 * i + 1,
                 /*direction*/ i, periodicity_vector);
         }
     }
 
-    Discretization.triangulation.add_periodicity(periodicity_vector);
+    DiscretizationRef.triangulation.add_periodicity(periodicity_vector);
     //pcout << "periodic facepairs: " << periodicity_vector.size() << std::endl;
 }
 
