@@ -67,7 +67,7 @@ set Time step = 4.0e-3
 
 # The simulation ends when either the number of time steps is reached or the
 # simulation time is reached.
-set Number of time steps = 10000
+set Number of time steps = 100000
 
 # =================================================================================
 # Set the boundary conditions
@@ -122,10 +122,10 @@ set Model constant correctionP = 1.0, DOUBLE
 subsection Linear solver parameters: P
     # Whether the tolerance value is compared to the residual (ABSOLUTE_RESIDUAL)
     # or the change in the residual (RELATIVE_RESIDUAL_CHANGE)
-    set Tolerance type = RELATIVE_RESIDUAL_CHANGE
+    set Tolerance type = ABSOLUTE_RESIDUAL
 
     # The tolerance for convergence (L2 norm)
-    set Tolerance value =1.0e-5
+    set Tolerance value = 1.0e-7
 
     # The maximum number of linear solver iterations per solve
     set Maximum linear solver iterations = 1000
@@ -157,4 +157,4 @@ set Checkpoint condition = EQUAL_SPACING
 
 # Number of times the creates checkpoints (total number for "EQUAL_SPACING"
 # and "LOG_SPACING", number per decade for "N_PER_DECADE", ignored for "LIST")
-set Number of checkpoints = 1
+set Number of checkpoints = 5
