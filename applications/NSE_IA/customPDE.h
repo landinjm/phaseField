@@ -57,9 +57,13 @@ private:
     double nu = userInputs.get_model_constant_double("nu");
     double rho = userInputs.get_model_constant_double("rho");
     double W = userInputs.get_model_constant_double("W");
+    double correctionP = userInputs.get_model_constant_double("correctionP");
 
     // This bool acts as a switch to indicate what Chorin projection step is being calculating
     bool ChorinSwitch;
+
+    //This acts as a simple stabilization for the pressure solve
+    double dtStabilized;
 
     double h = 2.757;
     double reg = 1e-10;
@@ -84,6 +88,12 @@ void customPDE<dim,degree>::solveIncrement(bool skip_time_dependent)
     this->computing_timer.enter_subsection("matrixFreePDE: solveIncrements");
     Timer time;
     char buffer[200];
+
+    //Correction for the pressure poisson solve
+    if (this->currentIncrement == 0){
+        double h = GridTools::maximal_cell_diameter(this->triangulation);
+        dtStabilized = correctionP*std::pow(h,degree+1.0);
+    }
 
     //Set ChorinSwitch to false so steps 1 and 2 may occur
     ChorinSwitch = false;

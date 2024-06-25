@@ -112,6 +112,9 @@ set Model constant rho = 100.0, DOUBLE
 #Interfacial width
 set Model constant W = 0.15, DOUBLE
 
+#Prefactor for pressure solve correction
+set Model constant correctionP = 1.0, DOUBLE
+
 # =================================================================================
 # Set the linear solver parameters
 # =================================================================================

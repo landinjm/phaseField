@@ -115,6 +115,9 @@ set Model constant W = 0.25, DOUBLE
 #Regularization value
 set Model constant reg = 1e-6, DOUBLE
 
+#Prefactor for pressure solve correction
+set Model constant correctionP = 1.0, DOUBLE
+
 # =================================================================================
 # Set the linear solver parameters
 # =================================================================================

@@ -104,7 +104,7 @@ void customPDE<dim, degree>::explicitEquationRHS(variableContainer<dim, degree, 
     // Step three of the Chorin projection
     if (ChorinSwitch) {
         // Setting the expressions for the terms in the governing equations
-        eq_u = u - constV(userInputs.dtValue / rho) * Px;
+        eq_u = u - constV(dtStabilized / rho) * Px;
     }
 
     // Submitting the terms for the governing equations
@@ -137,7 +137,7 @@ void customPDE<dim, degree>::nonExplicitEquationRHS(variableContainer<dim, degre
     // Set the pressure poisson solve RHS
     scalarvalueType eq_P = constV(0.0);
     for(unsigned int i=0; i<dim; i++){
-		eq_P += -constV(rho/userInputs.dtValue)*ux[i][i];
+		eq_P += -constV(rho/dtStabilized)*ux[i][i];
 	}
     scalargradType eqx_P = -Px;
 
