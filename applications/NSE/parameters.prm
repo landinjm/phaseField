@@ -90,7 +90,7 @@ set Model constant correctionP = 1.0, DOUBLE
 subsection Linear solver parameters: P
     # Whether the tolerance value is compared to the residual (ABSOLUTE_RESIDUAL)
     # or the change in the residual (RELATIVE_RESIDUAL_CHANGE)
-    set Tolerance type = ABSOLUTE_RESIDUAL
+    set Tolerance type = RELATIVE_RESIDUAL_CHANGE
 
     # The tolerance for convergence (L2 norm)
     set Tolerance value =1.0e-5

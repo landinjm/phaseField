@@ -30,7 +30,7 @@ set Element degree = 2
 # Set the adaptive mesh refinement parameters
 # =================================================================================
 # Set the flag determining if adaptive meshing is activated
-set Mesh adaptivity = true
+set Mesh adaptivity = false
 
 # Set the maximum and minimum level of refinement
 # When adaptive meshing is enabled, the refine factor set in the block above is
@@ -63,7 +63,7 @@ end
 # Set the time step parameters
 # =================================================================================
 # The size of the time step
-set Time step = 1.0e-3
+set Time step = 4.0e-3
 
 # The simulation ends when either the number of time steps is reached or the
 # simulation time is reached.
@@ -112,6 +112,9 @@ set Model constant nu = 9.24, DOUBLE
 #Fluid density
 set Model constant rho = 0.1, DOUBLE
 
+#Prefactor for pressure solve correction
+set Model constant correctionP = 1.0, DOUBLE
+
 # =================================================================================
 # Set the linear solver parameters
 # =================================================================================
@@ -119,7 +122,7 @@ set Model constant rho = 0.1, DOUBLE
 subsection Linear solver parameters: P
     # Whether the tolerance value is compared to the residual (ABSOLUTE_RESIDUAL)
     # or the change in the residual (RELATIVE_RESIDUAL_CHANGE)
-    set Tolerance type = ABSOLUTE_RESIDUAL
+    set Tolerance type = RELATIVE_RESIDUAL_CHANGE
 
     # The tolerance for convergence (L2 norm)
     set Tolerance value =1.0e-5
