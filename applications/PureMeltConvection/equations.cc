@@ -124,6 +124,7 @@ void customPDE<dim, degree>::explicitEquationRHS(variableContainer<dim, degree, 
         // Calculating the advection-like term
         vectorvalueType advecTerm;
         advecTerm = advecTerm * constV(0.0);
+        vectorvalueType force;
         vectorvalueType phiU;
         phiU = phiU * constV(0.0);
         vectorgradType idk;
@@ -133,6 +134,7 @@ void customPDE<dim, degree>::explicitEquationRHS(variableContainer<dim, degree, 
                 phiU[i] += constV(nu) * phix[j] * ux[i][j] / (constV(1.0 + reg) - phi);
                 idk[i][j] = u[i] * phix[i] / (constV(1.0 + reg) - phi);
             }
+            force[i] = constV(gravity[i]);
         }
 
         // Calculating temperature advection
@@ -143,7 +145,7 @@ void customPDE<dim, degree>::explicitEquationRHS(variableContainer<dim, degree, 
         vectorvalueType hcorr = constV(nu * h / (2.0 * W * W)) * u * (constV(1.0) + phi) * (constV(1.0) + phi);
 
         // Setting the expressions for the terms in the governing equations
-        eq_u = u + constV(userInputs.dtValue) * (dphiU - advecTerm - phiU - hcorr);
+        eq_u = u + constV(userInputs.dtValue) * (force - advecTerm + dphiU - phiU - hcorr);
         eqx_u = constV(-userInputs.dtValue * nu) * (ux - idk);
 
         eq_phi = phi + constV(userInputs.dtValue) * dphidt;

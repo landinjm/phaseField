@@ -73,6 +73,9 @@ private:
     double lambda = 1.5957 * D * tau / W / W;
     double delta = W / std::sqrt(2.0);
 
+    //Forcing terms
+    double gravity[3] = {0.0, 0.0, 0.0};
+
     // ================================================================
 };
 
