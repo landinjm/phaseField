@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include <iterator>
+#include <type_traits>
 
 // dealii headers
 #include <deal.II/base/quadrature.h>
@@ -353,7 +354,8 @@ class MatrixFreePDE:public Subscriptor
   void outputFreeEnergy(const std::vector<double>& freeEnergyValues) const;
 
   /*Method to compute the integral of a field.*/
-  void computeIntegral(double& integratedField, int index, std::vector<vectorType*> postProcessedSet);
+  template <typename T>
+  void computeIntegral(T& integratedField, int index, std::vector<vectorType*> postProcessedSet);
 
   //variables for time dependent problems
   /*Flag used to see if invM, time stepping in run(), etc are necessary*/

@@ -2,56 +2,98 @@
 #include "../../include/matrixFreePDE.h"
 
 template <int dim, int degree>
-void  MatrixFreePDE<dim,degree>::computeIntegral(double& integratedField, int index, std::vector<vectorType*> variableSet) {
-	QGauss<dim>  quadrature_formula(degree+1);
-	FE_Q<dim> FE (QGaussLobatto<1>(degree+1));
-	FEValues<dim> fe_values (FE, quadrature_formula, update_values | update_JxW_values | update_quadrature_points);
-	const unsigned int   n_q_points    = quadrature_formula.size();
-	std::vector<double> cVal(n_q_points);
+template <typename T>
+void  MatrixFreePDE<dim,degree>::computeIntegral(T& integratedField, int index, std::vector<vectorType*> variableSet) {
+	//Compile time assert that integratedField is an expected type
+	static_assert(std::is_same<T, double>::value || std::is_same<T, std::vector<double>>::value, "TypeError: integratedField must either be a double or a vector<double>");
 
-	//find indices of first occuring scalar & vector field
-	unsigned int scalarField = 0;
-	bool foundScalar = false;
-	unsigned int vectorField = 0;
-	bool foundVector = false;
-	for(unsigned int fieldIndex=0; fieldIndex<fields.size(); fieldIndex++){
-		if(fields[fieldIndex].type==SCALAR && !foundScalar){
-			scalarField = fieldIndex;
-			foundScalar = true;
-		}
-		else if(fields[fieldIndex].type==VECTOR && !foundVector){
-			vectorField = fieldIndex;
-			foundVector = true;
-		}
-	}
-
-	// constraintsDirichletSet[index]->distribute(*variableSet[index]);
-	// constraintsOtherSet[index]->distribute(*variableSet[index]);
-	// variableSet[index]->update_ghost_values();
-
-	typename DoFHandler<dim>::active_cell_iterator cell= this->dofHandlersSet[scalarField]->begin_active(), endc = this->dofHandlersSet[scalarField]->end();
-
-	double value = 0.0;
-
-	for (; cell!=endc; ++cell) {
-		if (cell->is_locally_owned()){
-			fe_values.reinit (cell);
-
-			fe_values.get_function_values(*variableSet[index], cVal);
-
-			for (unsigned int q=0; q<n_q_points; ++q){
-				value+=(cVal[q])*fe_values.JxW(q);
+	//Determine if the input index is a scalar or vector field
+	switch (fields[index].type) {
+		case SCALAR:
+		{
+			//Check that integratedField type matches the field type
+			if(!std::is_same<T, double>::value){
+				std::cerr << "TypeError: double integratedField does not match the index which indicates a scalar field" << std::endl;
+				abort();
 			}
+
+			//Grab the requisite parts of the field for integration
+			QGauss<dim>  quadrature_formula(degree+1);
+			FE_Q<dim> FE (QGaussLobatto<1>(degree+1));
+			FEValues<dim> fe_values (FE, quadrature_formula, update_values | update_JxW_values | update_quadrature_points);
+			const unsigned int   n_q_points    = quadrature_formula.size();
+			std::vector<double> cVal(n_q_points);
+
+			double value = 0.0;
+
+			//Loop over the active cells and find the integrated value by taking the product of the quad values & quad weights
+			for (auto cell=this->dofHandlersSet[index]->begin_active(); cell!=this->dofHandlersSet[index]->end(); ++cell) {
+				if (cell->is_locally_owned()){
+					fe_values.reinit (cell);
+
+					fe_values.get_function_values(*variableSet[index], cVal);
+
+					for (unsigned int q=0; q<n_q_points; ++q){
+						value+=(cVal[q])*fe_values.JxW(q);
+					}
+				}
+			}
+
+			//Grab the sum over all processors
+			value=Utilities::MPI::sum(value, MPI_COMM_WORLD);
+
+			integratedField = value;
+
+			break;
 		}
+		case VECTOR:
+		{
+			//Check that integratedField type matches the field type
+			if(!std::is_same<T, std::vector<double>>::value){
+				std::cerr << "TypeError: vector<double> integratedField does not match the index which indicates a vector field" << std::endl;
+				abort();
+			}
+
+			//Resize the integratedField vector to match the number of dimensions
+			integratedField.resize(dim, 0.0); 
+
+			//Grab the requisite parts of the field for integration
+			QGauss<dim>  quadrature_formula(degree+1);
+			FE_Q<dim> FE (QGaussLobatto<1>(degree+1));
+			FEValues<dim> fe_values (FE, quadrature_formula, update_values | update_JxW_values | update_quadrature_points);
+			const unsigned int   n_q_points    = quadrature_formula.size();
+			std::vector<dealii::Vector<double>> cVal(n_q_points,dealii::Vector<double>(dim));
+
+			double value[dim] = {0.0};
+
+			//Loop over the active cells and find the integrated value by taking the product of the quad values & quad weights
+			for (auto cell=this->dofHandlersSet[index]->begin_active(); cell!=this->dofHandlersSet[index]->end(); ++cell) {
+				if (cell->is_locally_owned()){
+					fe_values.reinit (cell);
+
+					fe_values.get_function_values(*variableSet[index], cVal);
+
+					for (unsigned int q=0; q<n_q_points; ++q){
+						for (unsigned int i=0; i<dim; ++i){
+							value[i] += (cVal[q][i])*fe_values.JxW(q);
+						}
+					}
+				}
+			}
+
+			//Grab the sum over all processors
+			for (unsigned int i=0; i<dim; ++i){
+				value[i] = Utilities::MPI::sum(value[i], MPI_COMM_WORLD);
+
+				integratedField[i] = value[i];
+			}
+
+			break;
+		}
+		default:
+			std::cerr << "PRISMS-PF: Invalid field specified for integration." << std::endl;
+			abort();
 	}
-
-	value=Utilities::MPI::sum(value, MPI_COMM_WORLD);
-
-	//   if (Utilities::MPI::this_mpi_process(MPI_COMM_WORLD) == 0){
-	//   std::cout<<"Integrated field: "<<value<<std::endl;
-	//   }
-
-	integratedField = value;
 }
 
 //-----------------------------------
