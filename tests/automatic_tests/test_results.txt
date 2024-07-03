@@ -1658,3 +1658,130 @@ Time: 105.63543462753296
  
 Tests Passed: 4/5
 --------------------------------------------------------- 
+--------------------------------------------------------- 
+Unit test on 2024-06-12 12:29
+--------------------------------------------------------- 
+Unit Tests Passed: 23/24
+--------------------------------------------------------- 
+Regression test on 2024-06-12 12:29
+--------------------------------------------------------- 
+Application: allenCahn 
+Result: Pass 
+Time: 2.1658742427825928 
+ 
+--------------------------------------------------------- 
+Unit test on 2024-06-13 14:30
+--------------------------------------------------------- 
+Unit Tests Passed: 23/24
+--------------------------------------------------------- 
+Regression test on 2024-06-13 14:30
+--------------------------------------------------------- 
+Application: allenCahn 
+Result: Pass 
+Time: 3.837747812271118 
+ 
+Application: cahnHilliard 
+Result: Pass 
+Time: 49.22662878036499 
+ 
+Application: CHAC_anisotropyRegularized 
+Result: Pass 
+Time: 30.019241333007812 
+ 
+Application: coupledCahnHilliardAllenCahn 
+Result: Pass 
+Time: 52.96580767631531 
+ 
+Application: precipitateEvolution 
+Result: Fail 
+Time: 67.73331618309021 
+ 
+Tests Passed: 4/5
+--------------------------------------------------------- 
+--------------------------------------------------------- 
+Unit test on 2024-07-01 18:24
+--------------------------------------------------------- 
+Unit Tests Passed: 23/24
+--------------------------------------------------------- 
+Regression test on 2024-07-01 18:24
+--------------------------------------------------------- 
+Application: allenCahn 
+Result: Pass 
+Time: 3.8521666526794434 
+ 
+Application: cahnHilliard 
+Result: Pass 
+Time: 46.973503828048706 
+ 
+Application: CHAC_anisotropyRegularized 
+Result: Pass 
+Time: 28.862194299697876 
+ 
+Application: coupledCahnHilliardAllenCahn 
+Result: Pass 
+Time: 50.393463373184204 
+ 
+Application: precipitateEvolution 
+Result: Fail 
+Time: 63.15756940841675 
+ 
+Tests Passed: 4/5
+--------------------------------------------------------- 
+--------------------------------------------------------- 
+Unit test on 2024-07-03 13:01
+--------------------------------------------------------- 
+Unit Tests Passed: 23/24
+--------------------------------------------------------- 
+Regression test on 2024-07-03 13:01
+--------------------------------------------------------- 
+Application: allenCahn 
+Result: Pass 
+Time: 4.032949686050415 
+ 
+Application: cahnHilliard 
+Result: Pass 
+Time: 49.81211304664612 
+ 
+Application: CHAC_anisotropyRegularized 
+Result: Pass 
+Time: 30.342003345489502 
+ 
+Application: coupledCahnHilliardAllenCahn 
+Result: Pass 
+Time: 53.359458446502686 
+ 
+Application: precipitateEvolution 
+Result: Fail 
+Time: 70.89970779418945 
+ 
+Tests Passed: 4/5
+--------------------------------------------------------- 
+--------------------------------------------------------- 
+Unit test on 2024-07-03 13:07
+--------------------------------------------------------- 
+Unit Tests Passed: 22/24
+--------------------------------------------------------- 
+Regression test on 2024-07-03 13:07
+--------------------------------------------------------- 
+Application: allenCahn 
+Result: New Gold Standard 
+Time: 3.9617271423339844 
+ 
+Application: cahnHilliard 
+Result: New Gold Standard 
+Time: 49.77876091003418 
+ 
+Application: CHAC_anisotropyRegularized 
+Result: New Gold Standard 
+Time: 30.365745782852173 
+ 
+Application: coupledCahnHilliardAllenCahn 
+Result: New Gold Standard 
+Time: 53.08559060096741 
+ 
+Application: precipitateEvolution 
+Result: New Gold Standard 
+Time: 68.9843602180481 
+ 
+Tests Passed: 5/5
+--------------------------------------------------------- 
