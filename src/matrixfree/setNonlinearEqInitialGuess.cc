@@ -43,22 +43,22 @@ void MatrixFreePDE<dim, degree>::setNonlinearEqInitialGuess()
             try {
                 if (fields[fieldIndex].type == SCALAR) {
                     dU_scalar = 0.0;
-                    solver.solve(*this, dU_scalar, *residualSet[fieldIndex], IdentityMatrix(solutionSet[fieldIndex]->size()));
+                    solver.solve(*this, dU_scalar, *residualSet[fieldIndex], IdentityMatrix(tStep.solutionSet[fieldIndex]->size()));
                 } else {
                     dU_vector = 0.0;
-                    solver.solve(*this, dU_vector, *residualSet[fieldIndex], IdentityMatrix(solutionSet[fieldIndex]->size()));
+                    solver.solve(*this, dU_vector, *residualSet[fieldIndex], IdentityMatrix(tStep.solutionSet[fieldIndex]->size()));
                 }
             } catch (...) {
                 pcout << "\nWarning: implicit solver did not converge as per set tolerances. consider increasing maxSolverIterations or decreasing solverTolerance.\n";
             }
 
             if (fields[fieldIndex].type == SCALAR) {
-                *solutionSet[fieldIndex] += dU_scalar;
+                *tStep.solutionSet[fieldIndex] += dU_scalar;
             } else {
-                *solutionSet[fieldIndex] += dU_vector;
+                *tStep.solutionSet[fieldIndex] += dU_vector;
             }
 
-            if (currentIncrement % userInputs.skip_print_steps == 0) {
+            if (tStep.currentIncrement % userInputs.skip_print_steps == 0) {
                 double dU_norm;
                 if (fields[fieldIndex].type == SCALAR) {
                     dU_norm = dU_scalar.l2_norm();
@@ -69,14 +69,14 @@ void MatrixFreePDE<dim, degree>::setNonlinearEqInitialGuess()
                     fields[fieldIndex].name.c_str(),
                     residualSet[fieldIndex]->l2_norm(),
                     solver_control.last_value(),
-                    solver_control.last_step(), solver_control.tolerance(), solutionSet[fieldIndex]->l2_norm(), dU_norm);
+                    solver_control.last_step(), solver_control.tolerance(), tStep.solutionSet[fieldIndex]->l2_norm(), dU_norm);
                 pcout << buffer;
                 pcout << std::endl;
             }
         }
     }
 
-    if (currentIncrement % userInputs.skip_print_steps == 0) {
+    if (tStep.currentIncrement % userInputs.skip_print_steps == 0) {
         pcout << "wall time: " << time.wall_time() << "s\n";
     }
     // log time
@@ -90,7 +90,7 @@ void MatrixFreePDE<dim, degree>::computeLaplaceRHS(unsigned int fieldIndex)
     computing_timer.enter_subsection("matrixFreePDE: computeLaplaceRHS");
 
     // call to integrate and assemble while clearing residual vecotrs
-    Discretization.matrixFreeObject.cell_loop(&MatrixFreePDE<dim, degree>::getLaplaceRHS, this, *residualSet[fieldIndex], *solutionSet[fieldIndex], true);
+    Discretization.matrixFreeObject.cell_loop(&MatrixFreePDE<dim, degree>::getLaplaceRHS, this, *residualSet[fieldIndex], *tStep.solutionSet[fieldIndex], true);
 
     // end log
     computing_timer.leave_subsection("matrixFreePDE: computeLaplaceRHS");

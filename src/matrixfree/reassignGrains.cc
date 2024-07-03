@@ -35,7 +35,7 @@ void MatrixFreePDE<dim, degree>::reassignGrains()
                 op_list_index++;
 
                 std::vector<GrainSet<dim>> single_OP_grain_sets;
-                flood_filler.calcGrainSets(*Discretization.FESet.at(scalar_field_index), *Discretization.dofHandlersSet_nonconst.at(scalar_field_index), solutionSet.at(fieldIndex), userInputs.order_parameter_threshold, 1.0 + userInputs.order_parameter_threshold, fieldIndex, single_OP_grain_sets);
+                flood_filler.calcGrainSets(*Discretization.FESet.at(scalar_field_index), *Discretization.dofHandlersSet_nonconst.at(scalar_field_index), tStep.solutionSet.at(fieldIndex), userInputs.order_parameter_threshold, 1.0 + userInputs.order_parameter_threshold, fieldIndex, single_OP_grain_sets);
 
                 grain_sets.insert(grain_sets.end(), single_OP_grain_sets.begin(), single_OP_grain_sets.end());
             }
@@ -59,7 +59,7 @@ void MatrixFreePDE<dim, degree>::reassignGrains()
 
     SimplifiedGrainManipulator<dim> simplified_grain_manipulator;
 
-    if (currentIncrement > 0 || userInputs.load_grain_structure) {
+    if (tStep.currentIncrement > 0 || userInputs.load_grain_structure) {
         simplified_grain_manipulator.transferGrainIds(old_grain_representations, simplified_grain_representations);
     }
 
@@ -70,7 +70,7 @@ void MatrixFreePDE<dim, degree>::reassignGrains()
     }
 
     OrderParameterRemapper<dim> order_parameter_remapper;
-    order_parameter_remapper.remap(simplified_grain_representations, solutionSet, *Discretization.dofHandlersSet_nonconst.at(scalar_field_index), Discretization.FESet.at(scalar_field_index)->dofs_per_cell, userInputs.buffer_between_grains);
+    order_parameter_remapper.remap(simplified_grain_representations, tStep.solutionSet, *Discretization.dofHandlersSet_nonconst.at(scalar_field_index), Discretization.FESet.at(scalar_field_index)->dofs_per_cell, userInputs.buffer_between_grains);
 
     pcout << "Reassigning grains completed." << std::endl
           << std::endl;

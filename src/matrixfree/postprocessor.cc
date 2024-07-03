@@ -19,7 +19,7 @@ void MatrixFreePDE<dim, degree>::computePostProcessedFields(std::vector<vectorTy
     }
 
     // call to integrate and assemble
-    Discretization.matrixFreeObject.cell_loop(&MatrixFreePDE<dim, degree>::getPostProcessedFields, this, postProcessedSet, solutionSet, true);
+    Discretization.matrixFreeObject.cell_loop(&MatrixFreePDE<dim, degree>::getPostProcessedFields, this, postProcessedSet, tStep.solutionSet, true);
 }
 
 template <int dim, int degree>

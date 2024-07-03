@@ -102,7 +102,7 @@ void MatrixFreePDE<dim, degree>::reinit()
     for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++) {
         vectorType* U;
 
-        U = solutionSet.at(fieldIndex);
+        U = tStep.solutionSet.at(fieldIndex);
 
         Discretization.matrixFreeObject.initialize_dof_vector(*U, fieldIndex);
         *U = 0;
@@ -132,7 +132,7 @@ void MatrixFreePDE<dim, degree>::reinit()
     for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++) {
 
         // interpolate and clear used solution transfer sets
-        soltransSet[fieldIndex]->interpolate(*solutionSet[fieldIndex]);
+        soltransSet[fieldIndex]->interpolate(*tStep.solutionSet[fieldIndex]);
         delete soltransSet[fieldIndex];
 
         // reset residual vector
@@ -148,15 +148,15 @@ void MatrixFreePDE<dim, degree>::reinit()
     }
 
     // If remeshing at the zeroth time step, re-apply initial conditions so the starting values are correct on the refined mesh
-    if (currentIncrement == 0 && !userInputs.load_grain_structure) {
+    if (tStep.currentIncrement == 0 && !userInputs.load_grain_structure) {
         applyInitialConditions();
     }
 
     // Ghost the solution vectors. Also apply the Dirichet BC's (if any) on the solution vectors
     for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++) {
-        BCs.constraintsDirichletSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
-        RefineAdaptively.constraintsOtherSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
-        solutionSet[fieldIndex]->update_ghost_values();
+        BCs.constraintsDirichletSet[fieldIndex]->distribute(*tStep.solutionSet[fieldIndex]);
+        RefineAdaptively.constraintsOtherSet[fieldIndex]->distribute(*tStep.solutionSet[fieldIndex]);
+        tStep.solutionSet[fieldIndex]->update_ghost_values();
     }
 
     computing_timer.leave_subsection("matrixFreePDE: reinitialization");

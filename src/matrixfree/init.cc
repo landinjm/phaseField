@@ -202,7 +202,7 @@ void MatrixFreePDE<dim, degree>::init()
 
         U = new vectorType;
         R = new vectorType;
-        solutionSet.push_back(U);
+        tStep.solutionSet.push_back(U);
         residualSet.push_back(R);
         Discretization.matrixFreeObject.initialize_dof_vector(*R, fieldIndex);
         *R = 0;
@@ -248,9 +248,9 @@ void MatrixFreePDE<dim, degree>::init()
 
     // Ghost the solution vectors. Also apply the constraints (if any) on the solution vectors
     for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++) {
-        BCs.constraintsDirichletSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
-        RefineAdaptively.constraintsOtherSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
-        solutionSet[fieldIndex]->update_ghost_values();
+        BCs.constraintsDirichletSet[fieldIndex]->distribute(*tStep.solutionSet[fieldIndex]);
+        RefineAdaptively.constraintsOtherSet[fieldIndex]->distribute(*tStep.solutionSet[fieldIndex]);
+        tStep.solutionSet[fieldIndex]->update_ghost_values();
     }
 
     // If not resuming from a checkpoint, check and perform adaptive mesh refinement, which reinitializes the system with the new mesh
@@ -259,7 +259,7 @@ void MatrixFreePDE<dim, degree>::init()
 
         unsigned int numDoF_preremesh = Discretization.totalDOFs;
         for (unsigned int remesh_index = 0; remesh_index < (userInputs.max_refinement_level - userInputs.min_refinement_level); remesh_index++) {
-            RefineAdaptively.adaptiveRefine(currentIncrement);
+            RefineAdaptively.adaptiveRefine(tStep.currentIncrement);
             reinit();
             if (Discretization.totalDOFs == numDoF_preremesh)
                 break;

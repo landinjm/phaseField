@@ -76,7 +76,7 @@ void MatrixFreePDE<dim, degree>::initForTests(std::vector<Field<dim>> fields)
         vectorType *U, *R;
         U = new vectorType;
         R = new vectorType;
-        solutionSet.push_back(U);
+        tStep.solutionSet.push_back(U);
         residualSet.push_back(R);
         Discretization.matrixFreeObject.initialize_dof_vector(*R, 0);
         *R = 0;

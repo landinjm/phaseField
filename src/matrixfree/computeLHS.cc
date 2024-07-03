@@ -41,8 +41,8 @@ void MatrixFreePDE<dim, degree>::getLHS(const MatrixFree<dim, double>& data,
     for (unsigned int cell = cell_range.first; cell < cell_range.second; ++cell) {
 
         // Initialize, read DOFs, and set evaulation flags for each variable
-        // variable_list.reinit_and_eval_LHS(src,solutionSet,cell,currentFieldIndex);
-        variable_list.reinit_and_eval(solutionSet, cell);
+        // variable_list.reinit_and_eval_LHS(src,tStep.solutionSet,cell,currentFieldIndex);
+        variable_list.reinit_and_eval(tStep.solutionSet, cell);
         variable_list.reinit_and_eval_change_in_solution(src, cell, currentFieldIndex);
 
         unsigned int num_q_points = variable_list.get_num_q_points();

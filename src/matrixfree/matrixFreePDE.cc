@@ -13,16 +13,15 @@ MatrixFreePDE<dim, degree>::MatrixFreePDE(userInputParameters<dim> _userInputs)
     , isEllipticBVP(false)
     , hasExplicitEquation(false)
     , hasNonExplicitEquation(false)
-    , currentTime(0.0)
-    , currentIncrement(0)
     , currentOutput(0)
-    , currentCheckpoint(0)
     , current_grain_reassignment(0)
     , computing_timer(pcout, TimerOutput::summary, TimerOutput::wall_times)
     , first_integrated_var_output_complete(false)
-    , RefineAdaptively(_userInputs, Discretization.triangulation, fields, solutionSet, soltransSet, Discretization.FESet, Discretization.dofHandlersSet_nonconst, BCs.constraintsDirichletSet)
+    , RefineAdaptively(_userInputs, Discretization.triangulation, fields, tStep.solutionSet, soltransSet, Discretization.FESet, Discretization.dofHandlersSet_nonconst, BCs.constraintsDirichletSet)
     , Discretization(_userInputs)
+    , tStep(_userInputs)
     , BCs(_userInputs, Discretization)
+    , checkpoints(_userInputs, Discretization, tStep)
 {
 }
 
@@ -50,8 +49,8 @@ MatrixFreePDE<dim, degree>::~MatrixFreePDE()
     for (unsigned int iter = 0; iter < Discretization.FESet.size(); iter++) {
         delete Discretization.FESet[iter];
     }
-    for (unsigned int iter = 0; iter < solutionSet.size(); iter++) {
-        delete solutionSet[iter];
+    for (unsigned int iter = 0; iter < tStep.solutionSet.size(); iter++) {
+        delete tStep.solutionSet[iter];
     }
     for (unsigned int iter = 0; iter < residualSet.size(); iter++) {
         delete residualSet[iter];

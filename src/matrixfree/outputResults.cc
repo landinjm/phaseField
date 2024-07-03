@@ -22,7 +22,7 @@ void MatrixFreePDE<dim, degree>::outputResults()
             (fields[fieldIndex].type == SCALAR ? DataComponentInterpretation::component_is_scalar : DataComponentInterpretation::component_is_part_of_vector));
         // add field to data_out
         std::vector<std::string> solutionNames(fields[fieldIndex].numComponents, fields[fieldIndex].name.c_str());
-        data_out.add_data_vector(*Discretization.dofHandlersSet[fieldIndex], *solutionSet[fieldIndex], solutionNames, dataType);
+        data_out.add_data_vector(*Discretization.dofHandlersSet[fieldIndex], *tStep.solutionSet[fieldIndex], solutionNames, dataType);
     }
 
     // Test section for outputting postprocessed fields
@@ -58,7 +58,7 @@ void MatrixFreePDE<dim, degree>::outputResults()
             output_file.precision(10);
 
             if (Utilities::MPI::this_mpi_process(MPI_COMM_WORLD) == 0) {
-                output_file << currentTime;
+                output_file << tStep.currentTime;
             }
 
             for (unsigned int i = 0; i < userInputs.pp_number_of_variables; i++) {
@@ -104,7 +104,7 @@ void MatrixFreePDE<dim, degree>::outputResults()
     // write to results file
     // file name
     std::ostringstream cycleAsString;
-    cycleAsString << std::setw(std::floor(std::log10(userInputs.totalIncrements)) + 1) << std::setfill('0') << currentIncrement;
+    cycleAsString << std::setw(std::floor(std::log10(userInputs.totalIncrements)) + 1) << std::setfill('0') << tStep.currentIncrement;
     char baseFileName[100], vtuFileName[100];
     snprintf(baseFileName, sizeof(baseFileName), "%s-%s", userInputs.output_file_name.c_str(), cycleAsString.str().c_str());
     snprintf(vtuFileName, sizeof(vtuFileName), "%s.%u.%s", baseFileName, Utilities::MPI::this_mpi_process(MPI_COMM_WORLD), userInputs.output_file_type.c_str());
@@ -114,8 +114,8 @@ void MatrixFreePDE<dim, degree>::outputResults()
 
         // Set flags to output the time and cycle number as part of the vtu file
         dealii::DataOutBase::VtkFlags flags;
-        flags.time = currentTime;
-        flags.cycle = currentIncrement;
+        flags.time = tStep.currentTime;
+        flags.cycle = tStep.currentIncrement;
         flags.print_date_and_time = true;
         data_out.set_flags(flags);
 

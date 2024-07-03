@@ -50,7 +50,7 @@ void MatrixFreePDE<dim, degree>::applyInitialConditions()
         for (unsigned int var_index = 0; var_index < userInputs.number_of_variables; var_index++) {
             if (op_list_index < userInputs.variables_for_remapping.size()) {
                 if (var_index == userInputs.variables_for_remapping.at(op_list_index)) {
-                    *solutionSet[var_index] = 0.0;
+                    *tStep.solutionSet[var_index] = 0.0;
                     op_list_index++;
                 }
             }
@@ -149,7 +149,7 @@ void MatrixFreePDE<dim, degree>::applyInitialConditions()
 
         pcout << "Placing the grains in their new order parameters...\n";
         OrderParameterRemapper<dim> order_parameter_remapper;
-        order_parameter_remapper.remap_from_index_field(simplified_grain_representations, &grain_index_field, solutionSet, *Discretization.dofHandlersSet_nonconst.at(scalar_field_index), Discretization.FESet.at(scalar_field_index)->dofs_per_cell, userInputs.buffer_between_grains);
+        order_parameter_remapper.remap_from_index_field(simplified_grain_representations, &grain_index_field, tStep.solutionSet, *Discretization.dofHandlersSet_nonconst.at(scalar_field_index), Discretization.FESet.at(scalar_field_index)->dofs_per_cell, userInputs.buffer_between_grains);
 
         // Smooth the order parameters according to Fick's 2nd Law
         // In the time cycle below, we evolve the weak form of Eq.: field_i^(n+1)=field_i^(n)+D*dt*Laplacian(field_i^(n))
@@ -171,26 +171,26 @@ void MatrixFreePDE<dim, degree>::applyInitialConditions()
                         if (fields[fieldIndex].type == SCALAR) {
 #if (DEAL_II_VERSION_MAJOR == 9 && DEAL_II_VERSION_MINOR < 4)
                             unsigned int invM_size = invMscalar.local_size();
-                            for (unsigned int dof = 0; dof < solutionSet[fieldIndex]->local_size(); ++dof) {
+                            for (unsigned int dof = 0; dof < tStep.solutionSet[fieldIndex]->local_size(); ++dof) {
 #else
                             unsigned int invM_size = invMscalar.locally_owned_size();
-                            for (unsigned int dof = 0; dof < solutionSet[fieldIndex]->locally_owned_size(); ++dof) {
+                            for (unsigned int dof = 0; dof < tStep.solutionSet[fieldIndex]->locally_owned_size(); ++dof) {
 #endif
-                                solutionSet[fieldIndex]->local_element(dof) = solutionSet[fieldIndex]->local_element(dof) - invMscalar.local_element(dof % invM_size) * residualSet[fieldIndex]->local_element(dof) * dt_for_smoothing;
+                                tStep.solutionSet[fieldIndex]->local_element(dof) = tStep.solutionSet[fieldIndex]->local_element(dof) - invMscalar.local_element(dof % invM_size) * residualSet[fieldIndex]->local_element(dof) * dt_for_smoothing;
                             }
                         } else if (fields[fieldIndex].type == VECTOR) {
 #if (DEAL_II_VERSION_MAJOR == 9 && DEAL_II_VERSION_MINOR < 4)
                             unsigned int invM_size = invMvector.local_size();
-                            for (unsigned int dof = 0; dof < solutionSet[fieldIndex]->local_size(); ++dof) {
+                            for (unsigned int dof = 0; dof < tStep.solutionSet[fieldIndex]->local_size(); ++dof) {
 #else
                             unsigned int invM_size = invMvector.locally_owned_size();
-                            for (unsigned int dof = 0; dof < solutionSet[fieldIndex]->locally_owned_size(); ++dof) {
+                            for (unsigned int dof = 0; dof < tStep.solutionSet[fieldIndex]->locally_owned_size(); ++dof) {
 #endif
-                                solutionSet[fieldIndex]->local_element(dof) = solutionSet[fieldIndex]->local_element(dof) - invMvector.local_element(dof % invM_size) * residualSet[fieldIndex]->local_element(dof) * dt_for_smoothing;
+                                tStep.solutionSet[fieldIndex]->local_element(dof) = tStep.solutionSet[fieldIndex]->local_element(dof) - invMvector.local_element(dof % invM_size) * residualSet[fieldIndex]->local_element(dof) * dt_for_smoothing;
                             }
                         }
 
-                        solutionSet[fieldIndex]->update_ghost_values();
+                        tStep.solutionSet[fieldIndex]->update_ghost_values();
                     }
 
                     op_list_index++;
@@ -216,9 +216,9 @@ void MatrixFreePDE<dim, degree>::applyInitialConditions()
                 pcout << "Applying non-PField initial condition...\n";
 
                 if (userInputs.var_type[var_index] == SCALAR) {
-                    VectorTools::interpolate(*Discretization.dofHandlersSet[var_index], InitialCondition<dim, degree>(var_index, userInputs, this), *solutionSet[var_index]);
+                    VectorTools::interpolate(*Discretization.dofHandlersSet[var_index], InitialCondition<dim, degree>(var_index, userInputs, this), *tStep.solutionSet[var_index]);
                 } else if (userInputs.var_type[var_index] == VECTOR) {
-                    VectorTools::interpolate(*Discretization.dofHandlersSet[var_index], InitialConditionVector<dim, degree>(var_index, userInputs, this), *solutionSet[var_index]);
+                    VectorTools::interpolate(*Discretization.dofHandlersSet[var_index], InitialConditionVector<dim, degree>(var_index, userInputs, this), *tStep.solutionSet[var_index]);
                 }
             }
 
@@ -245,7 +245,7 @@ void MatrixFreePDE<dim, degree>::applyInitialConditions()
 
                 if (userInputs.var_type[var_index] == SCALAR) {
                     pcout << "Applying PField initial condition...\n";
-                    VectorTools::interpolate(*Discretization.dofHandlersSet[var_index], InitialConditionPField<dim>(var_index, conc), *solutionSet[var_index]);
+                    VectorTools::interpolate(*Discretization.dofHandlersSet[var_index], InitialConditionPField<dim>(var_index, conc), *tStep.solutionSet[var_index]);
                 } else {
                     std::cout << "PRISMS-PF Error: Cannot load vector fields. Loading initial conditions from file is currently limited to scalar fields" << std::endl;
                 }

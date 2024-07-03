@@ -15,28 +15,28 @@ void MatrixFreePDE<dim, degree>::updateNucleiList()
 {
 
     if (userInputs.nucleation_occurs) {
-        if (currentIncrement % userInputs.steps_between_nucleation_attempts == 0 || currentIncrement == 1) {
-            if (userInputs.dtValue * (double)currentIncrement >= userInputs.nucleation_start_time && userInputs.dtValue * (double)currentIncrement <= userInputs.nucleation_end_time) {
+        if (tStep.currentIncrement % userInputs.steps_between_nucleation_attempts == 0 || tStep.currentIncrement == 1) {
+            if (userInputs.dtValue * (double)tStep.currentIncrement >= userInputs.nucleation_start_time && userInputs.dtValue * (double)tStep.currentIncrement <= userInputs.nucleation_end_time) {
                 computing_timer.enter_subsection("matrixFreePDE: nucleation");
                 // Apply constraints
                 for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++) {
-                    BCs.constraintsDirichletSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
-                    RefineAdaptively.constraintsOtherSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
-                    solutionSet[fieldIndex]->update_ghost_values();
+                    BCs.constraintsDirichletSet[fieldIndex]->distribute(*tStep.solutionSet[fieldIndex]);
+                    RefineAdaptively.constraintsOtherSet[fieldIndex]->distribute(*tStep.solutionSet[fieldIndex]);
+                    tStep.solutionSet[fieldIndex]->update_ghost_values();
                 }
 
                 std::vector<nucleus<dim>> new_nuclei;
-                if (currentIncrement == 1 && !userInputs.evolution_before_nucleation) {
+                if (tStep.currentIncrement == 1 && !userInputs.evolution_before_nucleation) {
                     while (new_nuclei.size() == 0) {
-                        currentTime += userInputs.dtValue * (double)userInputs.steps_between_nucleation_attempts;
-                        currentIncrement += userInputs.steps_between_nucleation_attempts;
+                        tStep.currentTime += userInputs.dtValue * (double)userInputs.steps_between_nucleation_attempts;
+                        tStep.currentIncrement += userInputs.steps_between_nucleation_attempts;
 
-                        while (userInputs.outputTimeStepList.size() > 0 && userInputs.outputTimeStepList[currentOutput] < currentIncrement) {
+                        while (userInputs.outputTimeStepList.size() > 0 && userInputs.outputTimeStepList[currentOutput] < tStep.currentIncrement) {
                             currentOutput++;
                         }
 
-                        while (userInputs.checkpointTimeStepList.size() > 0 && userInputs.checkpointTimeStepList[currentCheckpoint] < currentIncrement) {
-                            currentCheckpoint++;
+                        while (userInputs.checkpointTimeStepList.size() > 0 && userInputs.checkpointTimeStepList[checkpoints.currentCheckpoint] < tStep.currentIncrement) {
+                            checkpoints.currentCheckpoint++;
                         }
 
                         new_nuclei = getNewNuclei();
@@ -66,10 +66,10 @@ std::vector<nucleus<dim>> MatrixFreePDE<dim, degree>::getNewNuclei()
     std::vector<nucleus<dim>> newnuclei;
 
     // Get list of prospective new nuclei for the local processor
-    pcout << "Nucleation attempt for increment " << currentIncrement << std::endl;
+    pcout << "Nucleation attempt for increment " << tStep.currentIncrement << std::endl;
 
     getLocalNucleiList(newnuclei);
-    pcout << "nucleation attempt! " << currentTime << " " << currentIncrement << std::endl;
+    pcout << "nucleation attempt! " << tStep.currentTime << " " << tStep.currentIncrement << std::endl;
 
     // Generate global list of new nuclei and resolve conflicts between new nuclei
     parallelNucleationList<dim> new_nuclei_parallel(newnuclei);
@@ -91,8 +91,8 @@ template <int dim, int degree>
 void MatrixFreePDE<dim, degree>::getLocalNucleiList(std::vector<nucleus<dim>>& newnuclei) const
 {
     // Nickname for current time and time step
-    double t = currentTime;
-    unsigned int inc = currentIncrement;
+    double t = tStep.currentTime;
+    unsigned int inc = tStep.currentIncrement;
 
     // QGauss<dim>  quadrature(degree+1);
     QGaussLobatto<dim> quadrature(degree + 1);
@@ -118,7 +118,7 @@ void MatrixFreePDE<dim, degree>::getLocalNucleiList(std::vector<nucleus<dim>>& n
             // Obtaining average element concentration by averaging over element's quadrature points
             fe_values.reinit(di);
             for (unsigned int var = 0; var < userInputs.nucleation_need_value.size(); var++) {
-                fe_values.get_function_values(*(solutionSet[userInputs.nucleation_need_value[var]]), var_values[var]);
+                fe_values.get_function_values(*(tStep.solutionSet[userInputs.nucleation_need_value[var]]), var_values[var]);
             }
             q_point_list = fe_values.get_quadrature_points();
 
@@ -268,7 +268,7 @@ void MatrixFreePDE<dim, degree>::safetyCheckNewNuclei(std::vector<nucleus<dim>> 
             if (di->is_locally_owned()) {
                 fe_values.reinit(di);
                 for (unsigned int var = 0; var < userInputs.nucleating_variable_indices.size(); var++) {
-                    fe_values.get_function_values(*(solutionSet[userInputs.nucleating_variable_indices[var]]), op_values[var]);
+                    fe_values.get_function_values(*(tStep.solutionSet[userInputs.nucleating_variable_indices[var]]), op_values[var]);
                 }
                 q_point_list = fe_values.get_quadrature_points();
 

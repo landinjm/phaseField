@@ -40,6 +40,8 @@
 #include "adaptiveRefinement.h"
 #include "discretization.h"
 #include "boundaryConditions.h"
+#include "timeStepping.h"
+#include "checkpoint.h"
 #include "fields.h"
 #include "nucleus.h"
 #include "userInputParameters.h"
@@ -126,8 +128,14 @@ protected:
     /*Boundary Conditions*/
     boundaryConditions<dim, degree> BCs;
 
+    /*Time stepping*/
+    TimeStepping<dim, degree> tStep;
+
     /*AMR methods*/
     adaptiveRefinement<dim, degree> RefineAdaptively;
+
+    /*Checkpoints*/
+    Checkpoint<dim, degree> checkpoints;
 
     // Virtual methods to set the attributes of the primary field variables and the postprocessing field variables
     // virtual void setVariableAttriubutes() = 0;
@@ -161,8 +169,6 @@ protected:
      */
     void outputResults();
 
-    /*Vector all the solution vectors in the problem. In a multi-field problem, each primal field has a solution vector associated with it.*/
-    std::vector<vectorType*> solutionSet;
     /*Vector all the residual (RHS) vectors in the problem. In a multi-field problem, each primal field has a residual vector associated with it.*/
     std::vector<vectorType*> residualSet;
     /*Vector of parallel solution transfer objects. This is used only when adaptive meshing is enabled.*/
@@ -255,17 +261,11 @@ protected:
 
     void applyInitialConditions();
 
-    // --------------------------------------------------------------------------
-    // Methods for saving and loading checkpoints
-    // --------------------------------------------------------------------------
-
-    void save_checkpoint();
+    
 
     void load_checkpoint_triangulation();
     void load_checkpoint_fields();
     void load_checkpoint_time_info();
-
-    void move_file(const std::string&, const std::string&);
 
     void verify_checkpoint_file_exists(const std::string filename);
 
@@ -306,8 +306,8 @@ protected:
     bool hasExplicitEquation;
     bool hasNonExplicitEquation;
     //
-    double currentTime;
-    unsigned int currentIncrement, currentOutput, currentCheckpoint, current_grain_reassignment;
+    
+    unsigned int currentOutput, current_grain_reassignment;
 
     /*Timer and logging object*/
     mutable TimerOutput computing_timer;
