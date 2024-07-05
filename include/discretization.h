@@ -1,12 +1,12 @@
 #ifndef INCLUDE_DISCRETIZATION_H_
 #define INCLUDE_DISCRETIZATION_H_
 
-#include <deal.II/fe/fe_system.h>
-#include <deal.II/distributed/tria.h>
-#include <deal.II/grid/grid_generator.h>
-#include <deal.II/base/point.h>
-#include <deal.II/dofs/dof_handler.h>
 #include <deal.II/base/index_set.h>
+#include <deal.II/base/point.h>
+#include <deal.II/distributed/tria.h>
+#include <deal.II/dofs/dof_handler.h>
+#include <deal.II/fe/fe_system.h>
+#include <deal.II/grid/grid_generator.h>
 #include <deal.II/matrix_free/matrix_free.h>
 
 #include "userInputParameters.h"

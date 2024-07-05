@@ -7,8 +7,6 @@
 #include <zlib.h>
 #endif
 
-
-
 // Load from a previously created checkpoint
 template <int dim, int degree>
 void MatrixFreePDE<dim, degree>::load_checkpoint_triangulation()

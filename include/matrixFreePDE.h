@@ -30,20 +30,20 @@
 #include <deal.II/grid/tria_accessor.h>
 #include <deal.II/grid/tria_iterator.h>
 #include <deal.II/lac/la_parallel_vector.h>
+#include <deal.II/lac/solver_control.h>
 #include <deal.II/matrix_free/fe_evaluation.h>
 #include <deal.II/matrix_free/matrix_free.h>
 #include <deal.II/numerics/vector_tools.h>
-#include <deal.II/lac/solver_control.h>
 
 // PRISMS headers
 #include "SimplifiedGrainRepresentation.h"
 #include "adaptiveRefinement.h"
-#include "discretization.h"
 #include "boundaryConditions.h"
-#include "timeStepping.h"
 #include "checkpoint.h"
+#include "discretization.h"
 #include "fields.h"
 #include "nucleus.h"
+#include "timeStepping.h"
 #include "userInputParameters.h"
 #include "variableContainer.h"
 #include "variableValueContainer.h"
@@ -80,7 +80,7 @@ public:
      */
     MatrixFreePDE(userInputParameters<dim>);
     ~MatrixFreePDE();
-    
+
     virtual void init();
 
     /**
@@ -192,7 +192,7 @@ protected:
     void applyBCs(unsigned int fieldIndex);
 
     /*Method to print outputs*/
-    void printOutputs(unsigned int fieldIndex, SolverControl *solver_control = nullptr);
+    void printOutputs(unsigned int fieldIndex, SolverControl* solver_control = nullptr);
 
     /*Method for nonlinear solve*/
     bool nonlinearSolve(unsigned int fieldIndex, unsigned int nonlinear_it_index);
@@ -251,17 +251,14 @@ protected:
         const std::vector<vectorType*>& src,
         const std::pair<unsigned int, unsigned int>& cell_range);
 
-    
     std::vector<std::map<dealii::types::global_dof_index, double>*> valuesDirichletSet;
-    
+
     void applyDirichletBCs();
 
     // methods to apply initial conditions
     /*Virtual method to apply initial conditions.  This is usually expected to be provided by the user in IBVP (Initial Boundary Value Problems).*/
 
     void applyInitialConditions();
-
-    
 
     void load_checkpoint_triangulation();
     void load_checkpoint_fields();
@@ -306,7 +303,7 @@ protected:
     bool hasExplicitEquation;
     bool hasNonExplicitEquation;
     //
-    
+
     unsigned int currentOutput, current_grain_reassignment;
 
     /*Timer and logging object*/

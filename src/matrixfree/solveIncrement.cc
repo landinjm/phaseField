@@ -42,67 +42,67 @@ void MatrixFreePDE<dim, degree>::solveIncrement(bool skip_time_dependent)
         }
     }
 
-    nonexplicit:
-        // Check if there is at least one nonexplicit equation. If not, skip ahead
-        if (!hasNonExplicitEquation) {
-            goto end;
-        }
-        // Now, update the non-explicit variables
-        for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++) {
+nonexplicit:
+    // Check if there is at least one nonexplicit equation. If not, skip ahead
+    if (!hasNonExplicitEquation) {
+        goto end;
+    }
+    // Now, update the non-explicit variables
+    for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++) {
         currentFieldIndex = fieldIndex; // Used in computeLHS()
 
-            // Update residualSet for the non-explicitly updated variables
-            computeNonexplicitRHS();
+        // Update residualSet for the non-explicitly updated variables
+        computeNonexplicitRHS();
 
-            if ((fields[fieldIndex].pdetype == IMPLICIT_TIME_DEPENDENT && !skip_time_dependent) || fields[fieldIndex].pdetype == TIME_INDEPENDENT) {
-                bool nonlinear_it_converged = false;
-                unsigned int nonlinear_it_index = 0;
+        if ((fields[fieldIndex].pdetype == IMPLICIT_TIME_DEPENDENT && !skip_time_dependent) || fields[fieldIndex].pdetype == TIME_INDEPENDENT) {
+            bool nonlinear_it_converged = false;
+            unsigned int nonlinear_it_index = 0;
 
-                while (!nonlinear_it_converged) {
-                    // Update residualSet for the non-explicitly updated variables
-                    computeNonexplicitRHS();
+            while (!nonlinear_it_converged) {
+                // Update residualSet for the non-explicitly updated variables
+                computeNonexplicitRHS();
 
-                    if (tStep.currentIncrement % userInputs.skip_print_steps == 0 && userInputs.var_nonlinear[fieldIndex]) {
-                        printOutputs(fieldIndex);
-                    }
-
-                    // This clears the residual where we want to apply Dirichlet BCs, otherwise the solver sees a positive residual
-                    BCs.constraintsDirichletSet[fieldIndex]->set_zero(*residualSet[fieldIndex]);
-
-                    // Solve
-                    nonlinear_it_converged = nonlinearSolve(fieldIndex, nonlinear_it_index);
-
-                    // Apply Boundary conditions
-                    applyBCs(fieldIndex);
-
-                    nonlinear_it_index++;
+                if (tStep.currentIncrement % userInputs.skip_print_steps == 0 && userInputs.var_nonlinear[fieldIndex]) {
+                    printOutputs(fieldIndex);
                 }
-            }
-            else if (fields[fieldIndex].pdetype == AUXILIARY) {
-                    
-                updateExplicitSolution(fieldIndex);
+
+                // This clears the residual where we want to apply Dirichlet BCs, otherwise the solver sees a positive residual
+                BCs.constraintsDirichletSet[fieldIndex]->set_zero(*residualSet[fieldIndex]);
+
+                // Solve
+                nonlinear_it_converged = nonlinearSolve(fieldIndex, nonlinear_it_index);
 
                 // Apply Boundary conditions
                 applyBCs(fieldIndex);
 
-                // Print update to screen
-                if (tStep.currentIncrement % userInputs.skip_print_steps == 0) {
-                    printOutputs(fieldIndex);
-                }
+                nonlinear_it_index++;
+            }
+        } else if (fields[fieldIndex].pdetype == AUXILIARY) {
+
+            updateExplicitSolution(fieldIndex);
+
+            // Apply Boundary conditions
+            applyBCs(fieldIndex);
+
+            // Print update to screen
+            if (tStep.currentIncrement % userInputs.skip_print_steps == 0) {
+                printOutputs(fieldIndex);
             }
         }
+    }
 
-    end:
-        if (tStep.currentIncrement % userInputs.skip_print_steps == 0) {
-            pcout << "wall time: " << time.wall_time() << "s\n";
-        }
-        // log time
-        computing_timer.leave_subsection("matrixFreePDE: solveIncrements");
+end:
+    if (tStep.currentIncrement % userInputs.skip_print_steps == 0) {
+        pcout << "wall time: " << time.wall_time() << "s\n";
+    }
+    // log time
+    computing_timer.leave_subsection("matrixFreePDE: solveIncrements");
 }
 
 // Nonlinear solving
 template <int dim, int degree>
-bool MatrixFreePDE<dim, degree>::nonlinearSolve(unsigned int fieldIndex, unsigned int nonlinear_it_index){
+bool MatrixFreePDE<dim, degree>::nonlinearSolve(unsigned int fieldIndex, unsigned int nonlinear_it_index)
+{
 
     bool nonlinear_it_converged = true; // Set to true here and will be set to false if any variable isn't converged
 
@@ -220,9 +220,9 @@ bool MatrixFreePDE<dim, degree>::nonlinearSolve(unsigned int fieldIndex, unsigne
 
 // Print outputs of solution & residual set
 template <int dim, int degree>
-void MatrixFreePDE<dim, degree>::printOutputs(unsigned int fieldIndex, SolverControl *solver_control)
+void MatrixFreePDE<dim, degree>::printOutputs(unsigned int fieldIndex, SolverControl* solver_control)
 {
-    //Character limit for output buffer
+    // Character limit for output buffer
     char buffer[200];
 
     double solution_L2_norm = tStep.solutionSet[fieldIndex]->l2_norm();
@@ -233,15 +233,14 @@ void MatrixFreePDE<dim, degree>::printOutputs(unsigned int fieldIndex, SolverCon
             fields[fieldIndex].name.c_str(),
             solution_L2_norm,
             residual_L2_norm);
-    }
-    else if (fields[fieldIndex].pdetype == IMPLICIT_TIME_DEPENDENT || fields[fieldIndex].pdetype == TIME_INDEPENDENT) {
+    } else if (fields[fieldIndex].pdetype == IMPLICIT_TIME_DEPENDENT || fields[fieldIndex].pdetype == TIME_INDEPENDENT) {
         if (userInputs.var_nonlinear[fieldIndex]) {
             snprintf(buffer, sizeof(buffer), "field '%2s' [nonlinear solve]: current solution: %12.6e, current residual:%12.6e\n",
                 fields[fieldIndex].name.c_str(),
                 solution_L2_norm,
                 residual_L2_norm);
         }
-        if (solver_control){
+        if (solver_control) {
             double dU_norm;
             if (fields[fieldIndex].type == SCALAR) {
                 dU_norm = dU_scalar.l2_norm();
@@ -258,8 +257,7 @@ void MatrixFreePDE<dim, degree>::printOutputs(unsigned int fieldIndex, SolverCon
                 solution_L2_norm,
                 dU_norm);
         }
-    }
-    else if (fields[fieldIndex].pdetype == AUXILIARY) {
+    } else if (fields[fieldIndex].pdetype == AUXILIARY) {
         snprintf(buffer, sizeof(buffer), "field '%2s' [auxiliary solve]: current solution: %12.6e, current residual:%12.6e\n",
             fields[fieldIndex].name.c_str(),
             solution_L2_norm,

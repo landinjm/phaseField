@@ -1,5 +1,5 @@
 #ifndef INCLUDE_TIMESTEPPING_H_
-#define INCLUDE_TIMESTEPPIN_H_
+#define INCLUDE_TIMESTEPPING_H_
 
 #include "userInputParameters.h"
 
@@ -23,7 +23,6 @@ public:
 private:
     /*User inputs*/
     userInputParameters<dim> userInputs;
-
 };
 
 template <int dim, int degree>

@@ -42,7 +42,6 @@ public:
     /*Copies of constraintSet elements, but stored as non-const to enable application of constraints.*/
     std::vector<AffineConstraints<double>*> constraintsOtherSet_nonconst;
 
-
 private:
     // Adaptive refinement criterion
     void adaptiveRefineCriterion();
@@ -120,16 +119,16 @@ void adaptiveRefinement<dim, degree>::adaptiveRefineCriterion()
         update_flags = update_values | update_gradients;
     }
 
-    //Before marking cells for refinement and/or coarsening clear user flags
-    //These user flags are used to mark whether cells have already been flagged for refinement
+    // Before marking cells for refinement and/or coarsening clear user flags
+    // These user flags are used to mark whether cells have already been flagged for refinement
     triangulation.clear_user_flags();
 
     for (auto it = userInputs.refinement_criteria.begin(); it != userInputs.refinement_criteria.end(); ++it) {
 
-        //Grab the field type
+        // Grab the field type
         unsigned int fieldType = userInputs.var_type[it->variable_index];
 
-        //Grab the field index
+        // Grab the field index
         unsigned int index = it->variable_index;
 
         FEValues<dim> fe_values(*FESet[index], quadrature, update_flags);
@@ -140,13 +139,13 @@ void adaptiveRefinement<dim, degree>::adaptiveRefineCriterion()
         std::vector<dealii::Vector<double>> values_vector(num_quad_points, dealii::Vector<double>(dim));
         dealii::Vector<double> gradient_magnitude_components(dim);
         std::vector<dealii::Tensor<1, dim, double>> gradients(num_quad_points);
-	    std::vector<std::vector<dealii::Tensor<1,dim,double>>> gradients_vector(num_quad_points, std::vector<dealii::Tensor<1,dim,double>>(dim));
+        std::vector<std::vector<dealii::Tensor<1, dim, double>>> gradients_vector(num_quad_points, std::vector<dealii::Tensor<1, dim, double>>(dim));
 
         typename DoFHandler<dim>::active_cell_iterator cell = dofHandlersSet_nonconst[index]->begin_active(), endc = dofHandlersSet_nonconst[index]->end();
 
         typename parallel::distributed::Triangulation<dim>::active_cell_iterator t_cell = triangulation.begin_active();
 
-        //Loop through locally owned cells
+        // Loop through locally owned cells
         for (; cell != endc; ++cell) {
             if (cell->is_locally_owned()) {
                 fe_values.reinit(cell);
@@ -157,7 +156,7 @@ void adaptiveRefinement<dim, degree>::adaptiveRefineCriterion()
                 } else if (need_value && fieldType == VECTOR) {
                     fe_values.get_function_values(*solutionSet[it->variable_index], values_vector);
 
-                    for (unsigned int q_point=0; q_point<num_quad_points; ++q_point){
+                    for (unsigned int q_point = 0; q_point < num_quad_points; ++q_point) {
                         values.at(q_point) = values_vector.at(q_point).l2_norm();
                     }
                 }
@@ -170,8 +169,8 @@ void adaptiveRefinement<dim, degree>::adaptiveRefineCriterion()
                 } else if (need_gradient && fieldType == VECTOR) {
                     fe_values.get_function_gradients(*solutionSet[it->variable_index], gradients_vector);
 
-                    for (unsigned int q_point=0; q_point<num_quad_points; ++q_point){
-                        for (unsigned int d = 0; d<dim; ++d){
+                    for (unsigned int q_point = 0; q_point < num_quad_points; ++q_point) {
+                        for (unsigned int d = 0; d < dim; ++d) {
                             gradient_magnitude_components[d] = gradients_vector.at(q_point).at(d).norm();
                         }
                         gradient_magnitudes.at(q_point) = gradient_magnitude_components.l2_norm();

@@ -4,8 +4,9 @@
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
 
-#include "userInputParameters.h"
 #include "discretization.h"
+#include "timeStepping.h"
+#include "userInputParameters.h"
 
 #ifdef DEAL_II_WITH_ZLIB
 #include <zlib.h>
@@ -36,7 +37,6 @@ private:
 
     /*Timestepping*/
     TimeStepping<dim, degree>& tStepRef;
-
 };
 
 template <int dim, int degree>

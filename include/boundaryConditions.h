@@ -1,15 +1,14 @@
 #ifndef INCLUDE_BOUNDARYCONDITIONS_H_
 #define INCLUDE_BOUNDARYCONDITIONS_H_
 
+#include <deal.II/dofs/dof_handler.h>
+#include <deal.II/dofs/dof_tools.h>
+#include <deal.II/grid/grid_tools.h>
 #include <deal.II/lac/affine_constraints.h>
 #include <deal.II/lac/la_parallel_vector.h>
-#include <deal.II/lac/affine_constraints.h>
-#include <deal.II/dofs/dof_tools.h>
-#include <deal.II/dofs/dof_handler.h>
-#include <deal.II/grid/grid_tools.h>
 
-#include "userInputParameters.h"
 #include "discretization.h"
+#include "userInputParameters.h"
 
 using namespace dealii;
 
@@ -45,14 +44,13 @@ public:
     /*Method for pinning solution if boundary conditions are insufficient*/
     void getComponentsWithRigidBodyModes(std::vector<int>&, unsigned int&) const;
     void setRigidBodyModeConstraints(const std::vector<int>, AffineConstraints<double>*, const DoFHandler<dim>*) const;
-    
+
 private:
     /*User inputs*/
     userInputParameters<dim> userInputs;
 
     /*Discretiziation*/
     discretization<dim>& DiscretizationRef;
-
 };
 
 template <int dim, int degree>
@@ -139,7 +137,7 @@ void boundaryConditions<dim, degree>::setPeriodicity()
     }
 
     DiscretizationRef.triangulation.add_periodicity(periodicity_vector);
-    //pcout << "periodic facepairs: " << periodicity_vector.size() << std::endl;
+    // pcout << "periodic facepairs: " << periodicity_vector.size() << std::endl;
 }
 
 template <int dim, int degree>

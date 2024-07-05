@@ -41,7 +41,8 @@ void MatrixFreePDE<dim, degree>::solve()
         if (userInputs.checkpointTimeStepList[checkpoints.currentCheckpoint] == tStep.currentIncrement) {
             computing_timer.enter_subsection("matrixFreePDE: save_checkpoint");
             checkpoints.save_checkpoint();
-            pcout << "*** Checkpoint created! ***" << std::endl << std::endl;
+            pcout << "*** Checkpoint created! ***" << std::endl
+                  << std::endl;
             computing_timer.leave_subsection("matrixFreePDE: save_checkpoint");
             checkpoints.currentCheckpoint++;
         }
@@ -108,7 +109,8 @@ void MatrixFreePDE<dim, degree>::solve()
             if (userInputs.checkpointTimeStepList[checkpoints.currentCheckpoint] == tStep.currentIncrement) {
                 computing_timer.enter_subsection("matrixFreePDE: save_checkpoint");
                 checkpoints.save_checkpoint();
-                pcout << "*** Checkpoint created! ***" << std::endl << std::endl;
+                pcout << "*** Checkpoint created! ***" << std::endl
+                      << std::endl;
                 computing_timer.leave_subsection("matrixFreePDE: save_checkpoint");
                 checkpoints.currentCheckpoint++;
             }
