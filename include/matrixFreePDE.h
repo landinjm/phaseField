@@ -354,8 +354,8 @@ class MatrixFreePDE:public Subscriptor
   void outputFreeEnergy(const std::vector<double>& freeEnergyValues) const;
 
   /*Method to compute the integral of a field.*/
-  template <typename T>
-  void computeIntegral(T& integratedField, int index, std::vector<vectorType*> postProcessedSet);
+  void computeIntegral(double& integratedField, int index, std::vector<vectorType*> postProcessedSet);
+  void computeIntegral(std::vector<double>& integratedField, int index, std::vector<vectorType*> postProcessedSet);
 
   //variables for time dependent problems
   /*Flag used to see if invM, time stepping in run(), etc are necessary*/
