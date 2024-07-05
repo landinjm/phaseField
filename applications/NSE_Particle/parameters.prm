@@ -8,9 +8,9 @@ set Number of dimensions = 2
 # (Domain size Z ignored in 2D)
 # =================================================================================
 # Each axes spans from zero to the specified length
-set Domain size X = 10
-set Domain size Y = 10
-set Domain size Z = 6
+set Domain size X = 2.2
+set Domain size Y = 0.41
+set Domain size Z = 1
 
 # =================================================================================
 # Set the element parameters
@@ -18,11 +18,11 @@ set Domain size Z = 6
 # The number of elements in each direction is 2^(refineFactor) * subdivisions
 # Subdivisions Z ignored in 2D
 # For optimal performance, use refineFactor primarily to determine the element size
-set Subdivisions X = 1
-set Subdivisions Y = 1
+set Subdivisions X = 220
+set Subdivisions Y = 41
 set Subdivisions Z = 1
 
-set Refine factor = 6
+set Refine factor = 0
 
 # Set the polynomial degree of the element (allowed values: 1, 2, or 3)
 set Element degree = 2
@@ -63,11 +63,11 @@ end
 # Set the time step parameters
 # =================================================================================
 # The size of the time step
-set Time step = 0.8e-2
+set Time step = 4.0e-4
 
 # The simulation ends when either the number of time steps is reached or the
 # simulation time is reached.
-set Number of time steps = 500
+set Number of time steps = 10000
 
 # =================================================================================
 # Set the boundary conditions
@@ -89,9 +89,9 @@ set Number of time steps = 500
 # 1.5 on the top and bottom for variable 'n' in 2D
 # set Boundary condition for variable n = NATURAL, NATURAL, DIRICHLET: 1.5, DIRICHLET: 1.5
 
-set Boundary condition for variable u, x component = NATURAL
-set Boundary condition for variable u, y component = NATURAL
-set Boundary condition for variable P = NATURAL
+set Boundary condition for variable u, x component = NON_UNIFORM_DIRICHLET, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0
+set Boundary condition for variable u, y component = DIRICHLET: 0.0, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0
+set Boundary condition for variable P = NATURAL, DIRICHLET: 0.0, NATURAL, NATURAL
 set Boundary condition for variable phi = NATURAL
 set Boundary condition for variable sigma = NATURAL
 
@@ -108,10 +108,10 @@ set Boundary condition for variable sigma = NATURAL
 set Model constant nu = 0.001, DOUBLE
 
 #Fluid density
-set Model constant rho = 1000.0, DOUBLE
+set Model constant rho = 1.0, DOUBLE
 
 #Interfacial width
-set Model constant W = 0.15, DOUBLE
+set Model constant W = 0.005, DOUBLE
 
 #Prefactor for pressure solve correction
 set Model constant correctionP = 1.0, DOUBLE
@@ -126,7 +126,7 @@ subsection Linear solver parameters: P
     set Tolerance type = ABSOLUTE_RESIDUAL
 
     # The tolerance for convergence (L2 norm)
-    set Tolerance value =1.0e-5
+    set Tolerance value =1.0e-3
 
     # The maximum number of linear solver iterations per solve
     set Maximum linear solver iterations = 1000
@@ -141,10 +141,10 @@ set Output condition = EQUAL_SPACING
 
 # Number of times the program outputs the fields (total number for "EQUAL_SPACING"
 # and "LOG_SPACING", number per decade for "N_PER_DECADE", ignored for "LIST")
-set Number of outputs = 10
+set Number of outputs = 20
 
 # The number of time steps between updates being printed to the screen
-set Skip print steps = 1
+set Skip print steps = 100
 
 # =================================================================================
 # Set the checkpoint/restart parameters

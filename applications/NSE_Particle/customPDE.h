@@ -65,13 +65,16 @@ private:
     // This acts as a simple stabilization for the pressure solve
     double dtStabilized;
 
+    // This is the ratio to convert to real pressure
+    double dtRatio;
+
     // Parameters for embedded domain
     double h = 2.757;
     double reg = 1e-10;
     double delta = W / std::sqrt(2.0);
 
     // Gravity
-    double gravity[3] = {0.0, -0.001, 0.0};
+    double gravity[3] = {0.0, 0.0, 0.0};
 
     // Particle velocity
     double vel[dim];
@@ -104,17 +107,18 @@ void customPDE<dim,degree>::solveIncrement(bool skip_time_dependent)
         dtStabilized = correctionP * std::pow(h,degree+1.0);
 
         //Calculate the ratio between actual timestep and stabilized timestep
-        double dtRatio = this->userInputs.dtValue / dtStabilized;
-        this->pcout << dtRatio << std::endl;
+        dtRatio = this->userInputs.dtValue / dtStabilized;
     }
 
     //Calculating integral for the force
-    this->computeIntegral(force[1], 3, this->solutionSet);
-    this->pcout << force[1] << std::endl;
+    this->computeIntegral(force[0], 3, this->solutionSet);
+    this->pcout << force[0] << std::endl;
 
-    //Calculation of particle velocity
-    for (unsigned int i=0; i<dim; i++) {
-        vel[i] += this->userInputs.dtValue * (gravity[i] + force[i]);
+    if (this->currentIncrement >= 1000){
+        //Calculation of particle velocity
+        for (unsigned int i=0; i<dim; i++) {
+            vel[i] += this->userInputs.dtValue * (gravity[i] + force[i]);
+        }
     }
 
     //Set ChorinSwitch to false so steps 1 and 2 may occur

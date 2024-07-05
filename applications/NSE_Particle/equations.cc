@@ -119,10 +119,10 @@ void customPDE<dim, degree>::explicitEquationRHS(variableContainer<dim, degree, 
         //Stress tensor
         vectorvalueType sigma;
         for (unsigned int j = 0; j < dim; j++) {
-            sigma[j] = -P + constV(2.0*nu)*ux[j][j];
+            sigma[j] = -P / constV(dtRatio) + constV(2.0*nu)*ux[j][j];
         }
 
-        eq_sigma = sigma[1] * normalPhi[1] * std::abs(phix[1]) / constV(4.0);
+        eq_sigma = sigma[0] * normalPhi[0] * std::abs(phix[0]) / constV(4.0);
     }
 
     // Step three of the Chorin projection
