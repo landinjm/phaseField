@@ -50,7 +50,7 @@ void  MatrixFreePDE<dim,degree>::computeIntegral(std::vector<double>& integrated
 
 	//Grab the requisite parts of the field for integration
 	QGauss<dim>  quadrature_formula(degree+1);
-	FE_Q<dim> FE (QGaussLobatto<1>(degree+1));
+	FESystem<dim> FE (FE_Q<dim>(QGaussLobatto<1>(degree+1)),dim);
 	FEValues<dim> fe_values (FE, quadrature_formula, update_values | update_JxW_values | update_quadrature_points);
 	const unsigned int   n_q_points    = quadrature_formula.size();
 	std::vector<dealii::Vector<double>> cVal(n_q_points,dealii::Vector<double>(dim));
