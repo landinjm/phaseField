@@ -19,12 +19,18 @@ void customPDE<dim, degree>::setInitialCondition(const dealii::Point<dim>& p, co
     double ellipseAxes[3] = { 1.0, 1.5, 1.0}; 
     scalar_IC = 0;
     double dist = 0.0;
+    double temp = 0.0;
     double rad = 1.0;
     for (unsigned int dir = 0; dir < dim; dir++) {
-        dist += (p[dir] - center[dir]) * (p[dir] - center[dir]) / ellipseAxes[dir] / ellipseAxes[dir];
+        double weightedDistance = (p[dir] - center[dir]) * (p[dir] - center[dir]) / ellipseAxes[dir] / ellipseAxes[dir];
+        dist += weightedDistance;
+        temp += 4.0 * weightedDistance / ellipseAxes[dir] / ellipseAxes[dir] + 1e-3;
     }
     dist = std::sqrt(dist);
-    double particle = 0.5 * (1.0 - std::tanh((dist - rad) / (W * std::sqrt(2))));
+    //double particle = 0.5 * (1.0 - std::tanh((dist - rad) / (W * std::sqrt(2))));
+    double normFactor = W * std::sqrt(temp);
+    double tanhInterior = (dist - rad) / normFactor;
+    double particle = 0.5 * (1.0 - std::tanh(tanhInterior));
 
     // Velocity
     if (index == 0) {
