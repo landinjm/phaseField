@@ -43,7 +43,7 @@ void variableAttributeLoader::loadVariableAttributes()
 
     // Variable 3 - stress density
     set_variable_name(3, "sigma");
-    set_variable_type(3, SCALAR);
+    set_variable_type(3, VECTOR);
     set_variable_equation_type(3, EXPLICIT_TIME_DEPENDENT);
 
     set_dependencies_value_term_RHS(3, "P,grad(phi),sigma");
@@ -82,7 +82,8 @@ void customPDE<dim, degree>::explicitEquationRHS(variableContainer<dim, degree, 
     vectorgradType eqx_u;
     eqx_u = eqx_u * constV(0.0);
     scalarvalueType eq_phi = constV(0.0);
-    scalarvalueType eq_sigma = constV(0.0);
+    vectorvalueType eq_sigma;
+    eq_sigma = eq_sigma * constV(0.0);
 
     // Step one of the Chorin projection
     if (!ChorinSwitch) {
@@ -118,11 +119,13 @@ void customPDE<dim, degree>::explicitEquationRHS(variableContainer<dim, degree, 
 
         //Stress tensor
         vectorvalueType sigma;
+        vectorvalueType surface;
         for (unsigned int j = 0; j < dim; j++) {
             sigma[j] = -P / constV(dtRatio) + constV(2.0*nu)*ux[j][j];
+            surface[j] = std::abs(phix[j]) / constV(4.0);
         }
 
-        eq_sigma = sigma[0] * normalPhi[0] * std::abs(phix[0]) / constV(4.0);
+        eq_sigma = sigma * normalPhi * surface;
     }
 
     // Step three of the Chorin projection
@@ -135,7 +138,7 @@ void customPDE<dim, degree>::explicitEquationRHS(variableContainer<dim, degree, 
     variable_list.set_vector_value_term_RHS(0, eq_u);
     variable_list.set_vector_gradient_term_RHS(0, eqx_u);
     variable_list.set_scalar_value_term_RHS(2, eq_phi);
-    variable_list.set_scalar_value_term_RHS(3, eq_sigma);
+    variable_list.set_vector_value_term_RHS(3, eq_sigma);
 }
 
 // =============================================================================================

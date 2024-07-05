@@ -78,7 +78,7 @@ private:
 
     // Particle velocity
     double vel[dim];
-    double force[dim];
+    std::vector<double> force;
 
     // Drag terms
     double integrated_dFy = 0.0;
@@ -111,8 +111,8 @@ void customPDE<dim,degree>::solveIncrement(bool skip_time_dependent)
     }
 
     //Calculating integral for the force
-    this->computeIntegral(force[0], 3, this->solutionSet);
-    this->pcout << force[0] << std::endl;
+    this->computeIntegral(force, 3, this->solutionSet);
+    this->pcout << "Integrated drag forces: " << force[0] << ", " << force[1] << std::endl;
 
     if (this->currentIncrement >= 1000){
         //Calculation of particle velocity
