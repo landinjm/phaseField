@@ -75,6 +75,8 @@ private:
 
     //Forcing terms
     double gravity[3] = {0.0, 0.0, 0.0};
+    double alpha_T = 100.0;
+    double theta_ref = -0.55;
 
     // ================================================================
 };

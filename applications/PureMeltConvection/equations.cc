@@ -134,7 +134,7 @@ void customPDE<dim, degree>::explicitEquationRHS(variableContainer<dim, degree, 
                 phiU[i] += constV(nu) * phix[j] * ux[i][j] / (constV(1.0 + reg) - phi);
                 idk[i][j] = u[i] * phix[i] / (constV(1.0 + reg) - phi);
             }
-            force[i] = constV(gravity[i]);
+            force[i] = constV(gravity[i]) * (constV(1.0) - constV(alpha_T) * (theta - constV(theta_ref)));
         }
 
         // Calculating temperature advection
@@ -144,6 +144,9 @@ void customPDE<dim, degree>::explicitEquationRHS(variableContainer<dim, degree, 
         vectorvalueType dphiU = dphidt * u / (constV(1.0 + reg) - phi);
         vectorvalueType hcorr = constV(nu * h / (2.0 * W * W)) * u * (constV(1.0) + phi) * (constV(1.0) + phi);
 
+        // Grid refinement criterion
+        scalarvalueType refine = std::sqrt(Px.norm_square());
+
         // Setting the expressions for the terms in the governing equations
         eq_u = u + constV(userInputs.dtValue) * (force - advecTerm + dphiU - phiU - hcorr);
         eqx_u = constV(-userInputs.dtValue * nu) * (ux - idk);
@@ -151,7 +154,7 @@ void customPDE<dim, degree>::explicitEquationRHS(variableContainer<dim, degree, 
         eq_phi = phi + constV(userInputs.dtValue) * dphidt;
         eq_theta = theta + constV(0.5 * userInputs.dtValue) * (dphidt - Tadvec);
         eqx_theta = -constV(D * userInputs.dtValue) * thetax;
-        eq_refine = 0.5*(1.0-phi)*std::abs(P);
+        eq_refine = refine;
     }
 
     // Step three of the Chorin projection
