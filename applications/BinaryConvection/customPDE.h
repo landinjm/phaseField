@@ -67,6 +67,7 @@ private:
     double radius = userInputs.get_model_constant_double("radius");
     double reg = userInputs.get_model_constant_double("reg");
     dealii::Tensor<1,dim> gravity = userInputs.get_model_constant_rank_1_tensor("gravity");
+    double alpha_c = userInputs.get_model_constant_double("alpha_c");
 
     // This bool acts as a switch to indicate what Chorin projection step is being calculating
     bool ChorinSwitch;
@@ -85,7 +86,6 @@ private:
     // Forcing terms
     double alpha_T = 0.0;
     double T_ref = 0.0;
-    double alpha_c = 10.0;
     double c_ref = cl0*(1.0-(1.0-k)*Omega);
 
     // ================================================================
