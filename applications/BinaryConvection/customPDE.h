@@ -71,7 +71,7 @@ private:
     // This bool acts as a switch to indicate what Chorin projection step is being calculating
     bool ChorinSwitch;
 
-    //This acts as a simple stabilization for the pressure solve
+    // This acts as a simple stabilization for the pressure solve
     double dtStabilized;
 
     // Fixed and derived constants
@@ -82,7 +82,7 @@ private:
     double D = a2*lambda*W*W/tau;
     double h = 2.757;
 
-    //Forcing terms
+    // Forcing terms
     double alpha_T = 0.0;
     double T_ref = 0.0;
     double alpha_c = 10.0;
