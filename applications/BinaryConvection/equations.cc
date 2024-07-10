@@ -99,10 +99,10 @@ void customPDE<dim, degree>::explicitEquationRHS(variableContainer<dim, degree, 
         scalargradType normalPhix = phix / (constV(reg) + magPhix);
 
         // The anisotropy function
-        scalarvalueType an = constV(1.0 - 3.0 * eps4);
-        for (unsigned int i = 0; i < dim; i++) {
-            an += constV(4.0 * eps4) * normalPhix[i] * normalPhix[i] * normalPhix[i] * normalPhix[i];
-        }
+        scalarvalueType cth = normalPhix[0];
+        scalarvalueType sth = normalPhix[1];
+        scalarvalueType c4th = sth*sth*sth*sth + cth*cth*cth*cth - constV(6.0)*sth*sth*cth*cth;
+        scalarvalueType an = constV(1.0)+constV(eps4)*c4th;
 
         // dphi/dt
         scalarvalueType dphidt = xi / (constV(tau) * an * an);
@@ -196,21 +196,16 @@ void customPDE<dim, degree>::nonExplicitEquationRHS(variableContainer<dim, degre
     scalargradType normalPhix = phix / (constV(reg) + magPhix);
 
     // The anisotropy function
-    scalarvalueType an = constV(1.0 - 3.0 * eps4);
-    for (unsigned int i = 0; i < dim; i++) {
-        an += constV(4.0 * eps4) * normalPhix[i] * normalPhix[i] * normalPhix[i] * normalPhix[i];
-    }
+    scalarvalueType cth = normalPhix[0];
+    scalarvalueType sth = normalPhix[1];
+    scalarvalueType c4th = sth*sth*sth*sth + cth*cth*cth*cth - constV(6.0)*sth*sth*cth*cth;
+    scalarvalueType an = constV(1.0)+constV(eps4)*c4th;
+    scalarvalueType ad = constV(-16.0*eps4)*(sth*cth*cth*cth - sth*sth*sth*cth);
 
     // The anisotropic laplacian part
     scalargradType anLap;
-    for (unsigned int i = 0; i < dim; i++) {
-        anLap[i] = constV(0.0);
-        for (unsigned int j = 0; j < dim; j++) {
-            anLap[i] += normalPhix[i] * normalPhix[j] * normalPhix[i] * normalPhix[j];
-            anLap[i] -= normalPhix[j] * normalPhix[j] * normalPhix[j] * normalPhix[j];
-        }
-        anLap[i] *= constV(16.0 * eps4) * normalPhix[i] / (constV(reg) + magPhix);
-    }
+    anLap[0] = -ad*phix[1];
+    anLap[1] = ad*phix[0];
 
     // Double-well and tilt
     scalarvalueType temp = constV(1.0) - phi * phi;
@@ -218,7 +213,7 @@ void customPDE<dim, degree>::nonExplicitEquationRHS(variableContainer<dim, degre
     scalarvalueType eq_xi = (phi - constV(lambda / (1.0 - k)) * (eu - constV(1.0)) * temp) * temp;
 
     // Gradient penalty terms
-    scalargradType eqx_xi = -constV(W * W) * (an * an * phix + magPhix * magPhix * an * anLap);
+    scalargradType eqx_xi = -constV(W * W) * (an * an * phix + an * anLap);
 
     // Set the pressure poisson solve RHS
     scalarvalueType eq_P = constV(0.0);

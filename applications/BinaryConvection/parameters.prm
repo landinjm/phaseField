@@ -8,9 +8,9 @@ set Number of dimensions = 2
 # (Domain size Z ignored in 2D)
 # =================================================================================
 # Each axes spans from zero to the specified length
-set Domain size X = 100
-set Domain size Y = 100
-set Domain size Z = 100
+set Domain size X = 800
+set Domain size Y = 800
+set Domain size Z = 200
 
 # =================================================================================
 # Set the element parameters
@@ -22,7 +22,7 @@ set Subdivisions X = 1
 set Subdivisions Y = 1
 set Subdivisions Z = 1
 
-set Refine factor = 6
+set Refine factor = 9
 
 # Set the polynomial degree of the element (allowed values: 1, 2, or 3)
 set Element degree = 2
@@ -35,7 +35,7 @@ set Time step = 6.0e-3
 
 # The simulation ends when either the number of time steps is reached or the
 # simulation time is reached.
-set Number of time steps = 10000
+set Number of time steps = 1000
 
 # =================================================================================
 # Set the boundary conditions
@@ -89,10 +89,10 @@ set Model constant Omega = 0.5, DOUBLE
 set Model constant k = 0.14, DOUBLE
 
 # Reference concentration (cl0)
-set Model constant cl0 = 1.0, DOUBLE
+set Model constant cl0 = 0.023, DOUBLE
 
 # Ratio of d0 in W
-set Model constant d0inW = 0.277, DOUBLE
+set Model constant d0inW = 0.078, DOUBLE
 
 # Kinematic viscosity
 set Model constant nu = 6.67, DOUBLE
@@ -101,7 +101,7 @@ set Model constant nu = 6.67, DOUBLE
 set Model constant rho = 1.0, DOUBLE
 
 # Gravity
-set Model constant gravity = (0,-0.0015,0), TENSOR
+set Model constant gravity = (0,0.0,0), TENSOR
 
 # Seed particle radius
 set Model constant radius = 4.0, DOUBLE
@@ -137,7 +137,7 @@ set Output condition = EQUAL_SPACING
 
 # Number of times the program outputs the fields (total number for "EQUAL_SPACING"
 # and "LOG_SPACING", number per decade for "N_PER_DECADE", ignored for "LIST")
-set Number of outputs = 20
+set Number of outputs = 10
 
 # The number of time steps between updates being printed to the screen
 set Skip print steps = 100
