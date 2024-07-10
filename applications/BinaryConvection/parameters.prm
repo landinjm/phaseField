@@ -35,7 +35,7 @@ set Time step = 6.0e-3
 
 # The simulation ends when either the number of time steps is reached or the
 # simulation time is reached.
-set Number of time steps = 1000
+set Number of time steps = 20000
 
 # =================================================================================
 # Set the boundary conditions
@@ -95,13 +95,16 @@ set Model constant cl0 = 0.023, DOUBLE
 set Model constant d0inW = 0.078, DOUBLE
 
 # Kinematic viscosity
-set Model constant nu = 6.67, DOUBLE
+set Model constant nu = 23.67, DOUBLE
 
 # Fluid density
 set Model constant rho = 1.0, DOUBLE
 
 # Gravity
-set Model constant gravity = (0,0.0,0), TENSOR
+set Model constant gravity = (0.0,-0.8683,0.0), TENSOR
+
+# Solute expansion coefficient
+set Model constant alpha_c = 0.0, DOUBLE
 
 # Seed particle radius
 set Model constant radius = 4.0, DOUBLE
@@ -137,7 +140,7 @@ set Output condition = EQUAL_SPACING
 
 # Number of times the program outputs the fields (total number for "EQUAL_SPACING"
 # and "LOG_SPACING", number per decade for "N_PER_DECADE", ignored for "LIST")
-set Number of outputs = 10
+set Number of outputs = 50
 
 # The number of time steps between updates being printed to the screen
 set Skip print steps = 100
@@ -154,4 +157,4 @@ set Checkpoint condition = EQUAL_SPACING
 
 # Number of times the creates checkpoints (total number for "EQUAL_SPACING"
 # and "LOG_SPACING", number per decade for "N_PER_DECADE", ignored for "LIST")
-set Number of checkpoints = 0
+set Number of checkpoints = 1
