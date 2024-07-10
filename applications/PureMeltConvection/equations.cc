@@ -131,7 +131,7 @@ void customPDE<dim, degree>::explicitEquationRHS(variableContainer<dim, degree, 
         for (unsigned int i = 0; i < dim; i++) {
             for (unsigned int j = 0; j < dim; j++) {
                 advecTerm[i] += u[j] * ux[i][j];
-                phiU[i] += constV(nu) * phix[j] * ux[i][j] / (constV(1.0 + reg) - phi);
+                phiU[i] += constV(2.0 * nu) * phix[j] * ux[i][j] / (constV(1.0 + reg) - phi);
                 idk[i][j] = u[i] * phix[i] / (constV(1.0 + reg) - phi);
             }
             force[i] = constV(gravity[i]) * (constV(1.0) - constV(alpha_T) * (theta - constV(theta_ref)));
