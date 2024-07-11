@@ -149,7 +149,7 @@ void customPDE<dim, degree>::explicitEquationRHS(variableContainer<dim, degree, 
         eqx_u = -constV(userInputs.dtValue * nu) * u_gradW;
 
         eq_phi = phi + constV(userInputs.dtValue) * dphidt;
-        eq_c = c + constV(userInputs.dtValue) * c_advec;
+        eq_c = c - constV(userInputs.dtValue) * c_advec;
         eqx_c = -constV(userInputs.dtValue) * j;
     }
 
