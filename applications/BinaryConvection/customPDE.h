@@ -73,7 +73,7 @@ private:
     bool ChorinSwitch;
 
     // This acts as a simple stabilization for the pressure solve
-    double dtStabilized;
+    double dtStabilized = std::numeric_limits<double>::quiet_NaN();
 
     // Fixed and derived constants
     double a1 = 0.8839;
@@ -107,7 +107,7 @@ void customPDE<dim,degree>::solveIncrement(bool skip_time_dependent)
     char buffer[200];
 
     //Correction for the pressure poisson solve
-    if (this->currentIncrement == 0){
+    if (std::isnan(dtStabilized)) {
         double h = GridTools::maximal_cell_diameter(this->triangulation);
         dtStabilized = correctionP*std::pow(h,degree+1.0);
     }
