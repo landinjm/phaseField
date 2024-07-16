@@ -15,13 +15,13 @@ void customPDE<dim, degree>::setInitialCondition(const dealii::Point<dim>& p, co
     // The initial condition is a set of overlapping circles/spheres defined
     // by a hyperbolic tangent function. The center of each circle/sphere is
     // given by "center" and its radius is given by "radius".
-    double center[3] = { 0.2, 0.2, 0.0 };
     double ellipseAxes[3] = { 1.0, 1.0, 1.0}; 
     scalar_IC = 0;
     double dist = 0.0;
-    double rad = 0.05;
+    double rad = 1.0;
     for (unsigned int dir = 0; dir < dim; dir++) {
-        dist += (p[dir] - center[dir]) * (p[dir] - center[dir]) / ellipseAxes[dir] / ellipseAxes[dir];
+        double weightedDistance = (p[dir] - position[dir]) * (p[dir] - position[dir]) / ellipseAxes[dir] / ellipseAxes[dir];
+        dist += weightedDistance;
     }
     dist = std::sqrt(dist);
     double particle = 0.5 * (1.0 - std::tanh((dist - rad) / (W * std::sqrt(2))));
@@ -75,7 +75,7 @@ void customPDE<dim, degree>::setNonUniformDirichletBCs(const dealii::Point<dim>&
 
     if(index == 0){
         if(direction == 0){
-            double MaxFlow = 0.3;
+            double MaxFlow = 0.009;
             double stepheight = 0.0;
             double normalizedPos = p[1]/userInputs.domain_size[1];
             //MaxFlow = MaxFlow*timeFactor;

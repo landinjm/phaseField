@@ -58,6 +58,8 @@ private:
     double rho = userInputs.get_model_constant_double("rho");
     double W = userInputs.get_model_constant_double("W");
     double correctionP = userInputs.get_model_constant_double("correctionP");
+    dealii::Tensor<1,dim> gravity = userInputs.get_model_constant_rank_1_tensor("gravity");
+    dealii::Tensor<1,dim> position = userInputs.get_model_constant_rank_1_tensor("position");
 
     // This bool acts as a switch to indicate what Chorin projection step is being calculating
     bool ChorinSwitch;
@@ -73,12 +75,13 @@ private:
     double reg = 1e-10;
     double delta = W / std::sqrt(2.0);
 
-    // Gravity
-    double gravity[3] = {0.0, 0.0, 0.0};
-
-    // Particle velocity & force
-    double vel[dim];
+    // Particle velocity & force & position
+    double vel[dim] = {0};
     std::vector<double> force;
+
+    // Particle density & volume
+    double rho_p = 1.0*rho;
+    double volume_p = M_PI * 100.0;
 
     // ================================================================
 };
@@ -98,7 +101,7 @@ void customPDE<dim,degree>::solveIncrement(bool skip_time_dependent)
     Timer time;
     char buffer[200];
 
-    //Correction for the pressure poisson solve
+    // Correction for the pressure poisson solve
     if (this->currentIncrement == 0){
         double h = GridTools::maximal_cell_diameter(this->triangulation);
         dtStabilized = correctionP * std::pow(h,degree+1.0);
@@ -107,18 +110,21 @@ void customPDE<dim,degree>::solveIncrement(bool skip_time_dependent)
         dtRatio = this->userInputs.dtValue / dtStabilized;
     }
 
-    //Calculating integral for the force
+    // Calculating integral for the force
     this->computeIntegral(force, 3, this->solutionSet);
-    this->pcout << "Integrated drag forces: " << force[0] << ", " << force[1] << std::endl;
+    this->pcout << "Integrated drag acceleration: " << force[0]/volume_p << ", " << force[1]/volume_p << std::endl;
 
-    if (this->currentIncrement >= 1000){
-        //Calculation of particle velocity
+    // Calculating integral for the volume
+    //this->computeIntegral(volume_p, 2, this->solutionSet); //Need to rederive equations with phi [0,1]
+
+    /*if (this->currentIncrement >= 4000){
+        // Calculation of particle velocity
         for (unsigned int i=0; i<dim; i++) {
-            vel[i] += this->userInputs.dtValue * (gravity[i] + force[i]);
+            vel[i] += this->userInputs.dtValue * (gravity[i] + force[i]/volume_p);
         }
-    }
+    }*/
 
-    //Set ChorinSwitch to false so steps 1 and 2 may occur
+    // Set ChorinSwitch to false so steps 1 and 2 may occur
     ChorinSwitch = false;
 
     // Get the RHS of the explicit equations
