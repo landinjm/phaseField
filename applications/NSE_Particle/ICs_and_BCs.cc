@@ -15,10 +15,8 @@ void customPDE<dim, degree>::setInitialCondition(const dealii::Point<dim>& p, co
     // The initial condition is a set of overlapping circles/spheres defined
     // by a hyperbolic tangent function. The center of each circle/sphere is
     // given by "center" and its radius is given by "radius".
-    double ellipseAxes[3] = { 1.0, 1.0, 1.0}; 
     scalar_IC = 0;
     double dist = 0.0;
-    double rad = 1.0;
     for (unsigned int dir = 0; dir < dim; dir++) {
         double weightedDistance = (p[dir] - position[dir]) * (p[dir] - position[dir]) / ellipseAxes[dir] / ellipseAxes[dir];
         dist += weightedDistance;

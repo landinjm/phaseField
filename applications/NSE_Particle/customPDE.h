@@ -60,6 +60,8 @@ private:
     double correctionP = userInputs.get_model_constant_double("correctionP");
     dealii::Tensor<1,dim> gravity = userInputs.get_model_constant_rank_1_tensor("gravity");
     dealii::Tensor<1,dim> position = userInputs.get_model_constant_rank_1_tensor("position");
+    dealii::Tensor<1,dim> ellipseAxes = userInputs.get_model_constant_rank_1_tensor("ellipseAxes");
+    double rad = userInputs.get_model_constant_double("radius");
 
     // This bool acts as a switch to indicate what Chorin projection step is being calculating
     bool ChorinSwitch;
@@ -117,12 +119,13 @@ void customPDE<dim,degree>::solveIncrement(bool skip_time_dependent)
     // Calculating integral for the volume
     //this->computeIntegral(volume_p, 2, this->solutionSet); //Need to rederive equations with phi [0,1]
 
-    /*if (this->currentIncrement >= 4000){
+    if (this->currentIncrement >= 4000){
         // Calculation of particle velocity
         for (unsigned int i=0; i<dim; i++) {
             vel[i] += this->userInputs.dtValue * (gravity[i] + force[i]/volume_p);
+            position[i] += this->userInputs.dtValue *  vel[i];
         }
-    }*/
+    }
 
     // Set ChorinSwitch to false so steps 1 and 2 may occur
     ChorinSwitch = false;

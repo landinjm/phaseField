@@ -84,10 +84,10 @@ void customPDE<dim, degree>::explicitEquationRHS(variableContainer<dim, degree, 
 
     // Step one of the Chorin projection
     if (!ChorinSwitch) {
-        //Normal vector
+        // Normal vector
         scalargradType normalPhi = - phix / (std::sqrt(phix.norm_square()) + constV(reg));
 
-        //Stress tensor
+        // Stress tensor
         vectorvalueType sigma;
         vectorvalueType surface;
         vectorvalueType velocity;
@@ -97,8 +97,20 @@ void customPDE<dim, degree>::explicitEquationRHS(variableContainer<dim, degree, 
             velocity[j] = constV(vel[j]);
         }
 
-        //Advection of particle (dphi/dt)
-        scalarvalueType dphidt = -phix*velocity;
+        // Replotting the particle with an updated position
+        scalarvalueType newPhi = constV(0.0);
+        for (unsigned int i=0; i<phi.size(); i++){
+            double dist = 0.0;
+            for (unsigned int dir = 0; dir < dim; dir++) {
+                double weightedDistance = (q_point_loc[dir][i] - position[dir]) * (q_point_loc[dir][i] - position[dir]) / ellipseAxes[dir] / ellipseAxes[dir];
+                dist += weightedDistance;
+            }
+            dist = std::sqrt(dist);
+            newPhi[i] =  - std::tanh((dist - rad) / (W * std::sqrt(2)));
+        }
+
+        // Advection of particle (dphi/dt)
+        scalarvalueType dphidt = (newPhi - phi) / constV(userInputs.dtValue);
 
         // Calculating the advection-like term & forcing term
         vectorvalueType advecTerm; advecTerm = advecTerm * constV(0.0);
@@ -126,7 +138,7 @@ void customPDE<dim, degree>::explicitEquationRHS(variableContainer<dim, degree, 
         eq_u = u + constV(userInputs.dtValue) * (dphiU - advecTerm - phiU + F);
         eqx_u = -constV(userInputs.dtValue * nu) * u_gradW;
 
-        eq_phi = phi + constV(userInputs.dtValue)*dphidt;
+        eq_phi = newPhi;
 
         eq_sigma = sigma * normalPhi * surface;
     }

@@ -91,6 +91,12 @@ set Model constant gravity = (0.0, 0.0, 0.0), TENSOR
 # Gravity
 set Model constant position = (7.0, 3.0, 0.0), TENSOR
 
+# Radius
+set Model constant radius = 1.0, DOUBLE
+
+# Ellipse semi-major & semi-minor
+set Model constant ellipseAxes = (1.0, 1.0, 1.0), TENSOR
+
 # =================================================================================
 # Set the linear solver parameters
 # =================================================================================
