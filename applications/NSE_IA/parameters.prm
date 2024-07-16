@@ -63,11 +63,11 @@ end
 # Set the time step parameters
 # =================================================================================
 # The size of the time step
-set Time step = 4.0e-3
+set Time step = 4.0e-2
 
 # The simulation ends when either the number of time steps is reached or the
 # simulation time is reached.
-set Number of time steps = 100
+set Number of time steps = 20000
 
 # =================================================================================
 # Set the boundary conditions
@@ -110,10 +110,10 @@ set Model constant nu = 0.01, DOUBLE
 set Model constant rho = 100.0, DOUBLE
 
 #Interfacial width
-set Model constant W = 0.075, DOUBLE
+set Model constant W = 0.10, DOUBLE
 
 #Prefactor for pressure solve correction
-set Model constant correctionP = 100.0, DOUBLE
+set Model constant correctionP = 1.0, DOUBLE
 
 # =================================================================================
 # Set the linear solver parameters
@@ -140,7 +140,7 @@ set Output condition = EQUAL_SPACING
 
 # Number of times the program outputs the fields (total number for "EQUAL_SPACING"
 # and "LOG_SPACING", number per decade for "N_PER_DECADE", ignored for "LIST")
-set Number of outputs = 100
+set Number of outputs = 1
 
 # The number of time steps between updates being printed to the screen
 set Skip print steps = 1
@@ -158,3 +158,23 @@ set Checkpoint condition = EQUAL_SPACING
 # Number of times the creates checkpoints (total number for "EQUAL_SPACING"
 # and "LOG_SPACING", number per decade for "N_PER_DECADE", ignored for "LIST")
 set Number of checkpoints = 0
+
+# =================================================================================
+# Set the parameters for loading in initial conditions (OPTIONAL)
+# =================================================================================
+# Specify whether initial conditions should be read in from a *.vtk file, and if
+# so, which files to read in for which variables. Each entry takes a comma-separated
+# list of values for each variable, given in the order of the indices at the top of
+# equations.cc.
+
+# Whether to load intial conditions
+set Load initial conditions = false, false, false
+
+# Whether each processor should read its own file
+set Load parallel file = false, false, false
+
+# Names of the files to be read without the file extension (assumed to be in the app directory)
+set File names = dummy, dummy, levelSet_0.10W
+
+# Names of the variables in the file being read (may differ from the model variable names)
+set Variable names in the files = phi, phi, phi
