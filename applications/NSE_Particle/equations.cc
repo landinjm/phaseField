@@ -73,57 +73,60 @@ void customPDE<dim, degree>::explicitEquationRHS(variableContainer<dim, degree, 
     scalargradType Px = variable_list.get_scalar_gradient(1);
     scalarvalueType phi = variable_list.get_scalar_value(2);
     scalargradType phix = variable_list.get_scalar_gradient(2);
-    scalarvalueType sigma = variable_list.get_scalar_value(3);
+    vectorvalueType sigma_test = variable_list.get_vector_value(3);
 
     // Initialize the submission terms to zero
     // This is necessary to remove any remaining residuals in the projection step
-    vectorvalueType eq_u;
-    eq_u = eq_u * constV(0.0);
-    vectorgradType eqx_u;
-    eqx_u = eqx_u * constV(0.0);
+    vectorvalueType eq_u; eq_u = eq_u * constV(0.0);
+    vectorgradType eqx_u; eqx_u = eqx_u * constV(0.0);
     scalarvalueType eq_phi = constV(0.0);
-    vectorvalueType eq_sigma;
-    eq_sigma = eq_sigma * constV(0.0);
+    vectorvalueType eq_sigma; eq_sigma = eq_sigma * constV(0.0);
 
     // Step one of the Chorin projection
     if (!ChorinSwitch) {
-        // Calculating the advection-like term & forcing term
-        vectorvalueType advecTerm;
-        advecTerm = advecTerm * constV(0.0);
-        vectorvalueType phiU;
-        phiU = phiU * constV(0.0);
-        vectorgradType idk;
-        vectorvalueType force;
-        vectorvalueType velocity;
-        for (unsigned int i = 0; i < dim; i++) {
-            for (unsigned int j = 0; j < dim; j++) {
-                advecTerm[i] += u[j] * ux[i][j];
-                phiU[i] += constV(nu) * phix[j] * ux[i][j] / (constV(1.0 + reg) - phi);
-                idk[i][j] = u[i] * phix[i] / (constV(1.0 + reg) - phi);
-            }
-            force[i] = constV(gravity[i]);
-            velocity[i] = constV(vel[i]);
-        }
-
-        // Other bits and pieces
-        vectorvalueType hcorr = constV(nu * h / (2.0 * W * W)) * u * (constV(1.0) + phi) * (constV(1.0) + phi);
-
-        // Setting the expressions for the terms in the governing equations
-        eq_u = u + constV(userInputs.dtValue) * (force - advecTerm - phiU - hcorr);
-        eqx_u = constV(-userInputs.dtValue * nu) * (ux - idk);
-
-        eq_phi = phi - constV(userInputs.dtValue)*phix*velocity;
-
         //Normal vector
         scalargradType normalPhi = - phix / (std::sqrt(phix.norm_square()) + constV(reg));
 
         //Stress tensor
         vectorvalueType sigma;
         vectorvalueType surface;
+        vectorvalueType velocity;
         for (unsigned int j = 0; j < dim; j++) {
             sigma[j] = -P / constV(dtRatio) + constV(2.0*nu)*ux[j][j];
             surface[j] = std::abs(phix[j]) / constV(4.0);
+            velocity[j] = constV(vel[j]);
         }
+
+        //Advection of particle (dphi/dt)
+        scalarvalueType dphidt = -phix*velocity;
+
+        // Calculating the advection-like term & forcing term
+        vectorvalueType advecTerm; advecTerm = advecTerm * constV(0.0);
+        vectorvalueType grav;
+        vectorvalueType phiU; phiU = phiU * constV(0.0);
+        vectorgradType u_gradW;
+        for (unsigned int i = 0; i < dim; i++) {
+            for (unsigned int j = 0; j < dim; j++) {
+                advecTerm[i] += u[j] * ux[i][j];
+                phiU[i] += constV(2.0 * nu) * phix[j] * ux[i][j] / (constV(1.0 + reg) - phi);
+                u_gradW[i][j] = ux[i][j] - u[i] * phix[i] / (constV(1.0 + reg) - phi);
+            }
+
+            // Gravity
+            grav[i] = constV(gravity[i]);
+        }
+
+        vectorvalueType dphiU = dphidt * u / (constV(1.0 + reg) - phi);
+        vectorvalueType hcorr = -constV(nu * h / (2.0 * W * W)) * u * (constV(1.0) + phi) * (constV(1.0) + phi);
+
+        // Forcing term
+        vectorvalueType F = hcorr + grav;
+
+        // Setting the expressions for the terms in the governing equations
+        eq_u = u + constV(userInputs.dtValue) * (dphiU - advecTerm - phiU + F);
+        eqx_u = -constV(userInputs.dtValue * nu) * u_gradW;
+
+        eq_phi = phi + constV(userInputs.dtValue)*dphidt;
 
         eq_sigma = sigma * normalPhi * surface;
     }

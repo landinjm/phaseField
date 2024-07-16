@@ -76,12 +76,9 @@ private:
     // Gravity
     double gravity[3] = {0.0, 0.0, 0.0};
 
-    // Particle velocity
+    // Particle velocity & force
     double vel[dim];
     std::vector<double> force;
-
-    // Drag terms
-    double integrated_dFy = 0.0;
 
     // ================================================================
 };
