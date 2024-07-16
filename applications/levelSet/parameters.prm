@@ -8,9 +8,9 @@ set Number of dimensions = 2
 # (Domain size Z ignored in 2D)
 # =================================================================================
 # Each axes spans from zero to the specified length
-set Domain size X = 100
-set Domain size Y = 100
-set Domain size Z = 100
+set Domain size X = 30
+set Domain size Y = 6
+set Domain size Z = 6
 
 # =================================================================================
 # Set the element parameters
@@ -18,11 +18,11 @@ set Domain size Z = 100
 # The number of elements in each direction is 2^(refineFactor) * subdivisions
 # Subdivisions Z ignored in 2D
 # For optimal performance, use refineFactor primarily to determine the element size
-set Subdivisions X = 1
+set Subdivisions X = 5
 set Subdivisions Y = 1
 set Subdivisions Z = 1
 
-set Refine factor = 7
+set Refine factor = 5
 
 # Set the polynomial degree of the element (allowed values: 1, 2, or 3)
 set Element degree = 2
@@ -35,7 +35,7 @@ set Time step = 0.0005
 
 # The simulation ends when either the number of time steps is reached or the
 # simulation time is reached.
-set Number of time steps = 200000
+set Number of time steps = 3000
 
 # =================================================================================
 # Set the output parameters
@@ -46,10 +46,13 @@ set Output condition = EQUAL_SPACING
 
 # Number of times the program outputs the fields (total number for "EQUAL_SPACING"
 # and "LOG_SPACING", number per decade for "N_PER_DECADE", ignored for "LIST")
-set Number of outputs = 10
+set Number of outputs = 1
 
 # The number of time steps between updates being printed to the screen
 set Skip print steps = 1000
+
+# The output file type
+set Output file type = vtk
 
 # =================================================================================
 # Set the boundary conditions
@@ -83,7 +86,10 @@ set Boundary condition for variable phi = NATURAL
 # where [symmetry] is ISOTROPIC, TRANSVERSE, ORTHOTROPIC, or ANISOTROPIC.
 
 # Regularization for the sign term
-set Model constant reg = 1.0e-3, DOUBLE
+set Model constant reg = 1.0e-2, DOUBLE
 
 # Artificial viscoisty for stability
-set Model constant nu = 1.0e-1, DOUBLE
+set Model constant nu = 3.0e-2, DOUBLE
+
+#Interfacial width
+set Model constant W = 0.25, DOUBLE

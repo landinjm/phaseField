@@ -52,6 +52,13 @@ scalarvalueType sign = phi / std::sqrt(phi * phi + constV(reg));
 scalarvalueType eq_n = phi + constV(userInputs.dtValue) * sign * (constV(1.0) - std::sqrt(phix * phix));
 scalargradType eqx_n = -constV(userInputs.dtValue * nu) * phix;
 
+if(this->currentIncrement == 3000){
+	for (unsigned int i=0; i<phi.size(); i++){
+		eq_n[i] = std::tanh(phi[i] / (W * std::sqrt(2.0)));
+	}
+	eqx_n = eqx_n * constV(0.0);
+}
+
 // --- Submitting the terms for the governing equations ---
 
 variable_list.set_scalar_value_term_RHS(0,eq_n);

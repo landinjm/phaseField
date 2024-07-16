@@ -53,6 +53,7 @@ private:
 
 	double reg = userInputs.get_model_constant_double("reg");
 	double nu = userInputs.get_model_constant_double("nu");
+	double W = userInputs.get_model_constant_double("W");
 
 	// ================================================================
 

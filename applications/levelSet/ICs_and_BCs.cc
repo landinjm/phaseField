@@ -15,22 +15,23 @@ void customPDE<dim,degree>::setInitialCondition(const dealii::Point<dim> &p, con
     // by a hyperbolic tangent function. The center of each circle/sphere is
     // given by "center" and its radius is given by "radius".
 
-  double center[12][3] = {{0.1,0.3,0},{0.8,0.7,0},{0.5,0.2,0},{0.4,0.4,0},{0.3,0.9,0},{0.8,0.1,0},{0.9,0.5,0},{0.0,0.1,0},{0.1,0.6,0},{0.5,0.6,0},{1,1,0},{0.7,0.95,0}};
-  double rad[12] = {12, 14, 19, 16, 11, 12, 17, 15, 20, 10, 11, 14};
-  double dist;
-  scalar_IC = 0;
-  for (unsigned int i=0; i<12; i++){
-	  dist = 0.0;
-	  for (unsigned int dir = 0; dir < dim; dir++){
-		  dist += (p[dir]-center[i][dir]*userInputs.domain_size[dir])*(p[dir]-center[i][dir]*userInputs.domain_size[dir]);
-	  }
-	  dist = std::sqrt(dist);
-
-	  scalar_IC +=	0.5*(1.0-std::tanh((dist-rad[i])/1.5));
+  double center[3] = { 7.0, 2.5, 0.0 };
+  double ellipseAxes[3] = { 1.0, 1.5, 1.0}; 
+  double dist = 0.0;
+  double temp = 0.0;
+  double rad = 1.0;
+  for (unsigned int dir = 0; dir < dim; dir++) {
+      double weightedDistance = (p[dir] - center[dir]) * (p[dir] - center[dir]) / ellipseAxes[dir] / ellipseAxes[dir];
+      dist += weightedDistance;
+      temp += 4.0 * weightedDistance / ellipseAxes[dir] / ellipseAxes[dir] + 1e-3;
   }
-  if (scalar_IC > 1.0) scalar_IC = 1.0;
+  dist = std::sqrt(dist);
+  //double particle = 0.5 * (1.0 - std::tanh((dist - rad) / (W * std::sqrt(2))));
+  double normFactor = W * std::sqrt(temp);
+  double tanhInterior = (dist - rad) / normFactor;
+  double particle = 0.5 * (1.0 - std::tanh(tanhInterior));
 
-  scalar_IC = 2.0 * scalar_IC - 1.0;
+  scalar_IC = 2.0 * particle - 1.0;
 
   // ---------------------------------------------------------------------
 }
