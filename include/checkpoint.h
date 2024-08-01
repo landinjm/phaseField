@@ -173,9 +173,7 @@ void Checkpoint<dim, degree>::load_checkpoint_triangulation()
     verify_checkpoint_file_exists("restart.mesh");
     verify_checkpoint_file_exists("restart.mesh.info");
 
-    pcout << std::endl
-          << "*** Resuming from a checkpoint! ***" << std::endl
-          << std::endl;
+    pcout << std::endl << "*** Resuming from a checkpoint! ***" << std::endl << std::endl;
 
     try {
         DiscretizationRef.triangulation.load("restart.mesh");
