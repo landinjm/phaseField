@@ -26,8 +26,6 @@ public:
 
     void save_checkpoint();
 
-    void move_file(const std::string&, const std::string&);
-
     void load_checkpoint_triangulation();
 
     void load_checkpoint_time_info();
@@ -47,7 +45,12 @@ private:
     /*Message stream*/
     ConditionalOStream pcout;
 
+    void move_file(const std::string&, const std::string&);
+
     void verify_checkpoint_file_exists(const std::string filename);
+
+    /*Flag for the existence of any previous checkpoints, saved or loaded*/
+    bool previous_snapshot_exists;
 };
 
 template <int dim, int degree>
@@ -57,6 +60,7 @@ Checkpoint<dim, degree>::Checkpoint(const userInputParameters<dim>& _userInputs,
     , tStepRef(tStep)
     , currentCheckpoint(0)
     , pcout(std::cout, Utilities::MPI::this_mpi_process(MPI_COMM_WORLD) == 0)
+    , previous_snapshot_exists(false)
 {
 }
 
@@ -64,22 +68,19 @@ Checkpoint<dim, degree>::Checkpoint(const userInputParameters<dim>& _userInputs,
 template <int dim, int degree>
 void Checkpoint<dim, degree>::save_checkpoint()
 {
+    // MPI process id
     unsigned int my_id = Utilities::MPI::this_mpi_process(MPI_COMM_WORLD);
 
     if (my_id == 0) {
-        // if we have previously written a snapshot, then keep the last
-        // snapshot in case this one fails to save. Note: static variables
-        // will only be initialized once per model run.
-        static bool previous_snapshot_exists = (userInputs.resume_from_checkpoint == true);
+        // if we have previously written a snapshot, then keep the last snapshot in case this one fails to save
+        previous_snapshot_exists = (userInputs.resume_from_checkpoint == true);
 
         if (previous_snapshot_exists == true) {
             move_file("restart.mesh", "restart.mesh.old");
             move_file("restart.mesh.info", "restart.mesh.info.old");
             move_file("restart.time.info", "restart.time.info.old");
         }
-        // from now on, we know that if we get into this
-        // function again that a snapshot has previously
-        // been written
+        // from now on, we know that if we get into this function again that a snapshot has previously been written
         previous_snapshot_exists = true;
     }
 
@@ -138,6 +139,8 @@ void Checkpoint<dim, degree>::save_checkpoint()
         time_info_file << tStepRef.currentTime << " (currentTime)\n";
         time_info_file.close();
     }
+
+    pcout << "*** Checkpoint created! ***" << std::endl << std::endl;
 }
 
 // Move/rename a checkpoint file
