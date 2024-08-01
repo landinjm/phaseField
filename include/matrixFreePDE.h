@@ -260,12 +260,6 @@ protected:
 
     void applyInitialConditions();
 
-    void load_checkpoint_triangulation();
-    void load_checkpoint_fields();
-    void load_checkpoint_time_info();
-
-    void verify_checkpoint_file_exists(const std::string filename);
-
     // --------------------------------------------------------------------------
     // Nucleation methods and variables
     // --------------------------------------------------------------------------

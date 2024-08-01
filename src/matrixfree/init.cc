@@ -22,7 +22,7 @@ void MatrixFreePDE<dim, degree>::init()
 
     // If resuming from a checkpoint, load the refined triangulation, otherwise refine globally per the parameters.in file
     if (userInputs.resume_from_checkpoint) {
-        load_checkpoint_triangulation();
+        checkpoints.load_checkpoint_triangulation();
     } else {
         // Do the initial global refinement
         Discretization.triangulation.refine_global(userInputs.refine_factor);
@@ -235,7 +235,7 @@ void MatrixFreePDE<dim, degree>::init()
     // The initial conditions are re-applied below in the "adaptiveRefine" function so that the mesh can
     // adapt based on the initial conditions.
     if (userInputs.resume_from_checkpoint) {
-        load_checkpoint_fields();
+        checkpoints.load_checkpoint_fields();
     } else {
         applyInitialConditions();
     }
@@ -271,7 +271,7 @@ void MatrixFreePDE<dim, degree>::init()
 
     // If resuming from a checkpoint, load the proper starting increment and time
     if (userInputs.resume_from_checkpoint) {
-        load_checkpoint_time_info();
+        checkpoints.load_checkpoint_time_info();
     }
 
     computing_timer.leave_subsection("matrixFreePDE: initialization");
