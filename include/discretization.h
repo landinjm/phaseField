@@ -28,7 +28,7 @@ public:
     std::vector<FESystem<dim>*> FESet;
 
     /*Initializes the mesh, degrees of freedom, constraints and data structures using the user provided inputs in the application parameters file.*/
-    void makeTriangulation(parallel::distributed::Triangulation<dim>&) const;
+    void makeTriangulation();
 
     /*Total degrees of freedom in a problem set.*/
     unsigned int totalDOFs;
@@ -66,7 +66,7 @@ discretization<dim>::discretization(const userInputParameters<dim>& _userInputs)
 }
 
 template <int dim>
-void discretization<dim>::makeTriangulation(parallel::distributed::Triangulation<dim>& tria) const
+void discretization<dim>::makeTriangulation()
 {
     // Define the bounds of the triangulation domain
     Point<dim> Origin = Point<dim>();
@@ -86,6 +86,9 @@ void discretization<dim>::makeTriangulation(parallel::distributed::Triangulation
             std::cerr << "PRISMS-PF Error: Invalid number of dimensions" << std::endl;
             abort();
     }
+
+    // Create a reference to the triangulation
+    parallel::distributed::Triangulation<dim>& tria = triangulation;
 
     // Generate triangulation
     GridGenerator::subdivided_hyper_rectangle(tria, userInputs.subdivisions, Origin, UpperBound);

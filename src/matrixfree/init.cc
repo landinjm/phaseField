@@ -12,10 +12,10 @@ void MatrixFreePDE<dim, degree>::init()
     computing_timer.enter_subsection("matrixFreePDE: initialization");
 
     // creating mesh
-
     pcout << "creating problem mesh...\n";
+
     // Create the coarse mesh and mark the boundaries
-    Discretization.makeTriangulation(Discretization.triangulation);
+    Discretization.makeTriangulation();
 
     // Set which (if any) faces of the triangulation are periodic
     BCs.setPeriodicity();
@@ -34,8 +34,7 @@ void MatrixFreePDE<dim, degree>::init()
     } else {
         pcout << "problem dimensions: " << userInputs.domain_size[0] << "x" << userInputs.domain_size[1] << "x" << userInputs.domain_size[2] << std::endl;
     }
-    pcout << "number of elements: " << Discretization.triangulation.n_global_active_cells() << std::endl;
-    pcout << std::endl;
+    pcout << "number of elements: " << Discretization.triangulation.n_global_active_cells() << std::endl << std::endl;
 
     // Setup system
     pcout << "initializing matrix free object\n";
