@@ -68,13 +68,27 @@ discretization<dim>::discretization(const userInputParameters<dim>& _userInputs)
 template <int dim>
 void discretization<dim>::makeTriangulation(parallel::distributed::Triangulation<dim>& tria) const
 {
-    if (dim == 3) {
-        GridGenerator::subdivided_hyper_rectangle(tria, userInputs.subdivisions, Point<dim>(), Point<dim>(userInputs.domain_size[0], userInputs.domain_size[1], userInputs.domain_size[2]));
-    } else if (dim == 2) {
-        GridGenerator::subdivided_hyper_rectangle(tria, userInputs.subdivisions, Point<dim>(), Point<dim>(userInputs.domain_size[0], userInputs.domain_size[1]));
-    } else {
-        GridGenerator::subdivided_hyper_rectangle(tria, userInputs.subdivisions, Point<dim>(), Point<dim>(userInputs.domain_size[0]));
+    // Define the bounds of the triangulation domain
+    Point<dim> Origin = Point<dim>();
+    Point<dim> UpperBound;
+
+    switch(dim) {
+        case 3:
+            UpperBound = Point<dim>(userInputs.domain_size[0], userInputs.domain_size[1], userInputs.domain_size[2]);
+            break;
+        case 2:
+            UpperBound = Point<dim>(userInputs.domain_size[0], userInputs.domain_size[1]);
+            break;
+        case 1:
+            UpperBound = Point<dim>(userInputs.domain_size[0]);
+            break;
+        default:
+            std::cerr << "PRISMS-PF Error: Invalid number of dimensions" << std::endl;
+            abort();
     }
+
+    // Generate triangulation
+    GridGenerator::subdivided_hyper_rectangle(tria, userInputs.subdivisions, Origin, UpperBound);
 
     // Mark boundaries for applying the boundary conditions
     markBoundaries(tria);
