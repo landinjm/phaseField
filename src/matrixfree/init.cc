@@ -20,7 +20,7 @@ void MatrixFreePDE<dim, degree>::init()
     // Set which (if any) faces of the triangulation are periodic
     BCs.setPeriodicity();
 
-    // If resuming from a checkpoint, load the refined triangulation, otherwise refine globally per the parameters.in file
+    // If resuming from a checkpoint, load the refined triangulation, otherwise refine globally per the parameters.prm file
     if (userInputs.resume_from_checkpoint) {
         checkpoints.load_checkpoint_triangulation();
     } else {
@@ -44,16 +44,28 @@ void MatrixFreePDE<dim, degree>::init()
 
         char buffer[100];
 
-        // print to std::out
         std::string var_type;
         if (it->pdetype == EXPLICIT_TIME_DEPENDENT) {
             var_type = "EXPLICIT_TIME_DEPENDENT";
+            isTimeDependentBVP = true;
+            hasExplicitEquation = true;
+            
         } else if (it->pdetype == IMPLICIT_TIME_DEPENDENT) {
             var_type = "IMPLICIT_TIME_DEPENDENT";
+            isTimeDependentBVP = true;
+            hasNonExplicitEquation = true;
+            std::cerr << "PRISMS-PF Error: IMPLICIT_TIME_DEPENDENT equation types are not currently supported" << std::endl;
+            abort();
+
         } else if (it->pdetype == TIME_INDEPENDENT) {
             var_type = "TIME_INDEPENDENT";
+            isEllipticBVP = true;
+            hasNonExplicitEquation = true;
+
         } else if (it->pdetype == AUXILIARY) {
             var_type = "AUXILIARY";
+            hasNonExplicitEquation = true;
+
         }
 
         snprintf(buffer, sizeof(buffer), "initializing finite element space P^%u for %9s:%6s field '%s'\n",
@@ -63,34 +75,9 @@ void MatrixFreePDE<dim, degree>::init()
             it->name.c_str());
         pcout << buffer;
 
-        // Check if any time dependent fields present
-        if (it->pdetype == EXPLICIT_TIME_DEPENDENT) {
-            isTimeDependentBVP = true;
-            hasExplicitEquation = true;
-        } else if (it->pdetype == IMPLICIT_TIME_DEPENDENT) {
-            isTimeDependentBVP = true;
-            hasNonExplicitEquation = true;
-            std::cerr << "PRISMS-PF Error: IMPLICIT_TIME_DEPENDENT equation types are not currently supported" << std::endl;
-            abort();
-        } else if (it->pdetype == AUXILIARY) {
-            hasNonExplicitEquation = true;
-        } else if (it->pdetype == TIME_INDEPENDENT) {
-            isEllipticBVP = true;
-            hasNonExplicitEquation = true;
-        }
-
         // create FESystem
         FESystem<dim>* fe;
-
-        if (it->type == SCALAR) {
-            fe = new FESystem<dim>(FE_Q<dim>(QGaussLobatto<1>(degree + 1)), 1);
-        } else if (it->type == VECTOR) {
-            fe = new FESystem<dim>(FE_Q<dim>(QGaussLobatto<1>(degree + 1)), dim);
-        } else {
-            pcout << "\nmatrixFreePDE.h: unknown field type\n";
-            exit(-1);
-        }
-        Discretization.FESet.push_back(fe);
+        Discretization.makeFESystem(fe, it->type, degree);
 
         // distribute DOFs
         DoFHandler<dim>* dof_handler;

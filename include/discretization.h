@@ -24,11 +24,14 @@ public:
     /*Parallel mesh object which holds information about the FE nodes, elements and parallel domain decomposition.*/
     parallel::distributed::Triangulation<dim> triangulation;
 
-    /*A vector of finite element objects used in a model. For problems with only one primal field, the size of this vector is one,otherwise the size is the number of primal fields in the problem.*/
-    std::vector<FESystem<dim>*> FESet;
-
     /*Initializes the mesh, degrees of freedom, constraints and data structures using the user provided inputs in the application parameters file.*/
     void makeTriangulation();
+
+    /*A vector of finite element objects used in a model. For problems with only one primal field, the size of this vector is one, otherwise the size is the number of primal fields in the problem.*/
+    std::vector<FESystem<dim>*> FESet;
+
+    /*Initializes finite element object*/
+    void makeFESystem(FESystem<dim>*, fieldType, int);
 
     /*Total degrees of freedom in a problem set.*/
     unsigned int totalDOFs;
@@ -54,6 +57,9 @@ private:
     /*User inputs*/
     userInputParameters<dim> userInputs;
 
+    /*Message stream*/
+    ConditionalOStream pcout;
+
     /*Method to mark the boundary cells of the triangulation so that boundary conditions can be applied later.*/
     void markBoundaries(parallel::distributed::Triangulation<dim>&) const;
 };
@@ -62,6 +68,7 @@ template <int dim>
 discretization<dim>::discretization(const userInputParameters<dim>& _userInputs)
     : userInputs(_userInputs)
     , triangulation(MPI_COMM_WORLD)
+    , pcout(std::cout, Utilities::MPI::this_mpi_process(MPI_COMM_WORLD) == 0)
 {
 }
 
@@ -95,6 +102,24 @@ void discretization<dim>::makeTriangulation()
 
     // Mark boundaries for applying the boundary conditions
     markBoundaries(tria);
+}
+
+template <int dim>
+void discretization<dim>::makeFESystem(FESystem<dim>* fe, fieldType field, int degree)
+{
+    switch(field) {
+        case SCALAR:
+            fe = new FESystem<dim>(FE_Q<dim>(QGaussLobatto<1>(degree + 1)), 1);
+            break;
+        case VECTOR:
+            fe = new FESystem<dim>(FE_Q<dim>(QGaussLobatto<1>(degree + 1)), dim);
+            break;
+        default:
+            pcout << std::endl << "matrixFreePDE.h: unknown field type" << std::endl;
+            exit(-1);
+    }
+
+    FESet.push_back(fe);
 }
 
 template <int dim>
