@@ -27,7 +27,7 @@ using namespace dealii;
 template <int dim, int degree>
 class adaptiveRefinement {
 public:
-    adaptiveRefinement(const userInputParameters<dim>& _userInputs,  discretization<dim>& Discretization, boundaryConditions<dim, degree>& BCs, parallel::distributed::Triangulation<dim>& _triangulation, std::vector<Field<dim>>& _fields, std::vector<vectorType*>& _solutionSet, std::vector<parallel::distributed::SolutionTransfer<dim, vectorType>*>& _soltransSet, std::vector<FESystem<dim>*>& _FESet, std::vector<DoFHandler<dim>*>& _dofHandlersSet_nonconst, std::vector<const AffineConstraints<double>*>& _constraintsDirichletSet);
+    adaptiveRefinement(const userInputParameters<dim>& _userInputs,  discretization<dim>& Discretization, boundaryConditions<dim, degree>& BCs, std::vector<Field<dim>>& _fields, std::vector<vectorType*>& _solutionSet, std::vector<parallel::distributed::SolutionTransfer<dim, vectorType>*>& _soltransSet);
 
     /*Adaptive refinement*/
     void adaptiveRefine(unsigned int _currentIncrement);
@@ -60,33 +60,22 @@ private:
     /*Boundary Conditions*/
     boundaryConditions<dim, degree>& BCsRef;
 
-    parallel::distributed::Triangulation<dim>& triangulation;
-
     std::vector<Field<dim>>& fields;
 
     std::vector<vectorType*>& solutionSet;
 
     std::vector<parallel::distributed::SolutionTransfer<dim, vectorType>*>& soltransSet;
 
-    std::vector<FESystem<dim>*>& FESet;
-
-    std::vector<DoFHandler<dim>*>& dofHandlersSet_nonconst;
-
-    std::vector<const AffineConstraints<double>*>& constraintsDirichletSet;
 };
 
 template <int dim, int degree>
-adaptiveRefinement<dim, degree>::adaptiveRefinement(const userInputParameters<dim>& _userInputs, discretization<dim>& Discretization, boundaryConditions<dim, degree>& BCs, parallel::distributed::Triangulation<dim>& _triangulation, std::vector<Field<dim>>& _fields, std::vector<vectorType*>& _solutionSet, std::vector<parallel::distributed::SolutionTransfer<dim, vectorType>*>& _soltransSet, std::vector<FESystem<dim>*>& _FESet, std::vector<DoFHandler<dim>*>& _dofHandlersSet_nonconst, std::vector<const AffineConstraints<double>*>& _constraintsDirichletSet)
+adaptiveRefinement<dim, degree>::adaptiveRefinement(const userInputParameters<dim>& _userInputs, discretization<dim>& Discretization, boundaryConditions<dim, degree>& BCs, std::vector<Field<dim>>& _fields, std::vector<vectorType*>& _solutionSet, std::vector<parallel::distributed::SolutionTransfer<dim, vectorType>*>& _soltransSet)
     : userInputs(_userInputs)
     , DiscretizationRef(Discretization)
     , BCsRef(BCs)
-    , triangulation(_triangulation)
     , fields(_fields)
     , solutionSet(_solutionSet)
     , soltransSet(_soltransSet)
-    , FESet(_FESet)
-    , dofHandlersSet_nonconst(_dofHandlersSet_nonconst)
-    , constraintsDirichletSet(_constraintsDirichletSet)
 {
 }
 
@@ -99,7 +88,7 @@ void adaptiveRefinement<dim, degree>::adaptiveRefine(unsigned int currentIncreme
     } else {
         // Apply constraints before remeshing
         for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++) {
-            constraintsDirichletSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
+            BCsRef.constraintsDirichletSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
             constraintsOtherSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
             solutionSet[fieldIndex]->update_ghost_values();
         }
@@ -135,7 +124,7 @@ void adaptiveRefinement<dim, degree>::adaptiveRefineCriterion()
 
     // Before marking cells for refinement and/or coarsening clear user flags
     // These user flags are used to mark whether cells have already been flagged for refinement
-    triangulation.clear_user_flags();
+    DiscretizationRef.triangulation.clear_user_flags();
 
     for (auto it = userInputs.refinement_criteria.begin(); it != userInputs.refinement_criteria.end(); ++it) {
 
@@ -145,7 +134,7 @@ void adaptiveRefinement<dim, degree>::adaptiveRefineCriterion()
         // Grab the field index
         unsigned int index = it->variable_index;
 
-        FEValues<dim> fe_values(*FESet[index], quadrature, update_flags);
+        FEValues<dim> fe_values(*DiscretizationRef.FESet[index], quadrature, update_flags);
 
         std::vector<double> values(num_quad_points);
         std::vector<double> gradient_magnitudes(num_quad_points);
@@ -155,9 +144,9 @@ void adaptiveRefinement<dim, degree>::adaptiveRefineCriterion()
         std::vector<dealii::Tensor<1, dim, double>> gradients(num_quad_points);
         std::vector<std::vector<dealii::Tensor<1, dim, double>>> gradients_vector(num_quad_points, std::vector<dealii::Tensor<1, dim, double>>(dim));
 
-        typename DoFHandler<dim>::active_cell_iterator cell = dofHandlersSet_nonconst[index]->begin_active(), endc = dofHandlersSet_nonconst[index]->end();
+        typename DoFHandler<dim>::active_cell_iterator cell = DiscretizationRef.dofHandlersSet_nonconst[index]->begin_active(), endc = DiscretizationRef.dofHandlersSet_nonconst[index]->end();
 
-        typename parallel::distributed::Triangulation<dim>::active_cell_iterator t_cell = triangulation.begin_active();
+        typename parallel::distributed::Triangulation<dim>::active_cell_iterator t_cell = DiscretizationRef.triangulation.begin_active();
 
         // Loop through locally owned cells
         for (; cell != endc; ++cell) {
@@ -231,12 +220,12 @@ template <int dim, int degree>
 void adaptiveRefinement<dim, degree>::refineGrid()
 {
     // prepare and refine
-    triangulation.prepare_coarsening_and_refinement();
+    DiscretizationRef.triangulation.prepare_coarsening_and_refinement();
     for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++) {
 
         soltransSet[fieldIndex]->prepare_for_coarsening_and_refinement(*solutionSet[fieldIndex]);
     }
-    triangulation.execute_coarsening_and_refinement();
+    DiscretizationRef.triangulation.execute_coarsening_and_refinement();
 }
 
 template <int dim, int degree>
