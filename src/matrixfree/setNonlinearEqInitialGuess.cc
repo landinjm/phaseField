@@ -20,7 +20,7 @@ void MatrixFreePDE<dim, degree>::setNonlinearEqInitialGuess()
 
             computeLaplaceRHS(fieldIndex);
 
-            for (std::map<types::global_dof_index, double>::const_iterator it = valuesDirichletSet[fieldIndex]->begin(); it != valuesDirichletSet[fieldIndex]->end(); ++it) {
+            for (std::map<types::global_dof_index, double>::const_iterator it = BCs.valuesDirichletSet[fieldIndex]->begin(); it != BCs.valuesDirichletSet[fieldIndex]->end(); ++it) {
                 if (residualSet[fieldIndex]->in_local_range(it->first)) {
                     (*residualSet[fieldIndex])(it->first) = 0.0;
                 }

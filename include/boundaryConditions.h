@@ -26,6 +26,12 @@ public:
     /*Copies of constraintSet elements, but stored as non-const to enable application of constraints.*/
     std::vector<AffineConstraints<double>*> constraintsDirichletSet_nonconst;
 
+    /**/
+    std::vector<std::map<dealii::types::global_dof_index, double>*> valuesDirichletSet;
+
+    /*Initializes Dirichlet constraints*/
+    void makeDirichletConstraints(AffineConstraints<double>*, IndexSet*);
+
     /*Non-uniform boundary conditions function*/
 
     /*Method to apply boundary conditions*/
@@ -59,6 +65,20 @@ boundaryConditions<dim, degree>::boundaryConditions(const userInputParameters<di
     , DiscretizationRef(Discretization)
 {
 }
+
+template <int dim, int degree>
+void boundaryConditions<dim, degree>::makeDirichletConstraints(AffineConstraints<double>* constraintsDirichlet, IndexSet* locally_relevant_dofs)
+{
+    constraintsDirichlet = new AffineConstraints<double>;
+    constraintsDirichletSet.push_back(constraintsDirichlet);
+    constraintsDirichletSet_nonconst.push_back(constraintsDirichlet);
+
+    valuesDirichletSet.push_back(new std::map<dealii::types::global_dof_index, double>);
+
+    constraintsDirichlet->clear();
+    constraintsDirichlet->reinit(*locally_relevant_dofs);
+}
+
 
 template <int dim, int degree>
 void boundaryConditions<dim, degree>::applyNeumannBCs(dealii::LinearAlgebra::distributed::Vector<double>& residual, unsigned int& currentFieldIndex)

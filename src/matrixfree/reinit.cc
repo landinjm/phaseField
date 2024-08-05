@@ -64,11 +64,11 @@ void MatrixFreePDE<dim, degree>::reinit()
         constraintsOther->close();
 
         // Store Dirichlet BC DOF's
-        valuesDirichletSet[it->index]->clear();
+        BCs.valuesDirichletSet[it->index]->clear();
         for (types::global_dof_index i = 0; i < dof_handler->n_dofs(); i++) {
             if (locally_relevant_dofs->is_element(i)) {
                 if (constraintsDirichlet->is_constrained(i)) {
-                    (*valuesDirichletSet[it->index])[i] = constraintsDirichlet->get_inhomogeneity(i);
+                    (*BCs.valuesDirichletSet[it->index])[i] = constraintsDirichlet->get_inhomogeneity(i);
                 }
             }
         }

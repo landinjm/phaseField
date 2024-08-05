@@ -88,18 +88,13 @@ void MatrixFreePDE<dim, degree>::init()
         Discretization.extractLocalDOFs(locally_relevant_dofs, dof_handler);
 
         // Create constraints
-        AffineConstraints<double>*constraintsDirichlet, *constraintsOther;
-
-        constraintsDirichlet = new AffineConstraints<double>;
-        BCs.constraintsDirichletSet.push_back(constraintsDirichlet);
-        BCs.constraintsDirichletSet_nonconst.push_back(constraintsDirichlet);
+        AffineConstraints<double> *constraintsDirichlet, *constraintsOther;
+        BCs.makeDirichletConstraints(constraintsDirichlet, locally_relevant_dofs);
+        
         constraintsOther = new AffineConstraints<double>;
         RefineAdaptively.constraintsOtherSet.push_back(constraintsOther);
         RefineAdaptively.constraintsOtherSet_nonconst.push_back(constraintsOther);
-        valuesDirichletSet.push_back(new std::map<dealii::types::global_dof_index, double>);
 
-        constraintsDirichlet->clear();
-        constraintsDirichlet->reinit(*locally_relevant_dofs);
         constraintsOther->clear();
         constraintsOther->reinit(*locally_relevant_dofs);
 
@@ -134,11 +129,11 @@ void MatrixFreePDE<dim, degree>::init()
         constraintsOther->close();
 
         // Store Dirichlet BC DOF's
-        valuesDirichletSet[it->index]->clear();
+        BCs.valuesDirichletSet[it->index]->clear();
         for (types::global_dof_index i = 0; i < dof_handler->n_dofs(); i++) {
             if (locally_relevant_dofs->is_element(i)) {
                 if (constraintsDirichlet->is_constrained(i)) {
-                    (*valuesDirichletSet[it->index])[i] = constraintsDirichlet->get_inhomogeneity(i);
+                    (*BCs.valuesDirichletSet[it->index])[i] = constraintsDirichlet->get_inhomogeneity(i);
                 }
             }
         }

@@ -251,8 +251,6 @@ protected:
         const std::vector<vectorType*>& src,
         const std::pair<unsigned int, unsigned int>& cell_range);
 
-    std::vector<std::map<dealii::types::global_dof_index, double>*> valuesDirichletSet;
-
     void applyDirichletBCs();
 
     // methods to apply initial conditions
