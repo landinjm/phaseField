@@ -11,7 +11,9 @@
 #include <deal.II/lac/la_parallel_vector.h>
 
 #include "fields.h"
+#include "discretization.h"
 #include "userInputParameters.h"
+#include "boundaryConditions.h"
 
 #ifndef vectorType
 typedef dealii::LinearAlgebra::distributed::Vector<double> vectorType;
@@ -25,7 +27,7 @@ using namespace dealii;
 template <int dim, int degree>
 class adaptiveRefinement {
 public:
-    adaptiveRefinement(const userInputParameters<dim>& _userInputs, parallel::distributed::Triangulation<dim>& _triangulation, std::vector<Field<dim>>& _fields, std::vector<vectorType*>& _solutionSet, std::vector<parallel::distributed::SolutionTransfer<dim, vectorType>*>& _soltransSet, std::vector<FESystem<dim>*>& _FESet, std::vector<DoFHandler<dim>*>& _dofHandlersSet_nonconst, std::vector<const AffineConstraints<double>*>& _constraintsDirichletSet);
+    adaptiveRefinement(const userInputParameters<dim>& _userInputs,  discretization<dim>& Discretization, boundaryConditions<dim, degree>& BCs, parallel::distributed::Triangulation<dim>& _triangulation, std::vector<Field<dim>>& _fields, std::vector<vectorType*>& _solutionSet, std::vector<parallel::distributed::SolutionTransfer<dim, vectorType>*>& _soltransSet, std::vector<FESystem<dim>*>& _FESet, std::vector<DoFHandler<dim>*>& _dofHandlersSet_nonconst, std::vector<const AffineConstraints<double>*>& _constraintsDirichletSet);
 
     /*Adaptive refinement*/
     void adaptiveRefine(unsigned int _currentIncrement);
@@ -35,6 +37,9 @@ public:
 
     /*Current increment*/
     unsigned int currentIncrement;
+
+    /*Initializes constraints for adaptive meshes*/
+    void makeOtherConstraints(unsigned int);
 
     /*A vector of all the hanging node constraints for adaptive meshes in the problem. A constraint set is a map which holds the mapping between the degrees of freedom and the corresponding degree of freedom constraints.*/
     std::vector<const AffineConstraints<double>*> constraintsOtherSet;
@@ -46,7 +51,14 @@ private:
     // Adaptive refinement criterion
     void adaptiveRefineCriterion();
 
+     /*User inputs*/
     userInputParameters<dim> userInputs;
+
+    /*Discretiziation*/
+    discretization<dim>& DiscretizationRef;
+
+    /*Boundary Conditions*/
+    boundaryConditions<dim, degree>& BCsRef;
 
     parallel::distributed::Triangulation<dim>& triangulation;
 
@@ -64,8 +76,10 @@ private:
 };
 
 template <int dim, int degree>
-adaptiveRefinement<dim, degree>::adaptiveRefinement(const userInputParameters<dim>& _userInputs, parallel::distributed::Triangulation<dim>& _triangulation, std::vector<Field<dim>>& _fields, std::vector<vectorType*>& _solutionSet, std::vector<parallel::distributed::SolutionTransfer<dim, vectorType>*>& _soltransSet, std::vector<FESystem<dim>*>& _FESet, std::vector<DoFHandler<dim>*>& _dofHandlersSet_nonconst, std::vector<const AffineConstraints<double>*>& _constraintsDirichletSet)
+adaptiveRefinement<dim, degree>::adaptiveRefinement(const userInputParameters<dim>& _userInputs, discretization<dim>& Discretization, boundaryConditions<dim, degree>& BCs, parallel::distributed::Triangulation<dim>& _triangulation, std::vector<Field<dim>>& _fields, std::vector<vectorType*>& _solutionSet, std::vector<parallel::distributed::SolutionTransfer<dim, vectorType>*>& _soltransSet, std::vector<FESystem<dim>*>& _FESet, std::vector<DoFHandler<dim>*>& _dofHandlersSet_nonconst, std::vector<const AffineConstraints<double>*>& _constraintsDirichletSet)
     : userInputs(_userInputs)
+    , DiscretizationRef(Discretization)
+    , BCsRef(BCs)
     , triangulation(_triangulation)
     , fields(_fields)
     , solutionSet(_solutionSet)
@@ -223,6 +237,32 @@ void adaptiveRefinement<dim, degree>::refineGrid()
         soltransSet[fieldIndex]->prepare_for_coarsening_and_refinement(*solutionSet[fieldIndex]);
     }
     triangulation.execute_coarsening_and_refinement();
+}
+
+template <int dim, int degree>
+void adaptiveRefinement<dim, degree>::makeOtherConstraints(unsigned int index)
+{
+    AffineConstraints<double> *constraintsOther;
+
+    constraintsOther = new AffineConstraints<double>;
+    constraintsOtherSet.push_back(constraintsOther);
+    constraintsOtherSet_nonconst.push_back(constraintsOther);
+
+    constraintsOther->clear();
+    constraintsOther->reinit(*DiscretizationRef.locally_relevant_dofsSet[index]);
+
+    // Get hanging node constraints
+    DoFTools::make_hanging_node_constraints(*DiscretizationRef.dofHandlersSet[index], *constraintsOther);
+
+    // Add a constraint to fix the value at the origin to zero if all BCs are zero-derivative or periodic
+    //std::vector<int> rigidBodyModeComponents;
+    // BCs.getComponentsWithRigidBodyModes(rigidBodyModeComponents, currentFieldIndex);
+    // BCs.setRigidBodyModeConstraints(rigidBodyModeComponents,constraintsOther,dof_handler);
+
+    // Get constraints for periodic BCs
+    BCsRef.setPeriodicityConstraints(*constraintsOther, *DiscretizationRef.dofHandlersSet[index], index);
+
+    constraintsOther->close();
 }
 
 #endif

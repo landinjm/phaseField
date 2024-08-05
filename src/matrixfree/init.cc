@@ -76,38 +76,17 @@ void MatrixFreePDE<dim, degree>::init()
         pcout << buffer;
 
         // create FESystem
-        FESystem<dim>* fe;
-        Discretization.makeFESystem(fe, it->type, degree);
+        Discretization.makeFESystem(it->type, degree);
 
         // distribute DOFs
-        DoFHandler<dim>* dof_handler;
-        Discretization.makeDOFs(dof_handler, fe);
+        Discretization.makeDOFs(currentFieldIndex);
 
         // Extract locally_relevant_dofs
-        IndexSet* locally_relevant_dofs;
-        Discretization.extractLocalDOFs(locally_relevant_dofs, dof_handler);
+        Discretization.extractLocalDOFs(currentFieldIndex);
 
         // Create constraints
-        AffineConstraints<double> *constraintsDirichlet, *constraintsOther;
-        BCs.makeDirichletConstraints(constraintsDirichlet, locally_relevant_dofs);
-        
-        constraintsOther = new AffineConstraints<double>;
-        RefineAdaptively.constraintsOtherSet.push_back(constraintsOther);
-        RefineAdaptively.constraintsOtherSet_nonconst.push_back(constraintsOther);
-
-        constraintsOther->clear();
-        constraintsOther->reinit(*locally_relevant_dofs);
-
-        // Get hanging node constraints
-        DoFTools::make_hanging_node_constraints(*dof_handler, *constraintsOther);
-
-        // Add a constraint to fix the value at the origin to zero if all BCs are zero-derivative or periodic
-        std::vector<int> rigidBodyModeComponents;
-        // BCs.getComponentsWithRigidBodyModes(rigidBodyModeComponents, currentFieldIndex);
-        // BCs.setRigidBodyModeConstraints(rigidBodyModeComponents,constraintsOther,dof_handler);
-
-        // Get constraints for periodic BCs
-        BCs.setPeriodicityConstraints(*constraintsOther, *dof_handler, currentFieldIndex);
+        BCs.makeDirichletConstraints(currentFieldIndex);
+        RefineAdaptively.makeOtherConstraints(currentFieldIndex);
 
         // Check if Dirichlet BCs are used
         for (unsigned int i = 0; i < userInputs.BC_list.size(); i++) {
@@ -121,25 +100,22 @@ void MatrixFreePDE<dim, degree>::init()
                 }
             }
         }
-
+        
         // Get constraints for Dirichlet BCs
         applyDirichletBCs();
 
-        constraintsDirichlet->close();
-        constraintsOther->close();
-
         // Store Dirichlet BC DOF's
         BCs.valuesDirichletSet[it->index]->clear();
-        for (types::global_dof_index i = 0; i < dof_handler->n_dofs(); i++) {
-            if (locally_relevant_dofs->is_element(i)) {
-                if (constraintsDirichlet->is_constrained(i)) {
-                    (*BCs.valuesDirichletSet[it->index])[i] = constraintsDirichlet->get_inhomogeneity(i);
+        for (types::global_dof_index i = 0; i < Discretization.dofHandlersSet[currentFieldIndex]->n_dofs(); i++) {
+            if (Discretization.locally_relevant_dofsSet[currentFieldIndex]->is_element(i)) {
+                if (BCs.constraintsDirichletSet[currentFieldIndex]->is_constrained(i)) {
+                    (*BCs.valuesDirichletSet[it->index])[i] = BCs.constraintsDirichletSet[currentFieldIndex]->get_inhomogeneity(i);
                 }
             }
         }
 
         snprintf(buffer, sizeof(buffer), "field '%2s' DOF : %u (Constraint DOF : %u)\n",
-            it->name.c_str(), dof_handler->n_dofs(), constraintsDirichlet->n_constraints());
+            it->name.c_str(), Discretization.dofHandlersSet[currentFieldIndex]->n_dofs(), BCs.constraintsDirichletSet[currentFieldIndex]->n_constraints());
         pcout << buffer;
     }
     pcout << "total DOF : " << Discretization.totalDOFs << std::endl;

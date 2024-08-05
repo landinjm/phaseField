@@ -31,13 +31,13 @@ public:
     std::vector<FESystem<dim>*> FESet;
 
     /*Initializes finite element object*/
-    void makeFESystem(FESystem<dim>*, fieldType, int);
+    void makeFESystem(fieldType, int);
 
     /*Initialize DOFs*/
-    void makeDOFs(DoFHandler<dim>*, FESystem<dim>*);
+    void makeDOFs(unsigned int);
 
     /*Extract local DOFs*/
-    void extractLocalDOFs(IndexSet*, DoFHandler<dim>*);
+    void extractLocalDOFs(unsigned int);
 
     /*Total degrees of freedom in a problem set.*/
     unsigned int totalDOFs;
@@ -111,8 +111,10 @@ void discretization<dim>::makeTriangulation()
 }
 
 template <int dim>
-void discretization<dim>::makeFESystem(FESystem<dim>* fe, fieldType field, int degree)
+void discretization<dim>::makeFESystem(fieldType field, int degree)
 {
+    FESystem<dim>* fe;
+
     switch(field) {
         case SCALAR:
             fe = new FESystem<dim>(FE_Q<dim>(QGaussLobatto<1>(degree + 1)), 1);
@@ -129,25 +131,29 @@ void discretization<dim>::makeFESystem(FESystem<dim>* fe, fieldType field, int d
 }
 
 template <int dim>
-void discretization<dim>::makeDOFs(DoFHandler<dim>* dof_handler, FESystem<dim>* fe)
+void discretization<dim>::makeDOFs(unsigned int index)
 {
+    DoFHandler<dim>* dof_handler;
+
     dof_handler = new DoFHandler<dim>(triangulation);
     dofHandlersSet.push_back(dof_handler);
     dofHandlersSet_nonconst.push_back(dof_handler);
 
-    dof_handler->distribute_dofs(*fe);
+    dof_handler->distribute_dofs(*FESet[index]);
     totalDOFs += dof_handler->n_dofs();
 }
 
 template <int dim>
-void discretization<dim>::extractLocalDOFs(IndexSet* locally_relevant_dofs, DoFHandler<dim>* dof_handler)
+void discretization<dim>::extractLocalDOFs(unsigned int index)
 {
+    IndexSet* locally_relevant_dofs;
+
     locally_relevant_dofs = new IndexSet;
     locally_relevant_dofsSet.push_back(locally_relevant_dofs);
     locally_relevant_dofsSet_nonconst.push_back(locally_relevant_dofs);
 
     locally_relevant_dofs->clear();
-    DoFTools::extract_locally_relevant_dofs(*dof_handler, *locally_relevant_dofs);
+    DoFTools::extract_locally_relevant_dofs(*dofHandlersSet[index], *locally_relevant_dofs);
 }
 
 template <int dim>

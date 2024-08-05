@@ -30,7 +30,7 @@ public:
     std::vector<std::map<dealii::types::global_dof_index, double>*> valuesDirichletSet;
 
     /*Initializes Dirichlet constraints*/
-    void makeDirichletConstraints(AffineConstraints<double>*, IndexSet*);
+    void makeDirichletConstraints(unsigned int);
 
     /*Non-uniform boundary conditions function*/
 
@@ -67,8 +67,10 @@ boundaryConditions<dim, degree>::boundaryConditions(const userInputParameters<di
 }
 
 template <int dim, int degree>
-void boundaryConditions<dim, degree>::makeDirichletConstraints(AffineConstraints<double>* constraintsDirichlet, IndexSet* locally_relevant_dofs)
+void boundaryConditions<dim, degree>::makeDirichletConstraints(unsigned int index)
 {
+    AffineConstraints<double> *constraintsDirichlet;
+    
     constraintsDirichlet = new AffineConstraints<double>;
     constraintsDirichletSet.push_back(constraintsDirichlet);
     constraintsDirichletSet_nonconst.push_back(constraintsDirichlet);
@@ -76,7 +78,9 @@ void boundaryConditions<dim, degree>::makeDirichletConstraints(AffineConstraints
     valuesDirichletSet.push_back(new std::map<dealii::types::global_dof_index, double>);
 
     constraintsDirichlet->clear();
-    constraintsDirichlet->reinit(*locally_relevant_dofs);
+    constraintsDirichlet->reinit(*DiscretizationRef.locally_relevant_dofsSet[index]);
+
+    constraintsDirichlet->close();
 }
 
 
