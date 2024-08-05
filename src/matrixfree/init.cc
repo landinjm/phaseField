@@ -81,23 +81,11 @@ void MatrixFreePDE<dim, degree>::init()
 
         // distribute DOFs
         DoFHandler<dim>* dof_handler;
-
-        dof_handler = new DoFHandler<dim>(Discretization.triangulation);
-        Discretization.dofHandlersSet.push_back(dof_handler);
-        Discretization.dofHandlersSet_nonconst.push_back(dof_handler);
-
-        dof_handler->distribute_dofs(*fe);
-        Discretization.totalDOFs += dof_handler->n_dofs();
+        Discretization.makeDOFs(dof_handler, fe);
 
         // Extract locally_relevant_dofs
         IndexSet* locally_relevant_dofs;
-
-        locally_relevant_dofs = new IndexSet;
-        Discretization.locally_relevant_dofsSet.push_back(locally_relevant_dofs);
-        Discretization.locally_relevant_dofsSet_nonconst.push_back(locally_relevant_dofs);
-
-        locally_relevant_dofs->clear();
-        DoFTools::extract_locally_relevant_dofs(*dof_handler, *locally_relevant_dofs);
+        Discretization.extractLocalDOFs(locally_relevant_dofs, dof_handler);
 
         // Create constraints
         AffineConstraints<double>*constraintsDirichlet, *constraintsOther;

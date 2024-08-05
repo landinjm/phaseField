@@ -33,6 +33,12 @@ public:
     /*Initializes finite element object*/
     void makeFESystem(FESystem<dim>*, fieldType, int);
 
+    /*Initialize DOFs*/
+    void makeDOFs(DoFHandler<dim>*, FESystem<dim>*);
+
+    /*Extract local DOFs*/
+    void extractLocalDOFs(IndexSet*, DoFHandler<dim>*);
+
     /*Total degrees of freedom in a problem set.*/
     unsigned int totalDOFs;
 
@@ -120,6 +126,28 @@ void discretization<dim>::makeFESystem(FESystem<dim>* fe, fieldType field, int d
     }
 
     FESet.push_back(fe);
+}
+
+template <int dim>
+void discretization<dim>::makeDOFs(DoFHandler<dim>* dof_handler, FESystem<dim>* fe)
+{
+    dof_handler = new DoFHandler<dim>(triangulation);
+    dofHandlersSet.push_back(dof_handler);
+    dofHandlersSet_nonconst.push_back(dof_handler);
+
+    dof_handler->distribute_dofs(*fe);
+    totalDOFs += dof_handler->n_dofs();
+}
+
+template <int dim>
+void discretization<dim>::extractLocalDOFs(IndexSet* locally_relevant_dofs, DoFHandler<dim>* dof_handler)
+{
+    locally_relevant_dofs = new IndexSet;
+    locally_relevant_dofsSet.push_back(locally_relevant_dofs);
+    locally_relevant_dofsSet_nonconst.push_back(locally_relevant_dofs);
+
+    locally_relevant_dofs->clear();
+    DoFTools::extract_locally_relevant_dofs(*dof_handler, *locally_relevant_dofs);
 }
 
 template <int dim>
