@@ -23,8 +23,23 @@ public:
     /*Flag used to mark problems with at least one explicit field*/
     bool hasExplicitEquation;
 
+    /*Flag used to mark problems with at least one scalar explicit field*/
+    bool hasScalarExplicitEquation;
+
+    /*FLag sed to mark problems with at least one vector explicit field*/
+    bool hasVectorExplicitEquation;
+
     /*Flag used to mark problems with at least one nonexplicit field*/
     bool hasNonExplicitEquation;
+
+    /*Flag used to mark problems with at least one postprocessed field*/
+    bool hasPostprocessedField;
+
+    /*Flag used to mark problems with at least one scalar postprocessed field*/
+    bool hasScalarPostprocessedField;
+
+    /*Flag used to mark problems with at least one vector postprocessed field*/
+    bool hasVectorPostprocessedField;
 
 private:
     /*User inputs*/
@@ -37,7 +52,12 @@ problemFlags<dim>::problemFlags(const userInputParameters<dim>& _userInputs)
     , isTimeDependentBVP(false)
     , isEllipticBVP(false)
     , hasExplicitEquation(false)
+    , hasScalarExplicitEquation(false)
+    , hasVectorExplicitEquation(false)
     , hasNonExplicitEquation(false)
+    , hasPostprocessedField(false)
+    , hasScalarPostprocessedField(false)
+    , hasVectorPostprocessedField(false)
 {
 }
 
