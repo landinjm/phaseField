@@ -273,9 +273,9 @@ void inputFileReader::declare_parameters(dealii::ParameterHandler& parameter_han
         parameter_handler.leave_subsection();
     }
 
-    parameter_handler.declare_entry("Number of time steps", "-1", dealii::Patterns::Integer(), "The time step size for the simulation.");
-    parameter_handler.declare_entry("Time step", "-0.1", dealii::Patterns::Double(), "The time step size for the simulation.");
-    parameter_handler.declare_entry("Simulation end time", "-0.1", dealii::Patterns::Double(), "The value of simulated time where the simulation ends.");
+    parameter_handler.declare_entry("Number of time steps", "0", dealii::Patterns::Integer(), "The time step size for the simulation.");
+    parameter_handler.declare_entry("Time step", "0.0", dealii::Patterns::Double(), "The time step size for the simulation.");
+    parameter_handler.declare_entry("Simulation end time", "0.0", dealii::Patterns::Double(), "The value of simulated time where the simulation ends.");
 
     for (unsigned int i = 0; i < var_types.size(); i++) {
         if (var_eq_types.at(i) == TIME_INDEPENDENT || var_eq_types.at(i) == IMPLICIT_TIME_DEPENDENT) {

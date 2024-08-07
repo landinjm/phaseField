@@ -11,132 +11,192 @@ template <int dim>
 userInputParameters<dim>::userInputParameters(inputFileReader& input_file_reader, dealii::ParameterHandler& parameter_handler, variableAttributeLoader variable_attributes)
 {
 
+    // Load the inputs into the class member variables
     loadVariableAttributes(variable_attributes);
 
-    // Load the inputs into the class member variables
+    /*
+        Meshing Parameters
+    */
 
-    // Meshing parameters
-    domain_size.push_back(parameter_handler.get_double("Domain size X"));
-    if (dim > 1) {
-        domain_size.push_back(parameter_handler.get_double("Domain size Y"));
-        if (dim > 2) {
-            domain_size.push_back(parameter_handler.get_double("Domain size Z"));
-        }
+    // Coordinate Axes
+    std::vector<std::string> coordAxes = {"X", "Y", "Z"};
+
+    // Domain size
+    for (unsigned int i = 0; i < dim; ++i) {
+        domain_size.push_back(parameter_handler.get_double("Domain size " + coordAxes[i]));
     }
 
-    subdivisions.push_back(parameter_handler.get_integer("Subdivisions X"));
-    if (dim > 1) {
-        subdivisions.push_back(parameter_handler.get_integer("Subdivisions Y"));
-        if (dim > 2) {
-            subdivisions.push_back(parameter_handler.get_integer("Subdivisions Z"));
-        }
+    // Subdivisions
+    for (unsigned int i = 0; i < dim; ++i) {
+        subdivisions.push_back(parameter_handler.get_integer("Subdivisions " + coordAxes[i]));
     }
 
+    // Global refinement
     refine_factor = parameter_handler.get_integer("Refine factor");
 
+    // Element degree
     degree = parameter_handler.get_integer("Element degree");
 
-    // Adaptive meshing parameters
+    // Flag for AMR 
     h_adaptivity = parameter_handler.get_bool("Mesh adaptivity");
+
+    // Steps between remeshing
     skip_remeshing_steps = parameter_handler.get_integer("Steps between remeshing operations");
 
+    // Minimum AMR refinement level
     max_refinement_level = parameter_handler.get_integer("Max refinement level");
+
+    // Maximum AMR refinement level
     min_refinement_level = parameter_handler.get_integer("Min refinement level");
 
-    // Enforce that the initial refinement level must be between the max and min level
+    // Check that the initial global refinement level is between the max and min AMR levels
     if (h_adaptivity && ((refine_factor < min_refinement_level) || (refine_factor > max_refinement_level))) {
-        std::cerr << "PRISMS-PF Error: The initial refinement factor must be between the maximum and minimum refinement levels when adaptive meshing is enabled." << std::endl;
-        std::cerr << "Initial refinement level: " << refine_factor << " Maximum and minimum refinement levels: " << max_refinement_level << ", " << min_refinement_level << std::endl;
-        abort();
+        AssertThrow(false, ExcMessage("The <Refine factor> parameter has an invalid value. It must be between the minimum and maximum refinement levels when AMR is enabled"));
     }
 
     // The adaptivity criterion for each variable has its own subsection
     for (unsigned int i = 0; i < number_of_variables; i++) {
 
+        // Enter the refinement subsection for variable i, even if it does not exist 
         std::string subsection_text = "Refinement criterion: ";
         subsection_text.append(input_file_reader.var_names.at(i));
 
         parameter_handler.enter_subsection(subsection_text);
-        {
-            std::string crit_type_string = parameter_handler.get("Criterion type");
-            if (crit_type_string.size() > 0) {
-                RefinementCriterion new_criterion;
-                new_criterion.variable_index = i;
-                new_criterion.variable_name = input_file_reader.var_names.at(i);
-                if (boost::iequals(crit_type_string, "VALUE")) {
-                    new_criterion.criterion_type = VALUE;
-                    new_criterion.value_lower_bound = parameter_handler.get_double("Value lower bound");
-                    new_criterion.value_upper_bound = parameter_handler.get_double("Value upper bound");
+        
+        std::string crit_type_string = parameter_handler.get("Criterion type");
 
-                    // Check to make sure that the upper bound is greater than or equal to the lower bound
-                    if (new_criterion.value_upper_bound < new_criterion.value_lower_bound) {
-                        std::cerr << "PRISMS-PF Error: The upper bound for refinement for variable " << new_criterion.variable_name << " is less than the lower bound. Please correct this in the parameters file." << std::endl;
-                    }
-                } else if (boost::iequals(crit_type_string, "GRADIENT")) {
-                    new_criterion.criterion_type = GRADIENT;
-                    new_criterion.gradient_lower_bound = parameter_handler.get_double("Gradient magnitude lower bound");
-                } else if (boost::iequals(crit_type_string, "VALUE_AND_GRADIENT")) {
-                    new_criterion.criterion_type = VALUE_AND_GRADIENT;
-                    new_criterion.value_lower_bound = parameter_handler.get_double("Value lower bound");
-                    new_criterion.value_upper_bound = parameter_handler.get_double("Value upper bound");
-                    new_criterion.gradient_lower_bound = parameter_handler.get_double("Gradient magnitude lower bound");
-
-                    // Check to make sure that the upper bound is greater than or equal to the lower bound
-                    if (new_criterion.value_upper_bound < new_criterion.value_lower_bound) {
-                        std::cerr << "PRISMS-PF Error: The upper bound for refinement for variable " << new_criterion.variable_name << " is less than the lower bound. Please correct this in the parameters file." << std::endl;
-                    }
-                } else {
-                    std::cerr << "PRISMS-PF Error: The refinement criteria type found in the parameters file, " << crit_type_string << ", is not an allowed type. The allowed types are VALUE, GRADIENT, VALUE_AND_GRADIENT" << std::endl;
-                    abort();
-                }
-                refinement_criteria.push_back(new_criterion);
-            }
+        // If no criterion exists skips the following steps and continue in the loop
+        if (!(crit_type_string.size() > 0)) {
+            parameter_handler.leave_subsection();
+            continue;
         }
+
+        // Create and fill an instance of the refinement criterion for this variable 
+        RefinementCriterion new_criterion;
+        new_criterion.variable_index = i;
+        new_criterion.variable_name = input_file_reader.var_names.at(i);
+
+        if (boost::iequals(crit_type_string, "VALUE")) {
+            new_criterion.criterion_type = VALUE;
+            new_criterion.value_lower_bound = parameter_handler.get_double("Value lower bound");
+            new_criterion.value_upper_bound = parameter_handler.get_double("Value upper bound");
+        } else if (boost::iequals(crit_type_string, "GRADIENT")) {
+            new_criterion.criterion_type = GRADIENT;
+            new_criterion.gradient_lower_bound = parameter_handler.get_double("Gradient magnitude lower bound");
+        } else if (boost::iequals(crit_type_string, "VALUE_AND_GRADIENT")) {
+            new_criterion.criterion_type = VALUE_AND_GRADIENT;
+            new_criterion.value_lower_bound = parameter_handler.get_double("Value lower bound");
+            new_criterion.value_upper_bound = parameter_handler.get_double("Value upper bound");
+            new_criterion.gradient_lower_bound = parameter_handler.get_double("Gradient magnitude lower bound");
+        } else {
+            AssertThrow(false, ExcMessage("The <Criterion type> parameter has an invalid value. The allowed types are VALUE, GRADIENT, VALUE_AND_GRADIENT."));
+        }
+
+        // Check to make sure that the upper bound is greater than or equal to the lower bound
+        bool containsValue = new_criterion.criterion_type == VALUE || new_criterion.criterion_type == VALUE_AND_GRADIENT;
+        bool LowerBoundIsLowerBound = new_criterion.value_lower_bound < new_criterion.value_upper_bound;
+        if (containsValue && !LowerBoundIsLowerBound) {
+            AssertThrow(false, ExcMessage("The <Value upper bound> parameter has an invalid value. The lower bound must be lower than the upper bound."));
+        }
+
+        refinement_criteria.push_back(new_criterion);
+        
         parameter_handler.leave_subsection();
     }
 
-    // Time stepping parameters
+    /*
+        Time Stepping Parameters
+    */
+
+    // Time step
     dtValue = parameter_handler.get_double("Time step");
-    int totalIncrements_temp = parameter_handler.get_integer("Number of time steps");
+
+    // Check that the time step is non-negative
+    if (dtValue < 0.0) {
+        AssertThrow(false, ExcMessage("The <Time step> parameter has an invalid value. The time step must be greater than or equal to 0."));
+    }
+
+    // Total number of increments
+    unsigned int totalIncrements_temp = parameter_handler.get_integer("Number of time steps");
+
+    // Final simulation time
     finalTime = parameter_handler.get_double("Simulation end time");
 
-    // Linear solver parameters
-    for (unsigned int i = 0; i < number_of_variables; i++) {
-        if (input_file_reader.var_eq_types.at(i) == TIME_INDEPENDENT || input_file_reader.var_eq_types.at(i) == IMPLICIT_TIME_DEPENDENT) {
-            std::string subsection_text = "Linear solver parameters: ";
-            subsection_text.append(input_file_reader.var_names.at(i));
+    // Check that the time step is non-negative
+    if (finalTime < 0.0) {
+        AssertThrow(false, ExcMessage("The <Simulation end time> parameter has an invalid value. The final simulation time must be greater than or equal to 0."));
+    }
 
-            parameter_handler.enter_subsection(subsection_text);
-            {
-                // Set the tolerance type
-                SolverToleranceType temp_type;
-                std::string type_string = parameter_handler.get("Tolerance type");
-                if (boost::iequals(type_string, "ABSOLUTE_RESIDUAL")) {
-                    temp_type = ABSOLUTE_RESIDUAL;
-                } else if (boost::iequals(type_string, "RELATIVE_RESIDUAL_CHANGE")) {
-                    temp_type = RELATIVE_RESIDUAL_CHANGE;
-                } else if (boost::iequals(type_string, "ABSOLUTE_SOLUTION_CHANGE")) {
-                    temp_type = ABSOLUTE_SOLUTION_CHANGE;
-                    std::cerr << "PRISMS-PF Error: Linear solver tolerance type " << type_string << " is not currently implemented, please use either ABSOLUTE_RESIDUAL or RELATIVE_RESIDUAL_CHANGE" << std::endl;
-                    abort();
-                } else {
-                    std::cerr << "PRISMS-PF Error: Linear solver tolerance type " << type_string << " is not one of the allowed values (ABSOLUTE_RESIDUAL, RELATIVE_RESIDUAL_CHANGE, ABSOLUTE_SOLUTION_CHANGE)" << std::endl;
-                    abort();
-                }
+    // Determine the maximum number of time steps
+    bool defaultFinalTime = finalTime == 0.0;
+    bool defaultTimeStep = dtValue == 0.0;
 
-                // Set the tolerance value
-                double temp_value = parameter_handler.get_double("Tolerance value");
-
-                // Set the maximum number of iterations
-                unsigned int temp_max_iterations = parameter_handler.get_integer("Maximum linear solver iterations");
-
-                linear_solver_parameters.loadParameters(i, temp_type, temp_value, temp_max_iterations);
-            }
-            parameter_handler.leave_subsection();
+    if (defaultFinalTime && defaultTimeStep) {
+        totalIncrements = 0;
+    } else if (defaultFinalTime) {
+        totalIncrements = totalIncrements_temp;
+        finalTime = totalIncrements * dtValue;
+    } else if (defaultTimeStep) {
+        totalIncrements = std::ceil(finalTime / dtValue);
+    } else {
+        if (std::ceil(finalTime / dtValue) < totalIncrements_temp) {
+            totalIncrements = totalIncrements_temp;
+            finalTime = totalIncrements * dtValue;
+        } else {
+            totalIncrements = std::ceil(finalTime / dtValue);
         }
     }
 
-    // Non-linear solver parameters
+    /*
+        Linear Solver Parameters
+    */
+
+    for (unsigned int i = 0; i < number_of_variables; i++) {
+
+        // If variable doesn't require a linear solve continue in the loop
+        // This could be moved down so the user is aware if they incorrectly specify the linear solver parameters
+        // (i.e., setting the linear solve for a explicit field)
+        if (!(input_file_reader.var_eq_types.at(i) == IMPLICIT_TIME_DEPENDENT) || !(input_file_reader.var_eq_types.at(i) == TIME_INDEPENDENT)) {
+            continue;
+        }
+
+        // Enter the linear solver subsection for variable i 
+        std::string subsection_text = "Linear solver parameters: ";
+        subsection_text.append(input_file_reader.var_names.at(i));
+
+        parameter_handler.enter_subsection(subsection_text);
+        
+        // Tolerance type
+        SolverToleranceType temp_type;
+        std::string type_string = parameter_handler.get("Tolerance type");
+
+        if (boost::iequals(type_string, "ABSOLUTE_RESIDUAL")) {
+            temp_type = ABSOLUTE_RESIDUAL;
+        } else if (boost::iequals(type_string, "RELATIVE_RESIDUAL_CHANGE")) {
+            temp_type = RELATIVE_RESIDUAL_CHANGE;
+        } else if (boost::iequals(type_string, "ABSOLUTE_SOLUTION_CHANGE")) {
+            temp_type = ABSOLUTE_SOLUTION_CHANGE;
+            AssertThrow(false, ExcMessage("The <Tolerance type> parameter has an invalid value. The absolute solution change is not currently supported."));
+        } else {
+            AssertThrow(false, ExcMessage("The <Tolerance type> parameter has an invalid value."));
+        }
+
+        // Tolerance value
+        double temp_value = parameter_handler.get_double("Tolerance value");
+
+        // Maximum number of iterations
+        unsigned int temp_max_iterations = parameter_handler.get_integer("Maximum linear solver iterations");
+
+        // Load the parameters and leave the subsection
+        linear_solver_parameters.loadParameters(i, temp_type, temp_value, temp_max_iterations);
+        
+        parameter_handler.leave_subsection();
+    }
+
+    /*
+        Non-linear Solver Parameters
+    */
+
     std::vector<bool> var_nonlinear = variable_attributes.var_nonlinear;
 
     nonlinear_solver_parameters.setMaxIterations(parameter_handler.get_integer("Maximum nonlinear solver iterations"));
@@ -232,43 +292,6 @@ userInputParameters<dim>::userInputParameters(inputFileReader& input_file_reader
         filecompression = outputCompression::NONE;
     } else {
         AssertThrow(false, ExcMessage("The <Output file compression type> parameter has an invalid value."));
-    }
-        
-
-    // Field variable definitions
-
-    // If all of the variables are ELLIPTIC, then totalIncrements should be 1 and finalTime should be 0
-    bool only_time_independent_pdes = true;
-    for (unsigned int i = 0; i < var_eq_type.size(); i++) {
-        if (var_eq_type.at(i) == EXPLICIT_TIME_DEPENDENT || var_eq_type.at(i) == IMPLICIT_TIME_DEPENDENT) {
-            only_time_independent_pdes = false;
-            break;
-        }
-    }
-
-    // Determine the maximum number of time steps
-    if (only_time_independent_pdes) {
-        totalIncrements = 1;
-        finalTime = 0.0;
-    } else {
-        if ((totalIncrements_temp >= 0) && (finalTime >= 0.0)) {
-            if (std::ceil(finalTime / dtValue) > totalIncrements_temp) {
-                totalIncrements = totalIncrements_temp;
-                finalTime = totalIncrements * dtValue;
-            } else {
-                totalIncrements = std::ceil(finalTime / dtValue);
-            }
-        } else if ((totalIncrements_temp >= 0) && (finalTime < 0.0)) {
-            totalIncrements = totalIncrements_temp;
-            finalTime = totalIncrements * dtValue;
-        } else if ((totalIncrements_temp < 0) && (finalTime >= 0.0)) {
-            totalIncrements = std::ceil(finalTime / dtValue);
-        } else {
-            // Should change to an exception
-            std::cerr << "Invalid selections for the final time and the number of increments. At least one should be given in the input file and should be positive." << std::endl;
-            std::cout << finalTime << " " << totalIncrements_temp << std::endl;
-            abort();
-        }
     }
 
     // Use these inputs to create a list of time steps where the code should output, stored in the member
