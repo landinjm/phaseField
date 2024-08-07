@@ -117,6 +117,27 @@ void MatrixFreePDE<dim, degree>::outputResults()
         flags.time = tStep.currentTime;
         flags.cycle = tStep.currentIncrement;
         flags.print_date_and_time = true;
+
+        // Set flag for output file compression
+        switch (userInputs.filecompression) {
+            case DEFAULT:
+                flags.compression_level = dealii::DataOutBase::CompressionLevel::default_compression;
+                break;
+            case SPEED:
+                flags.compression_level = dealii::DataOutBase::CompressionLevel::best_speed;
+                break;
+            case SIZE:
+                flags.compression_level = dealii::DataOutBase::CompressionLevel::best_compression;
+                break;
+            case NONE:
+                flags.compression_level = dealii::DataOutBase::CompressionLevel::no_compression;
+                break;
+            default:
+                std::cerr << "PRISMS-PF: Invalid filecompression type" << std::endl;
+                abort();  
+        }
+
+        // Apply the flags
         data_out.set_flags(flags);
 
         if (userInputs.output_vtu_per_process) {

@@ -25,11 +25,20 @@
 #include "varTypeEnums.h"
 #include "variableAttributeLoader.h"
 
-enum elasticityModel { ISOTROPIC,
+enum elasticityModel { 
+    ISOTROPIC,
     TRANSVERSE,
     ORTHOTROPIC,
     ANISOTROPIC,
-    ANISOTROPIC2D };
+    ANISOTROPIC2D 
+};
+
+enum outputCompression {
+    DEFAULT,
+    SPEED,
+    SIZE,
+    NONE
+};
 
 template <int dim>
 class userInputParameters {
@@ -84,6 +93,7 @@ public:
     std::string output_file_name;
     std::vector<unsigned int> outputTimeStepList;
     bool print_timing_with_output;
+    outputCompression filecompression;
 
     // Time step parameters
     double dtValue;

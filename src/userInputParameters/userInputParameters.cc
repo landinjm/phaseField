@@ -3,6 +3,9 @@
 
 #include <deal.II/base/mpi.h>
 #include <deal.II/base/utilities.h>
+#include <deal.II/base/exceptions.h>
+
+using namespace dealii;
 
 template <int dim>
 userInputParameters<dim>::userInputParameters(inputFileReader& input_file_reader, dealii::ParameterHandler& parameter_handler, variableAttributeLoader variable_attributes)
@@ -217,6 +220,20 @@ userInputParameters<dim>::userInputParameters(inputFileReader& input_file_reader
     }
 
     print_timing_with_output = parameter_handler.get_bool("Print timing information with output");
+
+    const std::string OutputFileCompression = parameter_handler.get("Output file compression type");
+    if (OutputFileCompression == "none") {
+        filecompression = outputCompression::DEFAULT;
+    } else if (OutputFileCompression == "default") {
+        filecompression = outputCompression::SPEED;
+    } else if (OutputFileCompression == "speed") {
+        filecompression = outputCompression::SIZE;
+    } else if (OutputFileCompression == "size") {
+        filecompression = outputCompression::NONE;
+    } else {
+        AssertThrow(false, ExcMessage("The <Output file compression type> parameter has an invalid value."));
+    }
+        
 
     // Field variable definitions
 
