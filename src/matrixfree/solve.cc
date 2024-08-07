@@ -11,7 +11,7 @@ void MatrixFreePDE<dim, degree>::solve()
     pcout << "\nsolving...\n\n";
 
     // time dependent BVP
-    if (isTimeDependentBVP) {
+    if (pFlags.isTimeDependentBVP) {
 
         // If grain reassignment is activated, reassign grains
         if (userInputs.grain_remapping_activated and (tStep.currentIncrement % userInputs.skip_grain_reassignment_steps == 0 or tStep.currentIncrement == 0)) {

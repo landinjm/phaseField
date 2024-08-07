@@ -13,7 +13,7 @@ void MatrixFreePDE<dim, degree>::solveIncrement(bool skip_time_dependent)
     Timer time;
 
     // Check if there is at least one explicit equation. If not, skip ahead
-    if (!hasExplicitEquation) {
+    if (!pFlags.hasExplicitEquation) {
         goto nonexplicit;
     }
     // Check if skipping time dependent solves (e.g. initial condition). If so, skip ahead
@@ -44,7 +44,7 @@ void MatrixFreePDE<dim, degree>::solveIncrement(bool skip_time_dependent)
 
 nonexplicit:
     // Check if there is at least one nonexplicit equation. If not, skip ahead
-    if (!hasNonExplicitEquation) {
+    if (!pFlags.hasNonExplicitEquation) {
         goto end;
     }
     // Now, update the non-explicit variables

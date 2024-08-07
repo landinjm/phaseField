@@ -40,6 +40,7 @@
 #include "adaptiveRefinement.h"
 #include "boundaryConditions.h"
 #include "checkpoint.h"
+#include "problemFlags.h"
 #include "discretization.h"
 #include "fields.h"
 #include "nucleus.h"
@@ -121,6 +122,9 @@ public:
 
 protected:
     userInputParameters<dim> userInputs;
+
+    /*Problem Flags*/
+    problemFlags<dim> pFlags;
 
     /*Discretization*/
     discretization<dim> Discretization;
@@ -285,16 +289,6 @@ protected:
 
     /*Method to compute the integral of a field.*/
     void computeIntegral(double& integratedField, int index, std::vector<vectorType*> postProcessedSet);
-
-    // variables for time dependent problems
-    /*Flag used to see if invM, time stepping in run(), etc are necessary*/
-    bool isTimeDependentBVP;
-    /*Flag used to mark problems with Elliptic fields.*/
-    bool isEllipticBVP;
-
-    bool hasExplicitEquation;
-    bool hasNonExplicitEquation;
-    //
 
     unsigned int currentOutput, current_grain_reassignment;
 

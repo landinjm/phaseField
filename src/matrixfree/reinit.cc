@@ -124,7 +124,7 @@ void MatrixFreePDE<dim, degree>::reinit()
     }
 
     // Compute invM in PDE is a time-dependent BVP
-    if (isTimeDependentBVP) {
+    if (pFlags.isTimeDependentBVP) {
         computeInvM();
     }
 

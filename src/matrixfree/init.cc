@@ -47,24 +47,24 @@ void MatrixFreePDE<dim, degree>::init()
         std::string var_type;
         if (it->pdetype == EXPLICIT_TIME_DEPENDENT) {
             var_type = "EXPLICIT_TIME_DEPENDENT";
-            isTimeDependentBVP = true;
-            hasExplicitEquation = true;
+            pFlags.isTimeDependentBVP = true;
+            pFlags.hasExplicitEquation = true;
             
         } else if (it->pdetype == IMPLICIT_TIME_DEPENDENT) {
             var_type = "IMPLICIT_TIME_DEPENDENT";
-            isTimeDependentBVP = true;
-            hasNonExplicitEquation = true;
+            pFlags.isTimeDependentBVP = true;
+            pFlags.hasNonExplicitEquation = true;
             std::cerr << "PRISMS-PF Error: IMPLICIT_TIME_DEPENDENT equation types are not currently supported" << std::endl;
             abort();
 
         } else if (it->pdetype == TIME_INDEPENDENT) {
             var_type = "TIME_INDEPENDENT";
-            isEllipticBVP = true;
-            hasNonExplicitEquation = true;
+            pFlags.isEllipticBVP = true;
+            pFlags.hasNonExplicitEquation = true;
 
         } else if (it->pdetype == AUXILIARY) {
             var_type = "AUXILIARY";
-            hasNonExplicitEquation = true;
+            pFlags.hasNonExplicitEquation = true;
 
         }
 
@@ -172,7 +172,7 @@ void MatrixFreePDE<dim, degree>::init()
     }
 
     // check if time dependent BVP and compute invM
-    if (isTimeDependentBVP) {
+    if (pFlags.isTimeDependentBVP) {
         computeInvM();
     }
 
