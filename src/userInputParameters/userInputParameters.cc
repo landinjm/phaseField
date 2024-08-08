@@ -178,7 +178,7 @@ userInputParameters<dim>::userInputParameters(inputFileReader& input_file_reader
             temp_type = ABSOLUTE_SOLUTION_CHANGE;
             AssertThrow(false, ExcMessage("The <Tolerance type> parameter has an invalid value. The absolute solution change is not currently supported."));
         } else {
-            AssertThrow(false, ExcMessage("The <Tolerance type> parameter has an invalid value."));
+            AssertThrow(false, ExcMessage("The <Tolerance type> parameter has an invalid value. Only ABSOLUTE_RESIDUAL, RELATIVE_RESIDUAL_CHANGE, and ABSOLUTE_SOLUTION_CHANGE are allowed."));
         }
 
         // Tolerance value
@@ -202,59 +202,64 @@ userInputParameters<dim>::userInputParameters(inputFileReader& input_file_reader
     nonlinear_solver_parameters.setMaxIterations(parameter_handler.get_integer("Maximum nonlinear solver iterations"));
 
     for (unsigned int i = 0; i < var_nonlinear.size(); i++) {
-        if (var_nonlinear.at(i)) {
-            std::string subsection_text = "Nonlinear solver parameters: ";
-            subsection_text.append(input_file_reader.var_names.at(i));
 
-            parameter_handler.enter_subsection(subsection_text);
-            {
-                // Set the tolerance type
-                SolverToleranceType temp_type;
-                std::string type_string = parameter_handler.get("Tolerance type");
-                if (boost::iequals(type_string, "ABSOLUTE_RESIDUAL")) {
-                    temp_type = ABSOLUTE_RESIDUAL;
-                } else if (boost::iequals(type_string, "RELATIVE_RESIDUAL_CHANGE")) {
-                    temp_type = RELATIVE_RESIDUAL_CHANGE;
-                } else if (boost::iequals(type_string, "ABSOLUTE_SOLUTION_CHANGE")) {
-                    temp_type = ABSOLUTE_SOLUTION_CHANGE;
-                } else {
-                    std::cerr << "PRISMS-PF Error: Nonlinear solver tolerance type " << type_string << " is not one of the allowed values (ABSOLUTE_RESIDUAL, RELATIVE_RESIDUAL_CHANGE, ABSOLUTE_SOLUTION_CHANGE)" << std::endl;
-                    abort();
-                }
-
-                // Set the tolerance value
-                double temp_value = parameter_handler.get_double("Tolerance value");
-
-                // Set the backtrace damping flag
-                bool temp_backtrack_damping = parameter_handler.get_bool("Use backtracking line search damping");
-
-                // Set the backtracking step size modifier
-                double temp_step_modifier = parameter_handler.get_double("Backtracking step size modifier");
-
-                // Set the constant that determines how much the residual must decrease to be accepted as sufficient
-                double temp_residual_decrease_coeff = parameter_handler.get_double("Backtracking residual decrease coefficient");
-
-                // Set the default damping coefficient (used if backtracking isn't used)
-                double temp_damping_coefficient = parameter_handler.get_double("Constant damping value");
-
-                // Set whether to use the solution of Laplace's equation instead of the IC in ICs_and_BCs.h as the initial guess for nonlinear, time independent equations
-                bool temp_laplace_for_initial_guess;
-                if (var_eq_type[i] == TIME_INDEPENDENT) {
-                    temp_laplace_for_initial_guess = parameter_handler.get_bool("Use Laplace's equation to determine the initial guess");
-                } else {
-                    temp_laplace_for_initial_guess = false;
-                    if (dealii::Utilities::MPI::this_mpi_process(MPI_COMM_WORLD) == 0) {
-                        std::cout << "PRISMS-PF Warning: Laplace's equation is only used to generate the initial guess for time independent equations. The equation for variable " << var_name[i] << " is not a time independent equation. No initial guess is needed for this equation." << std::endl;
-                    }
-                }
-
-                nonlinear_solver_parameters.loadParameters(i, temp_type, temp_value, temp_backtrack_damping, temp_step_modifier, temp_residual_decrease_coeff, temp_damping_coefficient, temp_laplace_for_initial_guess);
-            }
-            parameter_handler.leave_subsection();
+        // If variable doesn't require a nonlinear solve continue in the loop
+        if (!var_nonlinear.at(i)) {
+            continue;
         }
+
+        // Enter the linear solver subsection for variable i 
+        std::string subsection_text = "Nonlinear solver parameters: ";
+        subsection_text.append(input_file_reader.var_names.at(i));
+
+        parameter_handler.enter_subsection(subsection_text);
+
+        // Set the tolerance type
+        SolverToleranceType temp_type;
+        std::string type_string = parameter_handler.get("Tolerance type");
+
+        if (boost::iequals(type_string, "ABSOLUTE_RESIDUAL")) {
+            temp_type = ABSOLUTE_RESIDUAL;
+        } else if (boost::iequals(type_string, "RELATIVE_RESIDUAL_CHANGE")) {
+            temp_type = RELATIVE_RESIDUAL_CHANGE;
+        } else if (boost::iequals(type_string, "ABSOLUTE_SOLUTION_CHANGE")) {
+            temp_type = ABSOLUTE_SOLUTION_CHANGE;
+        } else {
+            AssertThrow(false, ExcMessage("The <Tolerance type> parameter has an invalid value. Only ABSOLUTE_RESIDUAL, RELATIVE_RESIDUAL_CHANGE, and ABSOLUTE_SOLUTION_CHANGE are allowed."));
+        }
+
+        // Tolerance value
+        double temp_value = parameter_handler.get_double("Tolerance value");
+
+        // Backtrace damping flag
+        bool temp_backtrack_damping = parameter_handler.get_bool("Use backtracking line search damping");
+
+        // Backtracking step size modifier
+        double temp_step_modifier = parameter_handler.get_double("Backtracking step size modifier");
+
+        // Constant that determines how much the residual must decrease to be accepted as sufficient
+        double temp_residual_decrease_coeff = parameter_handler.get_double("Backtracking residual decrease coefficient");
+
+        // Default damping coefficient (used if backtracking isn't used)
+        double temp_damping_coefficient = parameter_handler.get_double("Constant damping value");
+
+        // Whether to use the solution of Laplace's equation instead of the IC in ICs_and_BCs.h as the initial guess for nonlinear, time independent equations
+        bool temp_laplace_for_initial_guess = false;
+        if (var_eq_type[i] == TIME_INDEPENDENT) {
+            temp_laplace_for_initial_guess = parameter_handler.get_bool("Use Laplace's equation to determine the initial guess");
+        } else {
+            if (dealii::Utilities::MPI::this_mpi_process(MPI_COMM_WORLD) == 0) {
+                std::cout << "PRISMS-PF Warning: Laplace's equation is only used to generate the initial guess for time independent equations. The equation for variable " << var_name[i] << " is not a time independent equation. No initial guess is needed for this equation." << std::endl;
+            }
+        }
+
+        // Load the parameters and leave the subsection
+        nonlinear_solver_parameters.loadParameters(i, temp_type, temp_value, temp_backtrack_damping, temp_step_modifier, temp_residual_decrease_coeff, temp_damping_coefficient, temp_laplace_for_initial_guess);
+
+        parameter_handler.leave_subsection();
     }
 
-    // Set the max number of nonlinear iterations
+    // Correction for the max number of nonlinear iterations if there are no nonlinear variables
     if (var_nonlinear.size() == 0) {
         nonlinear_solver_parameters.setMaxIterations(0);
     }
