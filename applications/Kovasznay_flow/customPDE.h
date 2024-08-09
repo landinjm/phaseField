@@ -83,7 +83,7 @@ void customPDE<dim, degree>::solveIncrement(bool skip_time_dependent)
     ChorinSwitch = false;
 
     // Check if there is at least one explicit equation. If not, skip ahead
-    if (!this->hasExplicitEquation) {
+    if (!this->pFlags.hasExplicitEquation) {
         goto nonexplicit;
     }
     // Check if skipping time dependent solves (e.g. initial condition). If so, skip ahead
@@ -115,7 +115,7 @@ void customPDE<dim, degree>::solveIncrement(bool skip_time_dependent)
 
 nonexplicit:
     // Check if there is at least one nonexplicit equation. If not, skip ahead
-    if (!this->hasNonExplicitEquation) {
+    if (!this->pFlags.hasNonExplicitEquation) {
         goto end;
     }
 
