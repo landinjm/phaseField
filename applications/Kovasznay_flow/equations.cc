@@ -62,12 +62,15 @@ void customPDE<dim, degree>::explicitEquationRHS(variableContainer<dim, degree, 
 
     // Step one of the Chorin projection
     if (!ChorinSwitch) {
-        // Calculating the advection term
+        // Calculating the skew-symmetric advection term
         vectorvalueType advecTerm;
         for (unsigned int i = 0; i < dim; i++) {
+            scalarvalueType divU = constV(0.0);
             for (unsigned int j = 0; j < dim; j++) {
                 advecTerm[i] += u[j] * ux[i][j];
+                divU += ux[j][j];
             }
+            advecTerm[i] += constV(0.5)*divU*u[i];
         }
 
         eq_u = u - constV(userInputs.dtValue) * advecTerm;
