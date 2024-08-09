@@ -156,7 +156,7 @@ userInputParameters<dim>::userInputParameters(inputFileReader& input_file_reader
         // If variable doesn't require a linear solve continue in the loop
         // This could be moved down so the user is aware if they incorrectly specify the linear solver parameters
         // (i.e., setting the linear solve for a explicit field)
-        if (!(input_file_reader.var_eq_types.at(i) == IMPLICIT_TIME_DEPENDENT) || !(input_file_reader.var_eq_types.at(i) == TIME_INDEPENDENT)) {
+        if (!(input_file_reader.var_eq_types.at(i) == IMPLICIT_TIME_DEPENDENT) && !(input_file_reader.var_eq_types.at(i) == TIME_INDEPENDENT)) {
             continue;
         }
 
