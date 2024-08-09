@@ -19,8 +19,8 @@ public:
 
         // call computeInvM()
         this->computeInvM();
-        invMNormscalar = this->invMscalar.l2_norm();
-        invMNormvector = this->invMvector.l2_norm();
+        invMNormscalar = this->Discretization.invMscalar.l2_norm();
+        invMNormvector = this->Discretization.invMvector.l2_norm();
     };
     ~testInvM()
     {

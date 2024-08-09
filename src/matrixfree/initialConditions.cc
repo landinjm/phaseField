@@ -170,23 +170,23 @@ void MatrixFreePDE<dim, degree>::applyInitialConditions()
                         computeLaplaceRHS(fieldIndex);
                         if (fields[fieldIndex].type == SCALAR) {
 #if (DEAL_II_VERSION_MAJOR == 9 && DEAL_II_VERSION_MINOR < 4)
-                            unsigned int invM_size = invMscalar.local_size();
+                            unsigned int invM_size = Discretization.invMscalar.local_size();
                             for (unsigned int dof = 0; dof < tStep.solutionSet[fieldIndex]->local_size(); ++dof) {
 #else
-                            unsigned int invM_size = invMscalar.locally_owned_size();
+                            unsigned int invM_size = Discretization.invMscalar.locally_owned_size();
                             for (unsigned int dof = 0; dof < tStep.solutionSet[fieldIndex]->locally_owned_size(); ++dof) {
 #endif
-                                tStep.solutionSet[fieldIndex]->local_element(dof) = tStep.solutionSet[fieldIndex]->local_element(dof) - invMscalar.local_element(dof % invM_size) * tStep.residualSet[fieldIndex]->local_element(dof) * dt_for_smoothing;
+                                tStep.solutionSet[fieldIndex]->local_element(dof) = tStep.solutionSet[fieldIndex]->local_element(dof) - Discretization.invMscalar.local_element(dof % invM_size) * tStep.residualSet[fieldIndex]->local_element(dof) * dt_for_smoothing;
                             }
                         } else if (fields[fieldIndex].type == VECTOR) {
 #if (DEAL_II_VERSION_MAJOR == 9 && DEAL_II_VERSION_MINOR < 4)
-                            unsigned int invM_size = invMvector.local_size();
+                            unsigned int invM_size = Discretization.invMvector.local_size();
                             for (unsigned int dof = 0; dof < tStep.solutionSet[fieldIndex]->local_size(); ++dof) {
 #else
-                            unsigned int invM_size = invMvector.locally_owned_size();
+                            unsigned int invM_size = Discretization.invMvector.locally_owned_size();
                             for (unsigned int dof = 0; dof < tStep.solutionSet[fieldIndex]->locally_owned_size(); ++dof) {
 #endif
-                                tStep.solutionSet[fieldIndex]->local_element(dof) = tStep.solutionSet[fieldIndex]->local_element(dof) - invMvector.local_element(dof % invM_size) * tStep.residualSet[fieldIndex]->local_element(dof) * dt_for_smoothing;
+                                tStep.solutionSet[fieldIndex]->local_element(dof) = tStep.solutionSet[fieldIndex]->local_element(dof) - Discretization.invMvector.local_element(dof % invM_size) * tStep.residualSet[fieldIndex]->local_element(dof) * dt_for_smoothing;
                             }
                         }
 

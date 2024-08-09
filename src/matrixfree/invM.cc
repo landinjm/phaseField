@@ -43,10 +43,10 @@ void MatrixFreePDE<dim, degree>::computeInvM()
     }
 
     // Initialize invM and clear its values
-    Discretization.matrixFreeObject.initialize_dof_vector(invMscalar, parabolicScalarFieldIndex);
-    invMscalar = 0.0;
-    Discretization.matrixFreeObject.initialize_dof_vector(invMvector, parabolicVectorFieldIndex);
-    invMvector = 0.0;
+    Discretization.matrixFreeObject.initialize_dof_vector(Discretization.invMscalar, parabolicScalarFieldIndex);
+    Discretization.invMscalar = 0.0;
+    Discretization.matrixFreeObject.initialize_dof_vector(Discretization.invMvector, parabolicVectorFieldIndex);
+    Discretization.invMvector = 0.0;
 
     // Compute mass matrix for the given type of quadrature. Selecting gauss lobatto
     // quadrature points which are suboptimal but give diagonal M
@@ -60,7 +60,7 @@ void MatrixFreePDE<dim, degree>::computeInvM()
                 fe_eval.submit_value(one, q);
             }
             fe_eval.integrate(true, false);
-            fe_eval.distribute_local_to_global(invMscalar);
+            fe_eval.distribute_local_to_global(Discretization.invMscalar);
         }
     }
     if (fields[parabolicVectorFieldIndex].type == VECTOR) {
@@ -78,12 +78,12 @@ void MatrixFreePDE<dim, degree>::computeInvM()
                 fe_eval.submit_value(oneV, q);
             }
             fe_eval.integrate(true, false);
-            fe_eval.distribute_local_to_global(invMvector);
+            fe_eval.distribute_local_to_global(Discretization.invMvector);
         }
     }
 
-    invMscalar.compress(VectorOperation::add);
-    invMvector.compress(VectorOperation::add);
+    Discretization.invMscalar.compress(VectorOperation::add);
+    Discretization.invMvector.compress(VectorOperation::add);
 
     // Calculate the volume of the smallest cell to prevent a non-zero value of invM being
     // confused for a near zero value (which can happen if the domain size is 1e-6 or below)
@@ -96,28 +96,28 @@ void MatrixFreePDE<dim, degree>::computeInvM()
 
     // Invert scalar mass matrix diagonal elements
 #if (DEAL_II_VERSION_MAJOR == 9 && DEAL_II_VERSION_MINOR < 4)
-    for (unsigned int k = 0; k < invMscalar.local_size(); ++k) {
+    for (unsigned int k = 0; k < Discretization.invMscalar.local_size(); ++k) {
 #else
-    for (unsigned int k = 0; k < invMscalar.locally_owned_size(); ++k) {
+    for (unsigned int k = 0; k < Discretization.invMscalar.locally_owned_size(); ++k) {
 #endif
-        if (std::abs(invMscalar.local_element(k)) > 1.0e-15 * min_cell_volume) {
-            invMscalar.local_element(k) = 1. / invMscalar.local_element(k);
+        if (std::abs(Discretization.invMscalar.local_element(k)) > 1.0e-15 * min_cell_volume) {
+            Discretization.invMscalar.local_element(k) = 1. / Discretization.invMscalar.local_element(k);
         } else {
-            invMscalar.local_element(k) = 0;
+            Discretization.invMscalar.local_element(k) = 0;
         }
     }
     pcout << "computed scalar mass matrix (using FE space for field: " << parabolicScalarFieldIndex << ")\n";
 
     // Invert vector mass matrix diagonal elements
 #if (DEAL_II_VERSION_MAJOR == 9 && DEAL_II_VERSION_MINOR < 4)
-    for (unsigned int k = 0; k < invMvector.local_size(); ++k) {
+    for (unsigned int k = 0; k < Discretization.invMvector.local_size(); ++k) {
 #else
-    for (unsigned int k = 0; k < invMvector.locally_owned_size(); ++k) {
+    for (unsigned int k = 0; k < Discretization.invMvector.locally_owned_size(); ++k) {
 #endif
-        if (std::abs(invMvector.local_element(k)) > 1.0e-15 * min_cell_volume) {
-            invMvector.local_element(k) = 1. / invMvector.local_element(k);
+        if (std::abs(Discretization.invMvector.local_element(k)) > 1.0e-15 * min_cell_volume) {
+            Discretization.invMvector.local_element(k) = 1. / Discretization.invMvector.local_element(k);
         } else {
-            invMvector.local_element(k) = 0;
+            Discretization.invMvector.local_element(k) = 0;
         }
     }
     pcout << "computed vector mass matrix (using FE space for field: " << parabolicVectorFieldIndex << ")\n";

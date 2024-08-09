@@ -32,15 +32,15 @@ void MatrixFreePDE<dim, degree>::outputResults()
         std::vector<vectorType*> postProcessedSet;
         computePostProcessedFields(postProcessedSet);
 #if (DEAL_II_VERSION_MAJOR == 9 && DEAL_II_VERSION_MINOR < 4)
-        unsigned int invM_size = invMscalar.local_size();
+        unsigned int invM_size = Discretization.invMscalar.local_size();
         for (unsigned int fieldIndex = 0; fieldIndex < postProcessedSet.size(); fieldIndex++) {
             for (unsigned int dof = 0; dof < postProcessedSet[fieldIndex]->local_size(); ++dof) {
 #else
-        unsigned int invM_size = invMscalar.locally_owned_size();
+        unsigned int invM_size = Discretization.invMscalar.locally_owned_size();
         for (unsigned int fieldIndex = 0; fieldIndex < postProcessedSet.size(); fieldIndex++) {
             for (unsigned int dof = 0; dof < postProcessedSet[fieldIndex]->locally_owned_size(); ++dof) {
 #endif
-                postProcessedSet[fieldIndex]->local_element(dof) = invMscalar.local_element(dof % invM_size) * postProcessedSet[fieldIndex]->local_element(dof);
+                postProcessedSet[fieldIndex]->local_element(dof) = Discretization.invMscalar.local_element(dof % invM_size) * postProcessedSet[fieldIndex]->local_element(dof);
             }
             RefineAdaptively.constraintsOtherSet[0]->distribute(*postProcessedSet[fieldIndex]);
             postProcessedSet[fieldIndex]->update_ghost_values();

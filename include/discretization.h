@@ -8,6 +8,7 @@
 #include <deal.II/fe/fe_system.h>
 #include <deal.II/grid/grid_generator.h>
 #include <deal.II/matrix_free/matrix_free.h>
+#include <deal.II/lac/la_parallel_vector.h>
 
 #include "userInputParameters.h"
 
@@ -58,6 +59,9 @@ public:
 
     /*Object of class MatrixFree<dim>. This is primarily responsible for all the base matrix free functionality of this MatrixFreePDE<dim> class. Refer to deal.ii documentation of MatrixFree<dim> class for details.*/
     MatrixFree<dim, double> matrixFreeObject;
+
+    /*Vector to store the inverse of the mass matrix diagonal for scalar and vector fields. Due to the choice of spectral elements with Guass-Lobatto quadrature, the mass matrix is diagonal.*/
+    dealii::LinearAlgebra::distributed::Vector<double> invMscalar, invMvector;
 
 private:
     /*User inputs*/

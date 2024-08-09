@@ -316,23 +316,23 @@ void MatrixFreePDE<dim, degree>::updateExplicitSolution(unsigned int fieldIndex)
     // Takes advantage of knowledge that the length of solutionSet and residualSet is an integer multiple of the length of invM for vector variables
     if (fields[fieldIndex].type == SCALAR) {
 #if (DEAL_II_VERSION_MAJOR == 9 && DEAL_II_VERSION_MINOR < 4)
-        unsigned int invM_size = invMscalar.local_size();
+        unsigned int invM_size = Discretization.invMscalar.local_size();
         for (unsigned int dof = 0; dof < tStep.solutionSet[fieldIndex]->local_size(); ++dof) {
 #else
-        unsigned int invM_size = invMscalar.locally_owned_size();
+        unsigned int invM_size = Discretization.invMscalar.locally_owned_size();
         for (unsigned int dof = 0; dof < tStep.solutionSet[fieldIndex]->locally_owned_size(); ++dof) {
 #endif
-            tStep.solutionSet[fieldIndex]->local_element(dof) = invMscalar.local_element(dof % invM_size) * tStep.residualSet[fieldIndex]->local_element(dof);
+            tStep.solutionSet[fieldIndex]->local_element(dof) = Discretization.invMscalar.local_element(dof % invM_size) * tStep.residualSet[fieldIndex]->local_element(dof);
         }
     } else if (fields[fieldIndex].type == VECTOR) {
 #if (DEAL_II_VERSION_MAJOR == 9 && DEAL_II_VERSION_MINOR < 4)
-        unsigned int invM_size = invMvector.local_size();
+        unsigned int invM_size = Discretization.invMvector.local_size();
         for (unsigned int dof = 0; dof < tStep.solutionSet[fieldIndex]->local_size(); ++dof) {
 #else
-        unsigned int invM_size = invMvector.locally_owned_size();
+        unsigned int invM_size = Discretization.invMvector.locally_owned_size();
         for (unsigned int dof = 0; dof < tStep.solutionSet[fieldIndex]->locally_owned_size(); ++dof) {
 #endif
-            tStep.solutionSet[fieldIndex]->local_element(dof) = invMvector.local_element(dof % invM_size) * tStep.residualSet[fieldIndex]->local_element(dof);
+            tStep.solutionSet[fieldIndex]->local_element(dof) = Discretization.invMvector.local_element(dof % invM_size) * tStep.residualSet[fieldIndex]->local_element(dof);
         }
     }
 }
