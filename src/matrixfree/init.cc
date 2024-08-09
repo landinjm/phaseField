@@ -148,7 +148,7 @@ void MatrixFreePDE<dim, degree>::init()
         U = new vectorType;
         R = new vectorType;
         tStep.solutionSet.push_back(U);
-        residualSet.push_back(R);
+        tStep.residualSet.push_back(R);
         Discretization.matrixFreeObject.initialize_dof_vector(*R, fieldIndex);
         *R = 0;
 

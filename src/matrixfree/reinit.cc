@@ -136,7 +136,7 @@ void MatrixFreePDE<dim, degree>::reinit()
         delete soltransSet[fieldIndex];
 
         // reset residual vector
-        vectorType* R = residualSet.at(fieldIndex);
+        vectorType* R = tStep.residualSet.at(fieldIndex);
         Discretization.matrixFreeObject.initialize_dof_vector(*R, fieldIndex);
         *R = 0;
     }

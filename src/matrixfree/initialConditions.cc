@@ -176,7 +176,7 @@ void MatrixFreePDE<dim, degree>::applyInitialConditions()
                             unsigned int invM_size = invMscalar.locally_owned_size();
                             for (unsigned int dof = 0; dof < tStep.solutionSet[fieldIndex]->locally_owned_size(); ++dof) {
 #endif
-                                tStep.solutionSet[fieldIndex]->local_element(dof) = tStep.solutionSet[fieldIndex]->local_element(dof) - invMscalar.local_element(dof % invM_size) * residualSet[fieldIndex]->local_element(dof) * dt_for_smoothing;
+                                tStep.solutionSet[fieldIndex]->local_element(dof) = tStep.solutionSet[fieldIndex]->local_element(dof) - invMscalar.local_element(dof % invM_size) * tStep.residualSet[fieldIndex]->local_element(dof) * dt_for_smoothing;
                             }
                         } else if (fields[fieldIndex].type == VECTOR) {
 #if (DEAL_II_VERSION_MAJOR == 9 && DEAL_II_VERSION_MINOR < 4)
@@ -186,7 +186,7 @@ void MatrixFreePDE<dim, degree>::applyInitialConditions()
                             unsigned int invM_size = invMvector.locally_owned_size();
                             for (unsigned int dof = 0; dof < tStep.solutionSet[fieldIndex]->locally_owned_size(); ++dof) {
 #endif
-                                tStep.solutionSet[fieldIndex]->local_element(dof) = tStep.solutionSet[fieldIndex]->local_element(dof) - invMvector.local_element(dof % invM_size) * residualSet[fieldIndex]->local_element(dof) * dt_for_smoothing;
+                                tStep.solutionSet[fieldIndex]->local_element(dof) = tStep.solutionSet[fieldIndex]->local_element(dof) - invMvector.local_element(dof % invM_size) * tStep.residualSet[fieldIndex]->local_element(dof) * dt_for_smoothing;
                             }
                         }
 

@@ -11,7 +11,7 @@ void MatrixFreePDE<dim, degree>::computeExplicitRHS()
     computing_timer.enter_subsection("matrixFreePDE: computeRHS");
 
     // call to integrate and assemble while clearing residual vecotrs
-    Discretization.matrixFreeObject.cell_loop(&MatrixFreePDE<dim, degree>::getExplicitRHS, this, residualSet, tStep.solutionSet, true);
+    Discretization.matrixFreeObject.cell_loop(&MatrixFreePDE<dim, degree>::getExplicitRHS, this, tStep.residualSet, tStep.solutionSet, true);
 
     // end log
     computing_timer.leave_subsection("matrixFreePDE: computeRHS");
@@ -56,7 +56,7 @@ void MatrixFreePDE<dim, degree>::computeNonexplicitRHS()
     computing_timer.enter_subsection("matrixFreePDE: computeRHS");
 
     // call to integrate and assemble while clearing residual vecotrs
-    Discretization.matrixFreeObject.cell_loop(&MatrixFreePDE<dim, degree>::getNonexplicitRHS, this, residualSet, tStep.solutionSet, true);
+    Discretization.matrixFreeObject.cell_loop(&MatrixFreePDE<dim, degree>::getNonexplicitRHS, this, tStep.residualSet, tStep.solutionSet, true);
 
     // end log
     computing_timer.leave_subsection("matrixFreePDE: computeRHS");

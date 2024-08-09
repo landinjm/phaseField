@@ -173,8 +173,6 @@ protected:
      */
     void outputResults();
 
-    /*Vector all the residual (RHS) vectors in the problem. In a multi-field problem, each primal field has a residual vector associated with it.*/
-    std::vector<vectorType*> residualSet;
     /*Vector of parallel solution transfer objects. This is used only when adaptive meshing is enabled.*/
     std::vector<parallel::distributed::SolutionTransfer<dim, vectorType>*> soltransSet;
 

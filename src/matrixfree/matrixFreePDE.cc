@@ -49,8 +49,8 @@ MatrixFreePDE<dim, degree>::~MatrixFreePDE()
     for (unsigned int iter = 0; iter < tStep.solutionSet.size(); iter++) {
         delete tStep.solutionSet[iter];
     }
-    for (unsigned int iter = 0; iter < residualSet.size(); iter++) {
-        delete residualSet[iter];
+    for (unsigned int iter = 0; iter < tStep.residualSet.size(); iter++) {
+        delete tStep.residualSet[iter];
     }
 }
 

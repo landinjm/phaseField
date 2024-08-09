@@ -67,7 +67,7 @@ nonexplicit:
                 }
 
                 // This clears the residual where we want to apply Dirichlet BCs, otherwise the solver sees a positive residual
-                BCs.constraintsDirichletSet[fieldIndex]->set_zero(*residualSet[fieldIndex]);
+                BCs.constraintsDirichletSet[fieldIndex]->set_zero(*tStep.residualSet[fieldIndex]);
 
                 // Solve
                 nonlinear_it_converged = nonlinearSolve(fieldIndex, nonlinear_it_index);
@@ -111,7 +111,7 @@ bool MatrixFreePDE<dim, degree>::nonlinearSolve(unsigned int fieldIndex, unsigne
     if (userInputs.linear_solver_parameters.getToleranceType(fieldIndex) == ABSOLUTE_RESIDUAL) {
         tol_value = userInputs.linear_solver_parameters.getToleranceValue(fieldIndex);
     } else {
-        tol_value = userInputs.linear_solver_parameters.getToleranceValue(fieldIndex) * residualSet[fieldIndex]->l2_norm();
+        tol_value = userInputs.linear_solver_parameters.getToleranceValue(fieldIndex) * tStep.residualSet[fieldIndex]->l2_norm();
     }
 
     SolverControl solver_control(userInputs.linear_solver_parameters.getMaxIterations(fieldIndex), tol_value);
@@ -123,10 +123,10 @@ bool MatrixFreePDE<dim, degree>::nonlinearSolve(unsigned int fieldIndex, unsigne
     try {
         if (fields[fieldIndex].type == SCALAR) {
             dU_scalar = 0.0;
-            solver.solve(*this, dU_scalar, *residualSet[fieldIndex], IdentityMatrix(tStep.solutionSet[fieldIndex]->size()));
+            solver.solve(*this, dU_scalar, *tStep.residualSet[fieldIndex], IdentityMatrix(tStep.solutionSet[fieldIndex]->size()));
         } else {
             dU_vector = 0.0;
-            solver.solve(*this, dU_vector, *residualSet[fieldIndex], IdentityMatrix(tStep.solutionSet[fieldIndex]->size()));
+            solver.solve(*this, dU_vector, *tStep.residualSet[fieldIndex], IdentityMatrix(tStep.solutionSet[fieldIndex]->size()));
         }
     } catch (...) {
         pcout << "\nWarning: linear solver did not converge as per set tolerances. consider increasing the maximum number of iterations or decreasing the solver tolerance.\n";
@@ -138,7 +138,7 @@ bool MatrixFreePDE<dim, degree>::nonlinearSolve(unsigned int fieldIndex, unsigne
 
         if (userInputs.nonlinear_solver_parameters.getBacktrackDampingFlag(fieldIndex)) {
             vectorType solutionSet_old = *tStep.solutionSet[fieldIndex];
-            double residual_old = residualSet[fieldIndex]->l2_norm();
+            double residual_old = tStep.residualSet[fieldIndex]->l2_norm();
 
             damping_coefficient = 1.0;
             bool damping_coefficient_found = false;
@@ -151,9 +151,9 @@ bool MatrixFreePDE<dim, degree>::nonlinearSolve(unsigned int fieldIndex, unsigne
 
                 computeNonexplicitRHS();
 
-                BCs.constraintsDirichletSet[fieldIndex]->set_zero(*residualSet[fieldIndex]);
+                BCs.constraintsDirichletSet[fieldIndex]->set_zero(*tStep.residualSet[fieldIndex]);
 
-                double residual_new = residualSet[fieldIndex]->l2_norm();
+                double residual_new = tStep.residualSet[fieldIndex]->l2_norm();
 
                 if (tStep.currentIncrement % userInputs.skip_print_steps == 0) {
                     pcout << "    Old residual: " << residual_old << " Damping Coeff: " << damping_coefficient << " New Residual: " << residual_new << std::endl;
@@ -226,7 +226,7 @@ void MatrixFreePDE<dim, degree>::printOutputs(unsigned int fieldIndex, SolverCon
     char buffer[200];
 
     double solution_L2_norm = tStep.solutionSet[fieldIndex]->l2_norm();
-    double residual_L2_norm = residualSet[fieldIndex]->l2_norm();
+    double residual_L2_norm = tStep.residualSet[fieldIndex]->l2_norm();
 
     if (fields[fieldIndex].pdetype == EXPLICIT_TIME_DEPENDENT) {
         snprintf(buffer, sizeof(buffer), "field '%2s' [explicit solve]: current solution: %12.6e, current residual:%12.6e\n",
@@ -322,7 +322,7 @@ void MatrixFreePDE<dim, degree>::updateExplicitSolution(unsigned int fieldIndex)
         unsigned int invM_size = invMscalar.locally_owned_size();
         for (unsigned int dof = 0; dof < tStep.solutionSet[fieldIndex]->locally_owned_size(); ++dof) {
 #endif
-            tStep.solutionSet[fieldIndex]->local_element(dof) = invMscalar.local_element(dof % invM_size) * residualSet[fieldIndex]->local_element(dof);
+            tStep.solutionSet[fieldIndex]->local_element(dof) = invMscalar.local_element(dof % invM_size) * tStep.residualSet[fieldIndex]->local_element(dof);
         }
     } else if (fields[fieldIndex].type == VECTOR) {
 #if (DEAL_II_VERSION_MAJOR == 9 && DEAL_II_VERSION_MINOR < 4)
@@ -332,7 +332,7 @@ void MatrixFreePDE<dim, degree>::updateExplicitSolution(unsigned int fieldIndex)
         unsigned int invM_size = invMvector.locally_owned_size();
         for (unsigned int dof = 0; dof < tStep.solutionSet[fieldIndex]->locally_owned_size(); ++dof) {
 #endif
-            tStep.solutionSet[fieldIndex]->local_element(dof) = invMvector.local_element(dof % invM_size) * residualSet[fieldIndex]->local_element(dof);
+            tStep.solutionSet[fieldIndex]->local_element(dof) = invMvector.local_element(dof % invM_size) * tStep.residualSet[fieldIndex]->local_element(dof);
         }
     }
 }

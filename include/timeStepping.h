@@ -16,8 +16,13 @@ public:
     /*Vector all the solution vectors in the problem. In a multi-field problem, each primal field has a solution vector associated with it.*/
     std::vector<vectorType*> solutionSet;
 
+    /*Vector all the residual (RHS) vectors in the problem. In a multi-field problem, each primal field has a residual vector associated with it.*/
+    std::vector<vectorType*> residualSet;
+
+    /*Simulation time*/
     double currentTime;
 
+    /*Simulation increment*/
     unsigned int currentIncrement;
 
 private:

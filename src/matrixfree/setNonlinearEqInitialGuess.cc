@@ -21,8 +21,8 @@ void MatrixFreePDE<dim, degree>::setNonlinearEqInitialGuess()
             computeLaplaceRHS(fieldIndex);
 
             for (std::map<types::global_dof_index, double>::const_iterator it = BCs.valuesDirichletSet[fieldIndex]->begin(); it != BCs.valuesDirichletSet[fieldIndex]->end(); ++it) {
-                if (residualSet[fieldIndex]->in_local_range(it->first)) {
-                    (*residualSet[fieldIndex])(it->first) = 0.0;
+                if (tStep.residualSet[fieldIndex]->in_local_range(it->first)) {
+                    (*tStep.residualSet[fieldIndex])(it->first) = 0.0;
                 }
             }
 
@@ -31,7 +31,7 @@ void MatrixFreePDE<dim, degree>::setNonlinearEqInitialGuess()
             if (userInputs.linear_solver_parameters.getToleranceType(fieldIndex) == ABSOLUTE_RESIDUAL) {
                 tol_value = userInputs.linear_solver_parameters.getToleranceValue(fieldIndex);
             } else {
-                tol_value = userInputs.linear_solver_parameters.getToleranceValue(fieldIndex) * residualSet[fieldIndex]->l2_norm();
+                tol_value = userInputs.linear_solver_parameters.getToleranceValue(fieldIndex) * tStep.residualSet[fieldIndex]->l2_norm();
             }
 
             SolverControl solver_control(userInputs.linear_solver_parameters.getMaxIterations(fieldIndex), tol_value);
@@ -43,10 +43,10 @@ void MatrixFreePDE<dim, degree>::setNonlinearEqInitialGuess()
             try {
                 if (fields[fieldIndex].type == SCALAR) {
                     dU_scalar = 0.0;
-                    solver.solve(*this, dU_scalar, *residualSet[fieldIndex], IdentityMatrix(tStep.solutionSet[fieldIndex]->size()));
+                    solver.solve(*this, dU_scalar, *tStep.residualSet[fieldIndex], IdentityMatrix(tStep.solutionSet[fieldIndex]->size()));
                 } else {
                     dU_vector = 0.0;
-                    solver.solve(*this, dU_vector, *residualSet[fieldIndex], IdentityMatrix(tStep.solutionSet[fieldIndex]->size()));
+                    solver.solve(*this, dU_vector, *tStep.residualSet[fieldIndex], IdentityMatrix(tStep.solutionSet[fieldIndex]->size()));
                 }
             } catch (...) {
                 pcout << "\nWarning: implicit solver did not converge as per set tolerances. consider increasing maxSolverIterations or decreasing solverTolerance.\n";
@@ -67,7 +67,7 @@ void MatrixFreePDE<dim, degree>::setNonlinearEqInitialGuess()
                 }
                 snprintf(buffer, sizeof(buffer), "field '%2s' [laplace solve for initial guess]: initial residual:%12.6e, current residual:%12.6e, nsteps:%u, tolerance criterion:%12.6e, solution: %12.6e, dU: %12.6e\n",
                     fields[fieldIndex].name.c_str(),
-                    residualSet[fieldIndex]->l2_norm(),
+                    tStep.residualSet[fieldIndex]->l2_norm(),
                     solver_control.last_value(),
                     solver_control.last_step(), solver_control.tolerance(), tStep.solutionSet[fieldIndex]->l2_norm(), dU_norm);
                 pcout << buffer;
@@ -90,7 +90,7 @@ void MatrixFreePDE<dim, degree>::computeLaplaceRHS(unsigned int fieldIndex)
     computing_timer.enter_subsection("matrixFreePDE: computeLaplaceRHS");
 
     // call to integrate and assemble while clearing residual vecotrs
-    Discretization.matrixFreeObject.cell_loop(&MatrixFreePDE<dim, degree>::getLaplaceRHS, this, *residualSet[fieldIndex], *tStep.solutionSet[fieldIndex], true);
+    Discretization.matrixFreeObject.cell_loop(&MatrixFreePDE<dim, degree>::getLaplaceRHS, this, *tStep.residualSet[fieldIndex], *tStep.solutionSet[fieldIndex], true);
 
     // end log
     computing_timer.leave_subsection("matrixFreePDE: computeLaplaceRHS");
