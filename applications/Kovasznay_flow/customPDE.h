@@ -57,9 +57,13 @@ private:
     // ================================================================
 
     double Re = userInputs.get_model_constant_double("Re");
+    double C = userInputs.get_model_constant_double("C");
 
     // This bool acts as a switch to indicate what Chorin projection step is being calculating
     bool ChorinSwitch = false;
+
+    // Stabilization parameter
+    double tau = 0.0;
 
     // ================================================================
 };
@@ -81,6 +85,10 @@ void customPDE<dim, degree>::solveIncrement(bool skip_time_dependent)
 
     // Set ChorinSwitch to false so steps 1 and 2 may occur
     ChorinSwitch = false;
+
+    // Set the stabilization parameter
+    tau = C * Re * dealii::GridTools::maximal_cell_diameter(this->Discretization.triangulation);
+    this->pcout << "Stabilization parameter: " << tau << std::endl;
 
     // Check if there is at least one explicit equation. If not, skip ahead
     if (!this->pFlags.hasExplicitEquation) {
@@ -188,7 +196,7 @@ nonexplicit:
 
         // Here are the allowed fields that we recalulate
         bool skipLoop = true;
-        if (userInputs.var_name[fieldIndex] == "u") {
+        if (userInputs.var_name[fieldIndex] == "u" || userInputs.var_name[fieldIndex] == "pi") {
             skipLoop = false;
         }
         if (skipLoop) {

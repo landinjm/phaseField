@@ -31,7 +31,7 @@ set Element degree = 1
 # Set the time step parameters
 # =================================================================================
 # The size of the time step
-set Time step = 2.0e-4
+set Time step = 4.0e-7
 
 # The simulation ends when either the number of time steps is reached or the
 # simulation time is reached.
@@ -61,6 +61,8 @@ set Boundary condition for variable u, x component = NON_UNIFORM_DIRICHLET,NATUR
 set Boundary condition for variable u, y component = NON_UNIFORM_DIRICHLET,NATURAL,NON_UNIFORM_DIRICHLET,NON_UNIFORM_DIRICHLET
 
 set Boundary condition for variable P = NATURAL,DIRICHLET: 0.0,NATURAL,NATURAL
+set Boundary condition for variable pi, x component = NATURAL
+set Boundary condition for variable pi, y component = NATURAL
 
 # =================================================================================
 # Set the model constants
@@ -73,6 +75,9 @@ set Boundary condition for variable P = NATURAL,DIRICHLET: 0.0,NATURAL,NATURAL
 
 #Reynolds number
 set Model constant Re = 50.0, DOUBLE
+
+#Stabilization constant
+set Model constant C = 0.0001, DOUBLE
 
 # =================================================================================
 # Set the linear solver parameters

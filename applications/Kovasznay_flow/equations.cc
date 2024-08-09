@@ -29,9 +29,17 @@ void variableAttributeLoader::loadVariableAttributes()
     set_variable_equation_type(1, TIME_INDEPENDENT);
 
     set_dependencies_value_term_RHS(1, "grad(u)");
-    set_dependencies_gradient_term_RHS(1, "grad(P)");
+    set_dependencies_gradient_term_RHS(1, "grad(P),pi");
     set_dependencies_value_term_LHS(1, "");
     set_dependencies_gradient_term_LHS(1, "grad(change(P))");
+
+    // Variable 2 - pressure
+    set_variable_name(2, "pi");
+    set_variable_type(2, VECTOR);
+    set_variable_equation_type(2, EXPLICIT_TIME_DEPENDENT);
+
+    set_dependencies_value_term_RHS(2, "pi,grad(P)");
+    set_dependencies_gradient_term_RHS(2, "");
 }
 
 // =============================================================================================
@@ -57,8 +65,8 @@ void customPDE<dim, degree>::explicitEquationRHS(variableContainer<dim, degree, 
 
     // Initialize submission terms
     vectorvalueType eq_u = u;
-    vectorgradType eqx_u;
-    eqx_u = eqx_u * constV(0.0);
+    vectorgradType eqx_u; eqx_u = eqx_u * constV(0.0);
+    vectorvalueType eq_pi; eq_pi = constV(0.0) * eq_pi;
 
     // Step one of the Chorin projection
     if (!ChorinSwitch) {
@@ -81,11 +89,15 @@ void customPDE<dim, degree>::explicitEquationRHS(variableContainer<dim, degree, 
     if (ChorinSwitch == true) {
         // Setting the expressions for the terms in the governing equations
         eq_u = u - constV(userInputs.dtValue) * Px;
+
+        // Auxiliary pressure variable
+        eq_pi = Px;
     }
 
     // Submitting the terms for the governing equations
     variable_list.set_vector_value_term_RHS(0, eq_u);
     variable_list.set_vector_gradient_term_RHS(0, eqx_u);
+    variable_list.set_vector_value_term_RHS(2, eq_pi);
 }
 
 // =============================================================================================
@@ -108,6 +120,7 @@ void customPDE<dim, degree>::nonExplicitEquationRHS(variableContainer<dim, degre
     // Grab derivative model variable
     vectorgradType ux = variable_list.get_vector_gradient(0);
     scalargradType Px = variable_list.get_scalar_gradient(1);
+    vectorvalueType pi = variable_list.get_vector_value(2);
 
     // Initialize submission terms
     scalarvalueType eq_P = constV(0.0);
@@ -116,9 +129,12 @@ void customPDE<dim, degree>::nonExplicitEquationRHS(variableContainer<dim, degre
 
     // Continuity equation
     for (unsigned int i = 0; i < dim; i++) {
-        eq_P += -constV(1.0 / userInputs.dtValue) * ux[i][i];
+        eq_P += -constV(1.0 / (userInputs.dtValue + tau)) * ux[i][i];
     }
     eqx_P = -Px;
+
+    // Auxiliary variable stabilization
+    eqx_P += constV(tau / (userInputs.dtValue + tau)) * pi;
 
     // Submitting the terms for the governing equations
     variable_list.set_scalar_value_term_RHS(1, eq_P);
