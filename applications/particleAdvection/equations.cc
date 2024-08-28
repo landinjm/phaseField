@@ -19,10 +19,20 @@ variableAttributeLoader::loadVariableAttributes()
   // Variable 0
   set_variable_name(0, "n");
   set_variable_type(0, SCALAR);
-  set_variable_equation_type(0, EXPLICIT_TIME_DEPENDENT);
+  set_variable_equation_type(0, TIME_INDEPENDENT);
 
-  set_dependencies_value_term_RHS(0, "n, grad(n)");
-  set_dependencies_gradient_term_RHS(0, "");
+  set_dependencies_value_term_RHS(0, "n, n_old, grad(n_old)");
+  set_dependencies_gradient_term_RHS(0, "n, n_old, grad(n_old)");
+  set_dependencies_value_term_LHS(0, "change(n)");
+  set_dependencies_gradient_term_LHS(0, "change(n)");
+
+  // Variable 1
+  set_variable_name(1, "n_old");
+  set_variable_type(1, SCALAR);
+  set_variable_equation_type(1, EXPLICIT_TIME_DEPENDENT);
+
+  set_dependencies_value_term_RHS(1, "n");
+  set_dependencies_gradient_term_RHS(1, "");
 }
 
 // =============================================================================================
@@ -47,21 +57,12 @@ customPDE<dim, degree>::explicitEquationRHS(
   // --- Getting the values and derivatives of the model variables ---
 
   // The order parameter and its derivatives
-  scalarvalueType n  = variable_list.get_scalar_value(0);
-  scalargradType  nx = variable_list.get_scalar_gradient(0);
+  scalarvalueType n = variable_list.get_scalar_value(0);
 
   // --- Setting the expressions for the terms in the governing equations ---
-  vectorvalueType vel;
-  for (unsigned int i = 0; i < dim; i++)
-    {
-      vel[i] = constV(velocity[i]);
-    }
-
-  scalarvalueType eq_n = n - constV(userInputs.dtValue) * vel * nx;
 
   // --- Submitting the terms for the governing equations ---
-
-  variable_list.set_scalar_value_term_RHS(0, eq_n);
+  variable_list.set_scalar_value_term_RHS(1, n);
 }
 
 // =============================================================================================
@@ -82,7 +83,26 @@ void
 customPDE<dim, degree>::nonExplicitEquationRHS(
   variableContainer<dim, degree, dealii::VectorizedArray<double>> &variable_list,
   dealii::Point<dim, dealii::VectorizedArray<double>>              q_point_loc) const
-{}
+{
+  // Getting necessary variables
+  scalarvalueType n      = variable_list.get_scalar_value(0);
+  scalarvalueType n_old  = variable_list.get_scalar_value(1);
+  scalargradType  nx_old = variable_list.get_scalar_gradient(1);
+
+  // Converting prescibed velocity to a vectorvalueType
+  vectorvalueType vel;
+  for (unsigned int i = 0; i < dim; i++)
+    {
+      vel[i] = constV(velocity[i]);
+    }
+
+  scalarvalueType residual = (n_old - n - constV(userInputs.dtValue) * vel * nx_old);
+  scalarvalueType eq_n     = residual;
+  scalargradType  eqx_n    = residual * constV(stabilization_parameter) * vel;
+
+  variable_list.set_scalar_value_term_RHS(0, eq_n);
+  variable_list.set_scalar_gradient_term_RHS(0, eqx_n);
+}
 
 // =============================================================================================
 // equationLHS (needed only if at least one equation is time independent)
@@ -104,4 +124,20 @@ void
 customPDE<dim, degree>::equationLHS(
   variableContainer<dim, degree, dealii::VectorizedArray<double>> &variable_list,
   dealii::Point<dim, dealii::VectorizedArray<double>>              q_point_loc) const
-{}
+{
+  // Getting necessary variables
+  scalarvalueType change_phi = variable_list.get_change_in_scalar_value(0);
+
+  // Converting prescibed velocity to a vectorvalueType
+  vectorvalueType vel;
+  for (unsigned int i = 0; i < dim; i++)
+    {
+      vel[i] = constV(velocity[i]);
+    }
+
+  scalarvalueType eq_n  = change_phi;
+  scalargradType  eqx_n = change_phi * constV(stabilization_parameter) * vel;
+
+  variable_list.set_scalar_value_term_LHS(0, eq_n);
+  variable_list.set_scalar_gradient_term_LHS(0, eqx_n);
+}

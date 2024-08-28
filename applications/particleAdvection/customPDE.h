@@ -78,5 +78,16 @@ private:
   dealii::Tensor<1, dim> velocity =
     userInputs.get_model_constant_rank_1_tensor("velocity");
 
+  // h
+  double h = 1.41 * userInputs.domain_size[0] / dealii::Utilities::fixed_power<8>(2);
+
+  // 1/dt
+  double sdt = 1.0 / userInputs.dtValue;
+
+  double u_l2norm = 1.0e-12 + velocity[0] * velocity[0] + velocity[1] * velocity[1];
+
+  double stabilization_parameter =
+    1.0 / std::sqrt(dealii::Utilities::fixed_power<2>(sdt) + 4.0 * u_l2norm / h / h);
+
   // ================================================================
 };

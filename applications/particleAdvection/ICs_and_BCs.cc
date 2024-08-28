@@ -31,7 +31,7 @@ customPDE<dim, degree>::setInitialCondition(const dealii::Point<dim> &p,
     }
   dist = std::sqrt(dist);
 
-  if (index == 0)
+  if (index == 0 || index == 1)
     {
       scalar_IC = 0.5 - 0.5 * std::tanh((dist - rad) / (std::sqrt(2) * W));
     }
