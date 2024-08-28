@@ -20,20 +20,34 @@ customPDE<dim, degree>::setInitialCondition(const dealii::Point<dim> &p,
   // by a hyperbolic tangent function. The center of each circle/sphere is
   // given by "center" and its radius is given by "radius".
 
-  double center[3] = {0.5, 0.5, 0};
-  double rad       = 12.0;
-  double dist      = 0.0;
-
-  for (unsigned int dir = 0; dir < dim; dir++)
+  double center[3][3] = {
+    {0.55, 0.45, 0},
+    {0.3,  0.3,  0},
+    {0.4,  0.7,  0}
+  };
+  double rad[3] = {12, 14, 19};
+  double dist;
+  double irregular_shape = 0;
+  for (unsigned int i = 0; i < 3; i++)
     {
-      dist += (p[dir] - center[dir] * userInputs.domain_size[dir]) *
-              (p[dir] - center[dir] * userInputs.domain_size[dir]);
+      dist = 0.0;
+      for (unsigned int dir = 0; dir < dim; dir++)
+        {
+          dist += (p[dir] - center[i][dir] * userInputs.domain_size[dir]) *
+                  (p[dir] - center[i][dir] * userInputs.domain_size[dir]);
+        }
+      dist = std::sqrt(dist);
+
+      irregular_shape += 0.5 * (1.0 - std::tanh((dist - rad[i]) / (std::sqrt(2) * W)));
     }
-  dist = std::sqrt(dist);
+  if (irregular_shape > 1.0)
+    {
+      irregular_shape = 1.0;
+    }
 
   if (index == 0 || index == 1)
     {
-      scalar_IC = 0.5 - 0.5 * std::tanh((dist - rad) / (std::sqrt(2) * W));
+      scalar_IC = irregular_shape;
     }
 
   else

@@ -91,3 +91,19 @@ set Model constant W = 1.0, DOUBLE
 
 # The prescribed velocity
 set Model constant velocity = (1.0, 0.0, 0.0), TENSOR
+
+# =================================================================================
+# Set the linear solver parameters
+# =================================================================================
+
+subsection Linear solver parameters: n
+    # Whether the tolerance value is compared to the residual (ABSOLUTE_RESIDUAL)
+    # or the change in the residual (RELATIVE_RESIDUAL_CHANGE)
+    set Tolerance type = ABSOLUTE_RESIDUAL
+
+    # The tolerance for convergence (L2 norm)
+    set Tolerance value = 1e-4
+
+    # The maximum number of linear solver iterations per solve
+    set Maximum linear solver iterations = 1000
+end
