@@ -79,7 +79,8 @@ private:
     userInputs.get_model_constant_rank_1_tensor("velocity");
 
   // h
-  double h = 1.41 * userInputs.domain_size[0] / dealii::Utilities::fixed_power<8>(2);
+  double h = 2.0 * userInputs.domain_size[0] / dealii::Utilities::fixed_power<7>(2) /
+             userInputs.degree;
 
   // 1/dt
   double sdt = 1.0 / userInputs.dtValue;
