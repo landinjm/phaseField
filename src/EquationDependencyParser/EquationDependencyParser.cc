@@ -26,6 +26,8 @@ EquationDependencyParser::parse(std::vector<std::string> var_name,
   // Resize the dependency evaluation flag vectors
   eval_flags_explicit_RHS.resize(n_variables, dealii::EvaluationFlags::nothing);
   eval_flags_nonexplicit_RHS.resize(n_variables, dealii::EvaluationFlags::nothing);
+  eval_flags_previous_nonexplicit_RHS.resize(n_variables,
+                                             dealii::EvaluationFlags::nothing);
   eval_flags_nonexplicit_LHS.resize(n_variables, dealii::EvaluationFlags::nothing);
   eval_flags_change_nonexplicit_LHS.resize(n_variables, dealii::EvaluationFlags::nothing);
 
@@ -85,6 +87,7 @@ EquationDependencyParser::parse(std::vector<std::string> var_name,
                                  sorted_dependencies_value_RHS[i],
                                  sorted_dependencies_gradient_RHS[i],
                                  eval_flags_nonexplicit_RHS,
+                                 eval_flags_previous_nonexplicit_RHS,
                                  eval_flags_residual_nonexplicit_RHS,
                                  single_var_nonlinear_RHS);
 
@@ -193,6 +196,151 @@ EquationDependencyParser::parseDependencyListRHS(
           else if (dependency == hessian_variable)
             {
               evaluation_flags[dependency_variable_index] |=
+                dealii::EvaluationFlags::hessians;
+              dependency_entry_assigned = true;
+            }
+
+          // Check for nonlinearity
+          is_nonlinear =
+            !variable_is_explicit && !same_variable && !dependency_variable_is_explicit;
+
+          // Increment counter
+          ++dependency_variable_index;
+        }
+
+      Assert(dependency_entry_assigned,
+             dealii::StandardExceptions::ExcMessage("PRISMS-PF Error: Dependency entry " +
+                                                    dependency + " is not valid."));
+    }
+}
+
+void
+EquationDependencyParser::parseDependencyListRHS(
+  std::vector<std::string>                               variable_name_list,
+  std::vector<PDEType>                                   variable_eq_type,
+  unsigned int                                           variable_index,
+  std::string                                            value_dependencies,
+  std::string                                            gradient_dependencies,
+  std::vector<dealii::EvaluationFlags::EvaluationFlags> &evaluation_flags,
+  std::vector<dealii::EvaluationFlags::EvaluationFlags> &evaluation_flags_previous,
+  std::vector<dealii::EvaluationFlags::EvaluationFlags> &residual_flags,
+  bool                                                  &is_nonlinear)
+{
+  // Split the dependency strings into lists of entries
+  std::vector<std::string> split_value_dependency_list =
+    dealii::Utilities::split_string_list(value_dependencies);
+  std::vector<std::string> split_gradient_dependency_list =
+    dealii::Utilities::split_string_list(gradient_dependencies);
+
+  // Check if either is empty and set value and gradient flags for the
+  // residual appropriately
+  if (split_value_dependency_list.size() > 0)
+    {
+      residual_flags[variable_index] |= dealii::EvaluationFlags::values;
+    }
+  if (split_gradient_dependency_list.size() > 0)
+    {
+      residual_flags[variable_index] |= dealii::EvaluationFlags::gradients;
+    }
+
+  // Merge the lists of dependency entries
+  std::vector<std::string> split_dependency_list = split_value_dependency_list;
+  split_dependency_list.insert(split_dependency_list.end(),
+                               split_gradient_dependency_list.begin(),
+                               split_gradient_dependency_list.end());
+
+  // Set nonlinearity to false
+  is_nonlinear = false;
+
+  // Cycle through each dependency entry
+  for (const auto &dependency : split_dependency_list)
+    {
+      // Flag to make sure we have assigned a dependency entry
+      bool dependency_entry_assigned = false;
+
+      // Loop through all known variable names [x, grad(x), and hess(x)] to see which ones
+      // are on our dependency list. If we have two variables x and y this will loop twice
+      // to see if the supplied dependency needs either two of the variables. A successful
+      // match will update the values/gradient/hessian flag for that dependency variable.
+      std::size_t dependency_variable_index = 0;
+      for (const auto &variable : variable_name_list)
+        {
+          // Create grad(), hess(), and prev() variants of the variable name
+          std::string gradient_variable = {"grad()"};
+          gradient_variable.insert(--gradient_variable.end(),
+                                   variable.begin(),
+                                   variable.end());
+
+          std::string hessian_variable = {"hess()"};
+          hessian_variable.insert(--hessian_variable.end(),
+                                  variable.begin(),
+                                  variable.end());
+
+          std::string previous_value_variable = {"prev()"};
+          previous_value_variable.insert(--previous_value_variable.end(),
+                                         variable.begin(),
+                                         variable.end());
+
+          std::string previous_gradient_variable = {"grad(prev())"};
+          previous_gradient_variable.insert(--(--previous_gradient_variable.end()),
+                                            variable.begin(),
+                                            variable.end());
+
+          std::string previous_hessian_variable = {"hess(prev())"};
+          previous_hessian_variable.insert(--(--previous_hessian_variable.end()),
+                                           variable.begin(),
+                                           variable.end());
+
+          // Is the variable we are finding the dependencies for explicit
+          bool variable_is_explicit =
+            variable_eq_type[variable_index] == EXPLICIT_TIME_DEPENDENT;
+
+          // Is the dependency variable explicit
+          bool dependency_variable_is_explicit =
+            variable_eq_type[dependency_variable_index] == EXPLICIT_TIME_DEPENDENT;
+
+          // Is the dependency the variable
+          bool same_variable = variable_index == dependency_variable_index;
+
+          // Case if the dependency is x
+          if (dependency == variable)
+            {
+              evaluation_flags[dependency_variable_index] |=
+                dealii::EvaluationFlags::values;
+              dependency_entry_assigned = true;
+            }
+          // Case if the dependency is grad(x)
+          else if (dependency == gradient_variable)
+            {
+              evaluation_flags[dependency_variable_index] |=
+                dealii::EvaluationFlags::gradients;
+              dependency_entry_assigned = true;
+            }
+          // Case if the dependency is hess(x)
+          else if (dependency == hessian_variable)
+            {
+              evaluation_flags[dependency_variable_index] |=
+                dealii::EvaluationFlags::hessians;
+              dependency_entry_assigned = true;
+            }
+          // Case if the dependency is prev(x)
+          else if (dependency == previous_value_variable)
+            {
+              evaluation_flags_previous[dependency_variable_index] |=
+                dealii::EvaluationFlags::values;
+              dependency_entry_assigned = true;
+            }
+          // Case if the dependency is grad(prev(x))
+          else if (dependency == previous_gradient_variable)
+            {
+              evaluation_flags_previous[dependency_variable_index] |=
+                dealii::EvaluationFlags::gradients;
+              dependency_entry_assigned = true;
+            }
+          // Case if the dependency is hess(prev(x))
+          else if (dependency == previous_hessian_variable)
+            {
+              evaluation_flags_previous[dependency_variable_index] |=
                 dealii::EvaluationFlags::hessians;
               dependency_entry_assigned = true;
             }

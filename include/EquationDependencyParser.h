@@ -36,6 +36,8 @@ public:
   // nonexplicit_change, etc.)
   std::vector<dealii::EvaluationFlags::EvaluationFlags> eval_flags_explicit_RHS;
   std::vector<dealii::EvaluationFlags::EvaluationFlags> eval_flags_nonexplicit_RHS;
+  std::vector<dealii::EvaluationFlags::EvaluationFlags>
+    eval_flags_previous_nonexplicit_RHS;
   std::vector<dealii::EvaluationFlags::EvaluationFlags> eval_flags_nonexplicit_LHS;
   std::vector<dealii::EvaluationFlags::EvaluationFlags> eval_flags_change_nonexplicit_LHS;
 
@@ -69,6 +71,23 @@ protected:
     std::string                                            value_dependencies,
     std::string                                            gradient_dependencies,
     std::vector<dealii::EvaluationFlags::EvaluationFlags> &evaluation_flags,
+    std::vector<dealii::EvaluationFlags::EvaluationFlags> &residual_flags,
+    bool                                                  &is_nonlinear);
+
+  /**
+   * Method to parse the RHS dependency strings and populate the vectors for
+   * whether values, gradients, or hessians are needed. This is an overload that allows
+   * evaluation flags for previous timesteps.
+   */
+  void
+  parseDependencyListRHS(
+    std::vector<std::string>                               variable_name_list,
+    std::vector<PDEType>                                   variable_eq_type,
+    unsigned int                                           variable_index,
+    std::string                                            value_dependencies,
+    std::string                                            gradient_dependencies,
+    std::vector<dealii::EvaluationFlags::EvaluationFlags> &evaluation_flags,
+    std::vector<dealii::EvaluationFlags::EvaluationFlags> &evaluation_flags_previous,
     std::vector<dealii::EvaluationFlags::EvaluationFlags> &residual_flags,
     bool                                                  &is_nonlinear);
 
