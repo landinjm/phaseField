@@ -18,6 +18,7 @@
 #if (DEAL_II_VERSION_MAJOR == 9 && DEAL_II_VERSION_MINOR > 3)
 #  include <deal.II/fe/mapping_fe.h>
 #endif
+#include <deal.II/base/aligned_vector.h>
 #include <deal.II/base/config.h>
 #include <deal.II/base/exceptions.h>
 #include <deal.II/distributed/solution_transfer.h>
@@ -266,6 +267,13 @@ protected:
   /*Method to apply boundary conditions*/
   void
   applyBCs(unsigned int fieldIndex);
+
+  /*Calculate element volume*/
+  void
+  compute_element_volume();
+
+  /*Vector to store element volumes*/
+  dealii::AlignedVector<dealii::VectorizedArray<double>> element_volume;
 
   /*AMR methods*/
   AdaptiveRefinement<dim, degree> AMR;

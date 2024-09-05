@@ -364,6 +364,9 @@ MatrixFreePDE<dim, degree>::init()
       load_checkpoint_time_info();
     }
 
+  // Once the initial triangulation has been set, compute element volume
+  compute_element_volume();
+
   computing_timer.leave_subsection("matrixFreePDE: initialization");
 }
 
@@ -399,6 +402,31 @@ MatrixFreePDE<dim, degree>::makeTriangulation(
 
   // Mark boundaries for applying the boundary conditions
   markBoundaries(tria);
+}
+
+template <int dim, int degree>
+void
+MatrixFreePDE<dim, degree>::compute_element_volume()
+{
+  // Get the number of cell batches. Note this is the same as the cell range in
+  // cell_loop()
+  const unsigned int n_cells = matrixFreeObject.n_cell_batches();
+
+  // Resize vector
+  element_volume.resize(n_cells);
+
+  // Loop over the cells and each lane in the vectorized array
+  for (unsigned int cell = 0; cell < n_cells; cell++)
+    {
+      for (unsigned int lane = 0;
+           lane < matrixFreeObject.n_active_entries_per_cell_batch(cell);
+           lane++)
+        {
+          // Compute element volume. In 3D this is the volume. In 2D this is the area.
+          element_volume[cell][lane] =
+            matrixFreeObject.get_cell_iterator(cell, lane)->measure();
+        }
+    }
 }
 
 #include "../../include/matrixFreePDE_template_instantiations.h"
