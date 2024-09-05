@@ -40,20 +40,23 @@ private:
   void
   explicitEquationRHS(
     variableContainer<dim, degree, dealii::VectorizedArray<double>> &variable_list,
-    dealii::Point<dim, dealii::VectorizedArray<double>>              q_point_loc) const;
+    dealii::Point<dim, dealii::VectorizedArray<double>>              q_point_loc,
+    dealii::VectorizedArray<double> element_volume) const;
 
   // Function to set the RHS of the governing equations
   // for all other equations (in equations.h)
   void
   nonExplicitEquationRHS(
     variableContainer<dim, degree, dealii::VectorizedArray<double>> &variable_list,
-    dealii::Point<dim, dealii::VectorizedArray<double>>              q_point_loc) const;
+    dealii::Point<dim, dealii::VectorizedArray<double>>              q_point_loc,
+    dealii::VectorizedArray<double> element_volume) const;
 
   // Function to set the LHS of the governing equations (in equations.h)
   void
   equationLHS(
     variableContainer<dim, degree, dealii::VectorizedArray<double>> &variable_list,
-    dealii::Point<dim, dealii::VectorizedArray<double>>              q_point_loc) const;
+    dealii::Point<dim, dealii::VectorizedArray<double>>              q_point_loc,
+    dealii::VectorizedArray<double> element_volume) const;
 
   // Function to set postprocessing expressions (in postprocess.h)
 
@@ -62,7 +65,8 @@ private:
   postProcessedFields(
     const variableContainer<dim, degree, dealii::VectorizedArray<double>> &variable_list,
     variableContainer<dim, degree, dealii::VectorizedArray<double>> &pp_variable_list,
-    const dealii::Point<dim, dealii::VectorizedArray<double>>        q_point_loc) const;
+    const dealii::Point<dim, dealii::VectorizedArray<double>>        q_point_loc,
+    dealii::VectorizedArray<double> element_volume) const;
 #endif
 
 // Function to set the nucleation probability (in nucleation.h)
