@@ -86,19 +86,15 @@ MatrixFreePDE<dim, degree>::init()
                it->name.c_str());
       pcout << buffer;
 
-      // Check if any time dependent fields present (note: I should get rid of
-      // parabolicFieldIndex and ellipticFieldIndex, they only work if there is
-      // at max one of each)
+      // Check if any time dependent fields present
       if (it->pdetype == EXPLICIT_TIME_DEPENDENT)
         {
           isTimeDependentBVP  = true;
-          parabolicFieldIndex = it->index;
           hasExplicitEquation = true;
         }
       else if (it->pdetype == IMPLICIT_TIME_DEPENDENT)
         {
           isTimeDependentBVP     = true;
-          ellipticFieldIndex     = it->index;
           hasNonExplicitEquation = true;
           std::cerr << "PRISMS-PF Error: IMPLICIT_TIME_DEPENDENT equation "
                        "types are not currently supported"
@@ -107,14 +103,11 @@ MatrixFreePDE<dim, degree>::init()
         }
       else if (it->pdetype == AUXILIARY)
         {
-          parabolicFieldIndex    = it->index;
-          ellipticFieldIndex     = it->index;
           hasNonExplicitEquation = true;
         }
       else if (it->pdetype == TIME_INDEPENDENT)
         {
           isEllipticBVP          = true;
-          ellipticFieldIndex     = it->index;
           hasNonExplicitEquation = true;
         }
 
@@ -314,7 +307,7 @@ MatrixFreePDE<dim, degree>::init()
     }
 
   // Apply the initial conditions to the solution vectors
-  // The initial conditions are re-applied below in the "adaptiveRefine"
+  // The initial conditions are re-applied below in the "do_adaptive_refinement"
   // function so that the mesh can adapt based on the initial conditions.
   if (userInputs.resume_from_checkpoint)
     {
@@ -325,7 +318,7 @@ MatrixFreePDE<dim, degree>::init()
       applyInitialConditions();
     }
 
-  // Create new solution transfer sets (needed for the "refineGrid" call, might
+  // Create new solution transfer sets (needed for the "refine_grid" call, might
   // be able to move this elsewhere)
   soltransSet.clear();
   for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++)
@@ -343,11 +336,26 @@ MatrixFreePDE<dim, degree>::init()
       solutionSet[fieldIndex]->update_ghost_values();
     }
 
-  // If not resuming from a checkpoint, check and perform adaptive mesh
-  // refinement, which reinitializes the system with the new mesh
-  if (!userInputs.resume_from_checkpoint)
+  // If not resuming from a checkpoint, check and perform adaptive mesh refinement, which
+  // reinitializes the system with the new mesh
+  if (!userInputs.resume_from_checkpoint && userInputs.h_adaptivity == true)
     {
-      adaptiveRefine(0);
+      computing_timer.enter_subsection("matrixFreePDE: AMR");
+
+      unsigned int numDoF_preremesh = totalDOFs;
+      for (unsigned int remesh_index = 0;
+           remesh_index <
+           (userInputs.max_refinement_level - userInputs.min_refinement_level);
+           remesh_index++)
+        {
+          AMR.do_adaptive_refinement(currentIncrement);
+          reinit();
+          if (totalDOFs == numDoF_preremesh)
+            break;
+          numDoF_preremesh = totalDOFs;
+        }
+
+      computing_timer.leave_subsection("matrixFreePDE: AMR");
     }
 
   // If resuming from a checkpoint, load the proper starting increment and time
