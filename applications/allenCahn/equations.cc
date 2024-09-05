@@ -42,8 +42,8 @@ template <int dim, int degree>
 void
 customPDE<dim, degree>::explicitEquationRHS(
   variableContainer<dim, degree, dealii::VectorizedArray<double>> &variable_list,
-  dealii::Point<dim, dealii::VectorizedArray<double>>              q_point_loc) const,
-  dealii::VectorizedArray<double> element_volume
+  dealii::Point<dim, dealii::VectorizedArray<double>>              q_point_loc,
+  dealii::VectorizedArray<double>                                  element_volume) const
 {
   // --- Getting the values and derivatives of the model variables ---
 
