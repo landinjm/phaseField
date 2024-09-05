@@ -33,6 +33,14 @@ variableAttributeLoader::loadVariableAttributes()
 
   set_dependencies_value_term_RHS(1, "n");
   set_dependencies_gradient_term_RHS(1, "");
+
+  // Variable 2
+  set_variable_name(2, "h");
+  set_variable_type(2, SCALAR);
+  set_variable_equation_type(2, EXPLICIT_TIME_DEPENDENT);
+
+  set_dependencies_value_term_RHS(2, "h");
+  set_dependencies_gradient_term_RHS(2, "");
 }
 
 // =============================================================================================
@@ -59,11 +67,15 @@ customPDE<dim, degree>::explicitEquationRHS(
 
   // The order parameter and its derivatives
   scalarvalueType n = variable_list.get_scalar_value(0);
+  scalarvalueType h = variable_list.get_scalar_value(2);
+
+  h = std::sqrt(element_volume) * constV(std::sqrt(4.0 / M_PI) / degree);
 
   // --- Setting the expressions for the terms in the governing equations ---
 
   // --- Submitting the terms for the governing equations ---
   variable_list.set_scalar_value_term_RHS(1, n);
+  variable_list.set_scalar_value_term_RHS(2, h);
 }
 
 // =============================================================================================
@@ -98,9 +110,15 @@ customPDE<dim, degree>::nonExplicitEquationRHS(
       vel[i] = constV(velocity[i]);
     }
 
+  // Stabilization parameter
+  scalarvalueType h = std::sqrt(element_volume) * constV(std::sqrt(4.0 / M_PI) / degree);
+  scalarvalueType stabilization_parameter =
+    constV(1.0) / std::sqrt(constV(dealii::Utilities::fixed_power<2>(sdt)) +
+                            constV(4.0 * u_l2norm) / h / h);
+
   scalarvalueType residual = (n_old - n - constV(userInputs.dtValue) * vel * nx_old);
   scalarvalueType eq_n     = residual;
-  scalargradType  eqx_n    = residual * constV(stabilization_parameter) * vel;
+  scalargradType  eqx_n    = residual * stabilization_parameter * vel;
 
   variable_list.set_scalar_value_term_RHS(0, eq_n);
   variable_list.set_scalar_gradient_term_RHS(0, eqx_n);
@@ -138,8 +156,14 @@ customPDE<dim, degree>::equationLHS(
       vel[i] = constV(velocity[i]);
     }
 
+  // Stabilization parameter
+  scalarvalueType h = std::sqrt(element_volume) * constV(std::sqrt(4.0 / M_PI) / degree);
+  scalarvalueType stabilization_parameter =
+    constV(1.0) / std::sqrt(constV(dealii::Utilities::fixed_power<2>(sdt)) +
+                            constV(4.0 * u_l2norm) / h / h);
+
   scalarvalueType eq_n  = change_phi;
-  scalargradType  eqx_n = change_phi * constV(stabilization_parameter) * vel;
+  scalargradType  eqx_n = change_phi * stabilization_parameter * vel;
 
   variable_list.set_scalar_value_term_LHS(0, eq_n);
   variable_list.set_scalar_gradient_term_LHS(0, eqx_n);

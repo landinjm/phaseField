@@ -61,7 +61,7 @@ set Time step = 8.0e-4
 
 # The simulation ends when either the number of time steps is reached or the
 # simulation time is reached.
-set Number of time steps = 1
+set Number of time steps = 10000
 
 # =================================================================================
 # Set the output parameters
@@ -102,6 +102,7 @@ set Skip print steps = 1000
 
 set Boundary condition for variable n =  DIRICHLET: 0.0
 set Boundary condition for variable n_old = NATURAL
+set Boundary condition for variable h = NATURAL
 
 # =================================================================================
 # Set the model constants
