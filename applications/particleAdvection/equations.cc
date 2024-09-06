@@ -103,18 +103,33 @@ customPDE<dim, degree>::nonExplicitEquationRHS(
   scalarvalueType n_old  = variable_list.get_scalar_value(1);
   scalargradType  nx_old = variable_list.get_scalar_gradient(1);
 
-  // Converting prescibed velocity to a vectorvalueType
   vectorvalueType vel;
-  for (unsigned int i = 0; i < dim; i++)
+  scalarvalueType u_l2norm;
+  if (!zalesak)
     {
-      vel[i] = constV(velocity[i]);
+      // Converting prescibed velocity to a vectorvalueType
+      for (unsigned int i = 0; i < dim; i++)
+        {
+          vel[i] = constV(velocity[i]);
+        }
+    }
+  else
+    {
+      vectorvalueType radius;
+      for (unsigned int i = 0; i < dim; i++)
+        {
+          radius[i] = q_point_loc[i] - constV(disc_center[i]);
+        }
+      vel[0]   = -constV(angular_velocity) * radius[1];
+      vel[1]   = constV(angular_velocity) * radius[0];
+      u_l2norm = 1.0e-12 + vel.norm_square();
     }
 
   // Stabilization parameter
   scalarvalueType h = std::sqrt(element_volume) * constV(std::sqrt(4.0 / M_PI) / degree);
   scalarvalueType stabilization_parameter =
     constV(1.0) / std::sqrt(constV(dealii::Utilities::fixed_power<2>(sdt)) +
-                            constV(4.0 * u_l2norm) / h / h);
+                            constV(4.0) * u_l2norm / h / h);
 
   scalarvalueType residual = (n_old - n - constV(userInputs.dtValue) * vel * nx_old);
   scalarvalueType eq_n     = residual;
@@ -149,18 +164,32 @@ customPDE<dim, degree>::equationLHS(
   // Getting necessary variables
   scalarvalueType change_phi = variable_list.get_change_in_scalar_value(0);
 
-  // Converting prescibed velocity to a vectorvalueType
   vectorvalueType vel;
-  for (unsigned int i = 0; i < dim; i++)
+  scalarvalueType u_l2norm;
+  if (!zalesak)
     {
-      vel[i] = constV(velocity[i]);
+      // Converting prescibed velocity to a vectorvalueType
+      for (unsigned int i = 0; i < dim; i++)
+        {
+          vel[i] = constV(velocity[i]);
+        }
     }
-
+  else
+    {
+      vectorvalueType radius;
+      for (unsigned int i = 0; i < dim; i++)
+        {
+          radius[i] = q_point_loc[i] - constV(disc_center[i]);
+        }
+      vel[0]   = -constV(angular_velocity) * radius[1];
+      vel[1]   = constV(angular_velocity) * radius[0];
+      u_l2norm = 1.0e-12 + vel.norm_square();
+    }
   // Stabilization parameter
   scalarvalueType h = std::sqrt(element_volume) * constV(std::sqrt(4.0 / M_PI) / degree);
   scalarvalueType stabilization_parameter =
     constV(1.0) / std::sqrt(constV(dealii::Utilities::fixed_power<2>(sdt)) +
-                            constV(4.0 * u_l2norm) / h / h);
+                            constV(4.0) * u_l2norm / h / h);
 
   scalarvalueType eq_n  = change_phi;
   scalargradType  eqx_n = change_phi * stabilization_parameter * vel;

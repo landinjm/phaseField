@@ -81,11 +81,13 @@ private:
   double                 W = userInputs.get_model_constant_double("W");
   dealii::Tensor<1, dim> velocity =
     userInputs.get_model_constant_rank_1_tensor("velocity");
+  bool   zalesak          = userInputs.get_model_constant_bool("zalesak");
+  double angular_velocity = userInputs.get_model_constant_double("angular_velocity");
+
+  double disc_center[2] = {50.0, 50.0};
 
   // 1/dt
   double sdt = 1.0 / userInputs.dtValue;
-
-  double u_l2norm = 1.0e-12 + velocity[0] * velocity[0] + velocity[1] * velocity[1];
 
   // ================================================================
 };

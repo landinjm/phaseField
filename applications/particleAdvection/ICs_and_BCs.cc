@@ -1,6 +1,7 @@
 // ===========================================================================
 // FUNCTION FOR INITIAL CONDITIONS
 // ===========================================================================
+#include <deal.II/base/function_signed_distance.h>
 
 template <int dim, int degree>
 void
@@ -20,7 +21,7 @@ customPDE<dim, degree>::setInitialCondition(const dealii::Point<dim> &p,
   // by a hyperbolic tangent function. The center of each circle/sphere is
   // given by "center" and its radius is given by "radius".
 
-  double center[3][3] = {
+  /*double center[3][3] = {
     {0.55, 0.45, 0},
     {0.3,  0.3,  0},
     {0.4,  0.7,  0}
@@ -40,14 +41,30 @@ customPDE<dim, degree>::setInitialCondition(const dealii::Point<dim> &p,
 
       irregular_shape += 0.5 * (1.0 - std::tanh((dist - rad[i]) / (std::sqrt(2) * W)));
     }
+
   if (irregular_shape > 1.0)
     {
       irregular_shape = 1.0;
-    }
+    }*/
+
+  // Zalesak's disk level-set
+  double             radius       = 15.0;
+  double             notch_width  = 5.0;
+  double             notch_height = 25.0;
+  dealii::Point<dim> center(50.0, 75.0);
+
+  dealii::Functions::SignedDistance::ZalesakDisk<dim> zalesak_disk(center,
+                                                                   radius,
+                                                                   notch_width,
+                                                                   notch_height);
+
+  double distance = zalesak_disk.value(p);
+
+  double phi = 0.5 * (1.0 - std::tanh(distance / (std::sqrt(2) * W)));
 
   if (index == 0 || index == 1)
     {
-      scalar_IC = irregular_shape;
+      scalar_IC = phi;
     }
 
   else

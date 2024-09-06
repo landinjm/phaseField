@@ -37,11 +37,11 @@ set Mesh adaptivity = true
 # When adaptive meshing is enabled, the refine factor set in the block above is
 # only used to generate the first pass of the mesh as the initial conditions are
 # applied. It should be set somewhere between the max and min levels below.
-set Max refinement level = 7
+set Max refinement level = 8
 set Min refinement level = 4
 
 # Set the number of time steps between remeshing operations
-set Steps between remeshing operations = 100
+set Steps between remeshing operations = 40
 
 # Set the criteria for adapting the mesh
 subsection Refinement criterion: n
@@ -50,18 +50,19 @@ subsection Refinement criterion: n
     set Criterion type = VALUE
     # Set the lower and upper bounds for the value-based refinement window
     set Value lower bound = 0.01
-    set Value upper bound = 0.99
+    set Value upper bound = 2.0
 end
 
 # =================================================================================
 # Set the time step parameters
 # =================================================================================
 # The size of the time step
-set Time step = 8.0e-4
+set Time step = 4.0e-5
 
 # The simulation ends when either the number of time steps is reached or the
 # simulation time is reached.
-set Number of time steps = 10000
+set Number of time steps = 30000
+#set Simulation end time = 6.28318
 
 # =================================================================================
 # Set the output parameters
@@ -101,7 +102,7 @@ set Skip print steps = 1000
 # set Boundary condition for variable n = NATURAL, NATURAL, DIRICHLET: 1.5, DIRICHLET: 1.5
 
 set Boundary condition for variable n =  DIRICHLET: 0.0
-set Boundary condition for variable n_old = NATURAL
+set Boundary condition for variable n_old = DIRICHLET: 0.0
 set Boundary condition for variable h = NATURAL
 
 # =================================================================================
@@ -114,10 +115,16 @@ set Boundary condition for variable h = NATURAL
 # where [symmetry] is ISOTROPIC, TRANSVERSE, ORTHOTROPIC, or ANISOTROPIC.
 
 # The interfacial width
-set Model constant W = 1.0, DOUBLE
+set Model constant W = 0.5, DOUBLE
 
 # The prescribed velocity
 set Model constant velocity = (1.0, 0.0, 0.0), TENSOR
+
+# Do Zalesak test
+set Model constant zalesak = True, BOOL
+
+# The prescibed rotational velocity
+set Model constant angular_velocity = 1.0, DOUBLE
 
 # =================================================================================
 # Set the linear solver parameters
