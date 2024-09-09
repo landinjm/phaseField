@@ -21,8 +21,8 @@ variableAttributeLoader::loadVariableAttributes()
   set_variable_type(0, SCALAR);
   set_variable_equation_type(0, TIME_INDEPENDENT);
 
-  set_dependencies_value_term_RHS(0, "n, n_old, n_old_2, grad(n)");
-  set_dependencies_gradient_term_RHS(0, "n, n_old, n_old_2, grad(n)");
+  set_dependencies_value_term_RHS(0, "n, n_old, n_old_2, n_old_3, n_old_4, grad(n)");
+  set_dependencies_gradient_term_RHS(0, "n, n_old, n_old_2, n_old_3, n_old_4, grad(n)");
   set_dependencies_value_term_LHS(0, "change(n), grad(change(n))");
   set_dependencies_gradient_term_LHS(0, "change(n), grad(change(n))");
 
@@ -41,6 +41,22 @@ variableAttributeLoader::loadVariableAttributes()
 
   set_dependencies_value_term_RHS(2, "n_old");
   set_dependencies_gradient_term_RHS(2, "");
+
+  // Variable 3
+  set_variable_name(3, "n_old_3");
+  set_variable_type(3, SCALAR);
+  set_variable_equation_type(3, EXPLICIT_TIME_DEPENDENT);
+
+  set_dependencies_value_term_RHS(3, "n_old_2");
+  set_dependencies_gradient_term_RHS(3, "");
+
+  // Variable 4
+  set_variable_name(4, "n_old_4");
+  set_variable_type(4, SCALAR);
+  set_variable_equation_type(4, EXPLICIT_TIME_DEPENDENT);
+
+  set_dependencies_value_term_RHS(4, "n_old_3");
+  set_dependencies_gradient_term_RHS(4, "");
 }
 
 // =============================================================================================
@@ -66,14 +82,18 @@ customPDE<dim, degree>::explicitEquationRHS(
   // --- Getting the values and derivatives of the model variables ---
 
   // The order parameter and its derivatives
-  scalarvalueType n     = variable_list.get_scalar_value(0);
-  scalarvalueType n_old = variable_list.get_scalar_value(1);
+  scalarvalueType n       = variable_list.get_scalar_value(0);
+  scalarvalueType n_old   = variable_list.get_scalar_value(1);
+  scalarvalueType n_old_2 = variable_list.get_scalar_value(2);
+  scalarvalueType n_old_3 = variable_list.get_scalar_value(3);
 
   // --- Setting the expressions for the terms in the governing equations ---
 
   // --- Submitting the terms for the governing equations ---
   variable_list.set_scalar_value_term_RHS(1, n);
   variable_list.set_scalar_value_term_RHS(2, n_old);
+  variable_list.set_scalar_value_term_RHS(3, n_old_2);
+  variable_list.set_scalar_value_term_RHS(4, n_old_3);
 }
 
 // =============================================================================================
@@ -101,6 +121,8 @@ customPDE<dim, degree>::nonExplicitEquationRHS(
   scalargradType  nx      = variable_list.get_scalar_gradient(0);
   scalarvalueType n_old   = variable_list.get_scalar_value(1);
   scalarvalueType n_old_2 = variable_list.get_scalar_value(2);
+  scalarvalueType n_old_3 = variable_list.get_scalar_value(3);
+  scalarvalueType n_old_4 = variable_list.get_scalar_value(4);
 
   vectorvalueType vel;
   scalarvalueType u_l2norm;
@@ -131,9 +153,10 @@ customPDE<dim, degree>::nonExplicitEquationRHS(
                             constV(4.0) * u_l2norm / h / h);
 
   scalarvalueType weighted_n_old =
-    constV(4.0 / 3.0) * n_old - constV(1.0 / 3.0) * n_old_2;
+    constV(48.0 / 25.0) * n_old - constV(36.0 / 25.0) * n_old_2 +
+    constV(16.0 / 25.0) * n_old_3 - constV(3.0 / 25.0) * n_old_4;
   scalarvalueType residual =
-    (weighted_n_old - n - constV(2.0 / 3.0 * userInputs.dtValue) * vel * nx);
+    (weighted_n_old - n - constV(12.0 / 25.0 * userInputs.dtValue) * vel * nx);
   scalarvalueType eq_n  = residual;
   scalargradType  eqx_n = residual * stabilization_parameter * vel;
 
@@ -195,7 +218,7 @@ customPDE<dim, degree>::equationLHS(
                             constV(4.0) * u_l2norm / h / h);
 
   scalarvalueType residual =
-    (change_n + constV(2.0 / 3.0 * userInputs.dtValue) * vel * change_nx);
+    (change_n + constV(12.0 / 25.0 * userInputs.dtValue) * vel * change_nx);
   scalarvalueType eq_n  = residual;
   scalargradType  eqx_n = residual * stabilization_parameter * vel;
 

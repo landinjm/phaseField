@@ -104,6 +104,8 @@ set Skip print steps = 1000
 set Boundary condition for variable n =  DIRICHLET: 0.0
 set Boundary condition for variable n_old = DIRICHLET: 0.0
 set Boundary condition for variable n_old_2 = DIRICHLET: 0.0
+set Boundary condition for variable n_old_3 = DIRICHLET: 0.0
+set Boundary condition for variable n_old_4 = DIRICHLET: 0.0
 
 # =================================================================================
 # Set the model constants
