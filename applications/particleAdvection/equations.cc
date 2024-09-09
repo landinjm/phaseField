@@ -21,10 +21,10 @@ variableAttributeLoader::loadVariableAttributes()
   set_variable_type(0, SCALAR);
   set_variable_equation_type(0, TIME_INDEPENDENT);
 
-  set_dependencies_value_term_RHS(0, "n, n_old, grad(n_old)");
-  set_dependencies_gradient_term_RHS(0, "n, n_old, grad(n_old)");
-  set_dependencies_value_term_LHS(0, "change(n)");
-  set_dependencies_gradient_term_LHS(0, "change(n)");
+  set_dependencies_value_term_RHS(0, "n, n_old, grad(n)");
+  set_dependencies_gradient_term_RHS(0, "n, n_old, grad(n)");
+  set_dependencies_value_term_LHS(0, "change(n), grad(change(n))");
+  set_dependencies_gradient_term_LHS(0, "change(n), grad(change(n))");
 
   // Variable 1
   set_variable_name(1, "n_old");
@@ -99,9 +99,9 @@ customPDE<dim, degree>::nonExplicitEquationRHS(
   dealii::VectorizedArray<double>                                  element_volume) const
 {
   // Getting necessary variables
-  scalarvalueType n      = variable_list.get_scalar_value(0);
-  scalarvalueType n_old  = variable_list.get_scalar_value(1);
-  scalargradType  nx_old = variable_list.get_scalar_gradient(1);
+  scalarvalueType n     = variable_list.get_scalar_value(0);
+  scalargradType  nx    = variable_list.get_scalar_gradient(0);
+  scalarvalueType n_old = variable_list.get_scalar_value(1);
 
   vectorvalueType vel;
   scalarvalueType u_l2norm;
@@ -131,7 +131,7 @@ customPDE<dim, degree>::nonExplicitEquationRHS(
     constV(1.0) / std::sqrt(constV(dealii::Utilities::fixed_power<2>(sdt)) +
                             constV(4.0) * u_l2norm / h / h);
 
-  scalarvalueType residual = (n_old - n - constV(userInputs.dtValue) * vel * nx_old);
+  scalarvalueType residual = (n_old - n - constV(userInputs.dtValue) * vel * nx);
   scalarvalueType eq_n     = residual;
   scalargradType  eqx_n    = residual * stabilization_parameter * vel;
 
@@ -162,7 +162,8 @@ customPDE<dim, degree>::equationLHS(
   dealii::VectorizedArray<double>                                  element_volume) const
 {
   // Getting necessary variables
-  scalarvalueType change_phi = variable_list.get_change_in_scalar_value(0);
+  scalarvalueType change_n  = variable_list.get_change_in_scalar_value(0);
+  scalargradType  change_nx = variable_list.get_change_in_scalar_gradient(0);
 
   vectorvalueType vel;
   scalarvalueType u_l2norm;
@@ -191,8 +192,9 @@ customPDE<dim, degree>::equationLHS(
     constV(1.0) / std::sqrt(constV(dealii::Utilities::fixed_power<2>(sdt)) +
                             constV(4.0) * u_l2norm / h / h);
 
-  scalarvalueType eq_n  = change_phi;
-  scalargradType  eqx_n = change_phi * stabilization_parameter * vel;
+  scalarvalueType residual = (change_n + constV(userInputs.dtValue) * vel * change_nx);
+  scalarvalueType eq_n     = residual;
+  scalargradType  eqx_n    = residual * stabilization_parameter * vel;
 
   variable_list.set_scalar_value_term_LHS(0, eq_n);
   variable_list.set_scalar_gradient_term_LHS(0, eqx_n);
