@@ -100,6 +100,14 @@ main(int argc, char **argv)
                       problem.solve();
                       break;
                     }
+                  case (4):
+                    {
+                      customPDE<2, 4> problem(userInputs);
+                      problem.buildFields();
+                      problem.init();
+                      problem.solve();
+                      break;
+                    }
                 }
               break;
             }
@@ -129,6 +137,14 @@ main(int argc, char **argv)
                   case (3):
                     {
                       customPDE<3, 3> problem(userInputs);
+                      problem.buildFields();
+                      problem.init();
+                      problem.solve();
+                      break;
+                    }
+                  case (4):
+                    {
+                      customPDE<3, 4> problem(userInputs);
                       problem.buildFields();
                       problem.init();
                       problem.solve();

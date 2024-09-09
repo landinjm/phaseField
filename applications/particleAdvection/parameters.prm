@@ -25,7 +25,7 @@ set Subdivisions Z = 1
 set Refine factor = 7
 
 # Set the polynomial degree of the element (allowed values: 1, 2, or 3)
-set Element degree = 3
+set Element degree = 4
 
 # =================================================================================
 # Set the adaptive mesh refinement parameters
