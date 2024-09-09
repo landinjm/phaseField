@@ -62,7 +62,7 @@ customPDE<dim, degree>::setInitialCondition(const dealii::Point<dim> &p,
 
   double phi = 0.5 * (1.0 - std::tanh(distance / (std::sqrt(2) * W)));
 
-  if (index == 0 || index == 1)
+  if (index == 0 || index == 1 || index == 2)
     {
       scalar_IC = phi;
     }
