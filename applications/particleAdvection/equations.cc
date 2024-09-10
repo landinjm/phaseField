@@ -153,10 +153,10 @@ customPDE<dim, degree>::nonExplicitEquationRHS(
                             constV(4.0) * u_l2norm / h / h);
 
   scalarvalueType weighted_n_old =
-    constV(48.0 / 25.0) * n_old - constV(36.0 / 25.0) * n_old_2 +
-    constV(16.0 / 25.0) * n_old_3 - constV(3.0 / 25.0) * n_old_4;
+    constV(bdf[bdf_n][1]) * n_old + constV(bdf[bdf_n][2]) * n_old_2 +
+    constV(bdf[bdf_n][3]) * n_old_3 + constV(bdf[bdf_n][4]) * n_old_4;
   scalarvalueType residual =
-    (weighted_n_old - n - constV(12.0 / 25.0 * userInputs.dtValue) * vel * nx);
+    (weighted_n_old - n - constV(bdf[bdf_n][0] * userInputs.dtValue) * vel * nx);
   scalarvalueType eq_n  = residual;
   scalargradType  eqx_n = residual * stabilization_parameter * vel;
 
@@ -218,7 +218,7 @@ customPDE<dim, degree>::equationLHS(
                             constV(4.0) * u_l2norm / h / h);
 
   scalarvalueType residual =
-    (change_n + constV(12.0 / 25.0 * userInputs.dtValue) * vel * change_nx);
+    (change_n + constV(bdf[bdf_n][0] * userInputs.dtValue) * vel * change_nx);
   scalarvalueType eq_n  = residual;
   scalargradType  eqx_n = residual * stabilization_parameter * vel;
 

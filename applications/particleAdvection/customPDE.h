@@ -83,11 +83,19 @@ private:
     userInputs.get_model_constant_rank_1_tensor("velocity");
   bool   zalesak          = userInputs.get_model_constant_bool("zalesak");
   double angular_velocity = userInputs.get_model_constant_double("angular_velocity");
+  int    bdf_n            = userInputs.get_model_constant_int("bdf_n");
 
   double disc_center[2] = {50.0, 50.0};
 
   // 1/dt
   double sdt = 1.0 / userInputs.dtValue;
 
+  // bdf coefficients
+  std::vector<std::vector<double>> bdf = {
+    {1.,        1.,        0,          0,         0        },
+    {2. / 3.,   4. / 3.,   -1. / 3.,   0,         0        },
+    {6. / 11.,  18. / 11., -9. / 11.,  2. / 11.,  0        },
+    {12. / 25., 48. / 25., -36. / 25., 16. / 25., -3. / 25.}
+  };
   // ================================================================
 };
