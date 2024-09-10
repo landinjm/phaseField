@@ -492,6 +492,9 @@ protected:
   double       integrated_var;
   unsigned int integral_index;
   std::mutex   assembler_lock;
+
+  /*AMR methods*/
+  AdaptiveRefinement<dim, degree> AMR;
 };
 
 #endif

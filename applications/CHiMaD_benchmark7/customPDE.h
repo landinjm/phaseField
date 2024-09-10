@@ -14,7 +14,7 @@ public:
   setInitialCondition(const dealii::Point<dim> &p,
                       const unsigned int        index,
                       double                   &scalar_IC,
-                      dealii::Vector<double>   &vector_IC);
+                      dealii::Vector<double>   &vector_IC) override;
 
   // Function to set the non-uniform Dirichlet boundary conditions (in
   // ICs_and_BCs.h)
@@ -24,7 +24,7 @@ public:
                             const unsigned int        direction,
                             const double              time,
                             double                   &scalar_BC,
-                            dealii::Vector<double>   &vector_BC);
+                            dealii::Vector<double>   &vector_BC) override;
 
 private:
 #include "../../include/typeDefs.h"
@@ -37,7 +37,7 @@ private:
   explicitEquationRHS(
     variableContainer<dim, degree, dealii::VectorizedArray<double>> &variable_list,
     dealii::Point<dim, dealii::VectorizedArray<double>>              q_point_loc,
-    dealii::VectorizedArray<double> element_volume) const;
+    dealii::VectorizedArray<double> element_volume) const override;
 
   // Function to set the RHS of the governing equations for all other equations
   // (in equations.h)
@@ -45,14 +45,14 @@ private:
   nonExplicitEquationRHS(
     variableContainer<dim, degree, dealii::VectorizedArray<double>> &variable_list,
     dealii::Point<dim, dealii::VectorizedArray<double>>              q_point_loc,
-    dealii::VectorizedArray<double> element_volume) const;
+    dealii::VectorizedArray<double> element_volume) const override;
 
   // Function to set the LHS of the governing equations (in equations.h)
   void
   equationLHS(
     variableContainer<dim, degree, dealii::VectorizedArray<double>> &variable_list,
     dealii::Point<dim, dealii::VectorizedArray<double>>              q_point_loc,
-    dealii::VectorizedArray<double> element_volume) const;
+    dealii::VectorizedArray<double> element_volume) const override;
 
 // Function to set postprocessing expressions (in postprocess.h)
 #ifdef POSTPROCESS_FILE_EXISTS
@@ -61,13 +61,14 @@ private:
     const variableContainer<dim, degree, dealii::VectorizedArray<double>> &variable_list,
     variableContainer<dim, degree, dealii::VectorizedArray<double>> &pp_variable_list,
     const dealii::Point<dim, dealii::VectorizedArray<double>>        q_point_loc,
-    dealii::VectorizedArray<double> element_volume) const;
+    dealii::VectorizedArray<double> element_volume) const override;
 #endif
 
 // Function to set the nucleation probability (in nucleation.h)
 #ifdef NUCLEATION_FILE_EXISTS
   double
-  getNucleationProbability(variableValueContainer variable_value, double dV) const;
+  getNucleationProbability(variableValueContainer variable_value,
+                           double                 dV) const override;
 #endif
   // ================================================================
   // Methods specific to this subclass
