@@ -275,9 +275,6 @@ protected:
   /*Vector to store element volumes*/
   dealii::AlignedVector<dealii::VectorizedArray<double>> element_volume;
 
-  /*AMR methods*/
-  AdaptiveRefinement<dim, degree> AMR;
-
   /*Method to compute the right hand side (RHS) residual vectors*/
   void
   computeExplicitRHS();
