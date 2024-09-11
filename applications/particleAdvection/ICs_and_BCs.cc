@@ -21,46 +21,37 @@ customPDE<dim, degree>::setInitialCondition(const dealii::Point<dim> &p,
   // by a hyperbolic tangent function. The center of each circle/sphere is
   // given by "center" and its radius is given by "radius".
 
-  /*double center[3][3] = {
-    {0.55, 0.45, 0},
-    {0.3,  0.3,  0},
-    {0.4,  0.7,  0}
-  };
-  double rad[3] = {12, 14, 19};
-  double dist;
-  double irregular_shape = 0;
-  for (unsigned int i = 0; i < 3; i++)
-    {
-      dist = 0.0;
-      for (unsigned int dir = 0; dir < dim; dir++)
-        {
-          dist += (p[dir] - center[i][dir] * userInputs.domain_size[dir]) *
-                  (p[dir] - center[i][dir] * userInputs.domain_size[dir]);
-        }
-      dist = std::sqrt(dist);
+  double phi = 0.0;
 
-      irregular_shape += 0.5 * (1.0 - std::tanh((dist - rad[i]) / (std::sqrt(2) * W)));
+  if (zalesak)
+    {
+      // Zalesak's disk level-set
+      double             radius       = 15.0;
+      double             notch_width  = 5.0;
+      double             notch_height = 25.0;
+      dealii::Point<dim> center(50.0, 75.0);
+
+      dealii::Functions::SignedDistance::ZalesakDisk<dim> zalesak_disk(center,
+                                                                       radius,
+                                                                       notch_width,
+                                                                       notch_height);
+
+      double distance = zalesak_disk.value(p);
+
+      phi = 0.5 * (1.0 - std::tanh(distance / (std::sqrt(2) * W)));
     }
-
-  if (irregular_shape > 1.0)
+  else
     {
-      irregular_shape = 1.0;
-    }*/
+      // Sphere level-set
+      double             radius = 15.0;
+      dealii::Point<dim> center(20.0, 20.0);
 
-  // Zalesak's disk level-set
-  double             radius       = 15.0;
-  double             notch_width  = 5.0;
-  double             notch_height = 25.0;
-  dealii::Point<dim> center(50.0, 75.0);
+      dealii::Functions::SignedDistance::Sphere<dim> sphere(center, radius);
 
-  dealii::Functions::SignedDistance::ZalesakDisk<dim> zalesak_disk(center,
-                                                                   radius,
-                                                                   notch_width,
-                                                                   notch_height);
+      double distance = sphere.value(p);
 
-  double distance = zalesak_disk.value(p);
-
-  double phi = 0.5 * (1.0 - std::tanh(distance / (std::sqrt(2) * W)));
+      phi = 0.5 * (1.0 - std::tanh(distance / (std::sqrt(2) * W)));
+    }
 
   if (index == 0 || index == 1 || index == 2 || index == 3 || index == 4)
     {

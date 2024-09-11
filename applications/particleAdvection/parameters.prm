@@ -61,8 +61,8 @@ set Time step = 1.0e-3
 
 # The simulation ends when either the number of time steps is reached or the
 # simulation time is reached.
-#set Number of time steps = 10000
-set Simulation end time = 6.28318
+set Number of time steps = 10000
+#set Simulation end time = 6.28318
 
 # =================================================================================
 # Set the output parameters
@@ -73,10 +73,10 @@ set Output condition = EQUAL_SPACING
 
 # Number of times the program outputs the fields (total number for "EQUAL_SPACING"
 # and "LOG_SPACING", number per decade for "N_PER_DECADE", ignored for "LIST")
-set Number of outputs = 1
+set Number of outputs = 10
 
 # Whether to print timing information every time the code outputs
-set Print timing information with output = true
+set Print timing information with output = false
 
 # The number of time steps between updates being printed to the screen
 set Skip print steps = 1000
@@ -101,11 +101,19 @@ set Skip print steps = 1000
 # 1.5 on the top and bottom for variable 'n' in 2D
 # set Boundary condition for variable n = NATURAL, NATURAL, DIRICHLET: 1.5, DIRICHLET: 1.5
 
-set Boundary condition for variable n =  DIRICHLET: 0.0
-set Boundary condition for variable n_old = DIRICHLET: 0.0
-set Boundary condition for variable n_old_2 = DIRICHLET: 0.0
-set Boundary condition for variable n_old_3 = DIRICHLET: 0.0
-set Boundary condition for variable n_old_4 = DIRICHLET: 0.0
+#BCs for Zalesak disc
+#set Boundary condition for variable n =  DIRICHLET: 0.0
+#set Boundary condition for variable n_old = DIRICHLET: 0.0
+#set Boundary condition for variable n_old_2 = DIRICHLET: 0.0
+#set Boundary condition for variable n_old_3 = DIRICHLET: 0.0
+#set Boundary condition for variable n_old_4 = DIRICHLET: 0.0
+
+#BCs for diagonal sphere
+set Boundary condition for variable n =  PERIODIC
+set Boundary condition for variable n_old = PERIODIC
+set Boundary condition for variable n_old_2 = PERIODIC
+set Boundary condition for variable n_old_3 = PERIODIC
+set Boundary condition for variable n_old_4 = PERIODIC
 
 # =================================================================================
 # Set the model constants
@@ -120,16 +128,16 @@ set Boundary condition for variable n_old_4 = DIRICHLET: 0.0
 set Model constant W = 0.5, DOUBLE
 
 # The prescribed velocity
-set Model constant velocity = (1.0, 0.0, 0.0), TENSOR
+set Model constant velocity = (1.0, 1.0, 0.0), TENSOR
 
 # Do Zalesak test
-set Model constant zalesak = True, BOOL
+set Model constant zalesak = False, BOOL
 
 # The prescibed rotational velocity
 set Model constant angular_velocity = 1.0, DOUBLE
 
 # BDF level (minus one so BDF1 is 0)
-set Model constant bdf_n = 2, INT
+set Model constant bdf_n = 0, INT
 
 # =================================================================================
 # Set the linear solver parameters
@@ -146,3 +154,17 @@ subsection Linear solver parameters: n
     # The maximum number of linear solver iterations per solve
     set Maximum linear solver iterations = 1000
 end
+
+# =================================================================================
+# Set the checkpoint/restart parameters
+# =================================================================================
+# Whether to start this simulation from the checkpoint of a previous simulation
+set Load from a checkpoint = false
+
+# Type of spacing between checkpoints ("EQUAL_SPACING", "LOG_SPACING", "N_PER_DECADE",
+# or "LIST")
+set Checkpoint condition = EQUAL_SPACING
+
+# Number of times the creates checkpoints (total number for "EQUAL_SPACING"
+# and "LOG_SPACING", number per decade for "N_PER_DECADE", ignored for "LIST")
+set Number of checkpoints = 0
