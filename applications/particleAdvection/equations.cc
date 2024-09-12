@@ -133,6 +133,7 @@ customPDE<dim, degree>::nonExplicitEquationRHS(
         {
           vel[i] = constV(velocity[i]);
         }
+      u_l2norm = 1.0e-12 + vel.norm_square();
     }
   else
     {
@@ -199,6 +200,7 @@ customPDE<dim, degree>::equationLHS(
         {
           vel[i] = constV(velocity[i]);
         }
+      u_l2norm = 1.0e-12 + vel.norm_square();
     }
   else
     {
