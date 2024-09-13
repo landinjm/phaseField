@@ -77,9 +77,10 @@ variableAttributeLoader::loadVariableAttributes()
 template <int dim, int degree>
 void
 customPDE<dim, degree>::explicitEquationRHS(
-  variableContainer<dim, degree, dealii::VectorizedArray<double>> &variable_list,
-  dealii::Point<dim, dealii::VectorizedArray<double>>              q_point_loc,
-  dealii::VectorizedArray<double>                                  element_volume) const
+  [[maybe_unused]] variableContainer<dim, degree, dealii::VectorizedArray<double>>
+                                                                      &variable_list,
+  [[maybe_unused]] dealii::Point<dim, dealii::VectorizedArray<double>> q_point_loc,
+  [[maybe_unused]] dealii::VectorizedArray<double> element_volume) const
 {
   // --- Getting the values and derivatives of the model variables ---
 
@@ -374,9 +375,10 @@ customPDE<dim, degree>::explicitEquationRHS(
 template <int dim, int degree>
 void
 customPDE<dim, degree>::nonExplicitEquationRHS(
-  variableContainer<dim, degree, dealii::VectorizedArray<double>> &variable_list,
-  dealii::Point<dim, dealii::VectorizedArray<double>>              q_point_loc,
-  dealii::VectorizedArray<double>                                  element_volume) const
+  [[maybe_unused]] variableContainer<dim, degree, dealii::VectorizedArray<double>>
+                                                                      &variable_list,
+  [[maybe_unused]] dealii::Point<dim, dealii::VectorizedArray<double>> q_point_loc,
+  [[maybe_unused]] dealii::VectorizedArray<double> element_volume) const
 {
   // --- Getting the values and derivatives of the model variables ---
 
@@ -493,9 +495,10 @@ customPDE<dim, degree>::nonExplicitEquationRHS(
 template <int dim, int degree>
 void
 customPDE<dim, degree>::equationLHS(
-  variableContainer<dim, degree, dealii::VectorizedArray<double>> &variable_list,
-  dealii::Point<dim, dealii::VectorizedArray<double>>              q_point_loc,
-  dealii::VectorizedArray<double>                                  element_volume) const
+  [[maybe_unused]] variableContainer<dim, degree, dealii::VectorizedArray<double>>
+                                                                      &variable_list,
+  [[maybe_unused]] dealii::Point<dim, dealii::VectorizedArray<double>> q_point_loc,
+  [[maybe_unused]] dealii::VectorizedArray<double> element_volume) const
 {
   // --- Getting the values and derivatives of the model variables ---
 
