@@ -21,6 +21,15 @@ variableAttributeLoader::loadPostProcessorVariableAttributes()
   set_dependencies_gradient_term_RHS(0, "");
 
   set_output_integral(0, true);
+
+  // Variable 1
+  set_variable_name(1, "psi");
+  set_variable_type(1, SCALAR);
+
+  set_dependencies_value_term_RHS(1, "psi_level_set");
+  set_dependencies_gradient_term_RHS(1, "");
+
+  set_output_integral(1, true);
 }
 
 // =============================================================================================
@@ -46,8 +55,9 @@ customPDE<dim, degree>::postProcessedFields(
   // --- Getting the values and derivatives of the model variables ---
 
   // The concentration and its derivatives
-  scalarvalueType U   = variable_list.get_scalar_value(0);
-  scalarvalueType phi = variable_list.get_scalar_value(1);
+  scalarvalueType U             = variable_list.get_scalar_value(0);
+  scalarvalueType phi           = variable_list.get_scalar_value(1);
+  scalarvalueType psi_level_set = variable_list.get_scalar_value(3);
 
   // --- Setting the expressions for the terms in the postprocessing expressions
   // ---
@@ -56,6 +66,13 @@ customPDE<dim, degree>::postProcessedFields(
                       (constV(1.0 + k) - constV(1.0 - k) * phi) *
                       (constV(1.0) + constV(1.0 - k) * U);
 
+  scalarvalueType psi;
+  for (unsigned int lane = 0; lane < psi.size(); lane++)
+    {
+      psi[lane] = std::tanh(psi_level_set[lane] / std::sqrt(2.0));
+    }
+
   // --- Submitting the terms for the postprocessing expressions ---
   pp_variable_list.set_scalar_value_term_RHS(0, c);
+  pp_variable_list.set_scalar_value_term_RHS(1, psi);
 }
