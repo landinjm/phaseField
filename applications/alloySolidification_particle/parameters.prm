@@ -8,7 +8,7 @@ set Number of dimensions = 2
 # (Domain size Z ignored in 2D)
 # =================================================================================
 # Each axes spans from zero to the specified length
-set Domain size X = 100
+set Domain size X = 50
 set Domain size Y = 100
 set Domain size Z = 100
 
@@ -19,7 +19,7 @@ set Domain size Z = 100
 # Subdivisions Z ignored in 2D
 # For optimal performance, use refineFactor primarily to determine the element size
 set Subdivisions X = 1
-set Subdivisions Y = 1
+set Subdivisions Y = 2
 set Subdivisions Z = 1
 
 set Refine factor = 6
@@ -37,7 +37,7 @@ set Mesh adaptivity = true
 # When adaptive meshing is enabled, the refine factor set in the block above is
 # only used to generate the first pass of the mesh as the initial conditions are
 # applied. It should be set somewhere between the max and min levels below.
-set Max refinement level = 7
+set Max refinement level = 6
 set Min refinement level = 2
 
 # Set the number of time steps between remeshing operations

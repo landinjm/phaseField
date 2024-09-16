@@ -21,21 +21,13 @@ customPDE<dim, degree>::setInitialCondition(const dealii::Point<dim> &p,
   // by a hyperbolic tangent function. The center of each circle/sphere is
   // given by "center" and its radius is given by "rad".
 
-  // Sphere level-set
-  double             phi    = 0.0;
-  double             radius = 5.0;
-  dealii::Point<dim> center(0.0, 0.0);
-
-  dealii::Functions::SignedDistance::Sphere<dim> sphere(center, radius);
-
-  double distance = sphere.value(p);
-
-  phi = -std::tanh(distance / std::sqrt(2));
+  // Planar front
+  double phi = -std::tanh((p[1] - y0) / std::sqrt(2.0));
 
   // Sphere level-set
   double             psi_level_set   = 0.0;
   double             radius_particle = 5.0;
-  dealii::Point<dim> center_particle(20.0, 20.0);
+  dealii::Point<dim> center_particle(0.5 * userInputs.domain_size[0], 20.0);
 
   dealii::Functions::SignedDistance::Sphere<dim> particle(center_particle,
                                                           radius_particle);
