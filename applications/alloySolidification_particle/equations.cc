@@ -21,7 +21,9 @@ variableAttributeLoader::loadVariableAttributes()
   set_variable_type(0, SCALAR);
   set_variable_equation_type(0, EXPLICIT_TIME_DEPENDENT);
 
-  set_dependencies_value_term_RHS(0, "U,xi,phi,grad(phi),grad(U)");
+  set_dependencies_value_term_RHS(
+    0,
+    "U,xi,phi,grad(phi),grad(U),psi_level_set,grad(psi_level_set)");
   set_dependencies_gradient_term_RHS(0, "U,grad(U),grad(phi),phi,xi");
 
   // Variable 1
@@ -100,7 +102,8 @@ customPDE<dim, degree>::explicitEquationRHS(
   scalarvalueType xi = variable_list.get_scalar_value(2);
 
   // The level-set field of the particle
-  scalarvalueType psi_level_set = variable_list.get_scalar_value(3);
+  scalarvalueType psi_level_set  = variable_list.get_scalar_value(3);
+  scalargradType  psix_level_set = variable_list.get_scalar_gradient(3);
 
   // --- Setting the expressions for the terms in the governing equations ---
 
@@ -142,8 +145,23 @@ customPDE<dim, degree>::explicitEquationRHS(
      (phix[0] * (Dtilde * ((constV(1.0) - phi) / constV(2.0)) * Ux[0] + j_at[0]) +
       phix[1] * (Dtilde * ((constV(1.0) - phi) / constV(2.0)) * Ux[1] + j_at[1])));
 
+  // SBM order parameter
+  scalarvalueType psi;
+  for (unsigned int lane = 0; lane < psi.size(); lane++)
+    {
+      psi[lane] = 0.5 + 0.5 * std::tanh(psi_level_set[lane] / std::sqrt(2.0));
+    }
+
+  // SBM chemical potential no-flux
+  scalargradType psix =
+    constV(1.0 / (2.0 * sqrt(2.0))) * (constV(1.0) - psi * psi) * psix_level_set;
+  scalarvalueType val_term_SBM =
+    constV(userInputs.dtValue) * psix *
+    (Dtilde * ((constV(1.0) - phi) / constV(2.0)) * Ux + j_at) /
+    (tau_U + psi + constV(1.0e-6));
+
   // Define required equations
-  scalarvalueType eq_U = (U + val_term1 - val_term2);
+  scalarvalueType eq_U = (U + val_term1 - val_term2 + val_term_SBM);
 
   scalargradType eqx_U =
     (constV(-1.0) * constV(userInputs.dtValue) *
