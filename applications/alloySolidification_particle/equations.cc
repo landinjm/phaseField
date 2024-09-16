@@ -23,15 +23,15 @@ variableAttributeLoader::loadVariableAttributes()
 
   set_dependencies_value_term_RHS(
     0,
-    "U,xi,phi,grad(phi),grad(U),psi_level_set,grad(psi_level_set)");
-  set_dependencies_gradient_term_RHS(0, "U,grad(U),grad(phi),phi,xi");
+    "U, xi, phi, grad(phi), grad(U), psi_level_set, grad(psi_level_set)");
+  set_dependencies_gradient_term_RHS(0, "U, grad(U), grad(phi), phi, xi");
 
   // Variable 1
   set_variable_name(1, "phi");
   set_variable_type(1, SCALAR);
   set_variable_equation_type(1, EXPLICIT_TIME_DEPENDENT);
 
-  set_dependencies_value_term_RHS(1, "phi,U,xi");
+  set_dependencies_value_term_RHS(1, "phi, U, xi");
   set_dependencies_gradient_term_RHS(1, "");
 
   // Variable 2
@@ -39,7 +39,7 @@ variableAttributeLoader::loadVariableAttributes()
   set_variable_type(2, SCALAR);
   set_variable_equation_type(2, AUXILIARY);
 
-  set_dependencies_value_term_RHS(2, "phi,U,grad(phi)");
+  set_dependencies_value_term_RHS(2, "phi, U, grad(phi)");
   set_dependencies_gradient_term_RHS(2, "grad(phi)");
 
   // Variable 3
@@ -66,6 +66,14 @@ variableAttributeLoader::loadVariableAttributes()
 
   set_dependencies_value_term_RHS(4, "psi_level_set");
   set_dependencies_gradient_term_RHS(4, "");
+
+  // Variable 5
+  set_variable_name(5, "distance");
+  set_variable_type(5, SCALAR);
+  set_variable_equation_type(5, EXPLICIT_TIME_DEPENDENT);
+
+  set_dependencies_value_term_RHS(5, "distance, psi_level_set, phi");
+  set_dependencies_gradient_term_RHS(5, "");
 }
 
 // =============================================================================================
@@ -104,6 +112,9 @@ customPDE<dim, degree>::explicitEquationRHS(
   // The level-set field of the particle
   scalarvalueType psi_level_set  = variable_list.get_scalar_value(3);
   scalargradType  psix_level_set = variable_list.get_scalar_gradient(3);
+
+  // The distance between the particle and the solidification front
+  scalarvalueType distance = variable_list.get_scalar_value(5);
 
   // --- Setting the expressions for the terms in the governing equations ---
 
@@ -160,6 +171,17 @@ customPDE<dim, degree>::explicitEquationRHS(
     (Dtilde * ((constV(1.0) - phi) / constV(2.0)) * Ux + j_at) /
     (tau_U + psi + constV(1.0e-6));
 
+  // Threshold the level-set to find the distance
+  double          width = 0.15;
+  scalarvalueType threshold_phi;
+  for (unsigned int lane = 0; lane < threshold_phi.size(); lane++)
+    {
+      threshold_phi[lane] = phi[lane] >= -width && phi[lane] <= width
+                              ? 1.0
+                              : std::numeric_limits<double>::quiet_NaN();
+    }
+  scalarvalueType eq_distance = threshold_phi;
+
   // Define required equations
   scalarvalueType eq_U = (U + val_term1 - val_term2 + val_term_SBM);
 
@@ -180,6 +202,9 @@ customPDE<dim, degree>::explicitEquationRHS(
 
   // Terms for the equation to evolve the particle level set field
   variable_list.set_scalar_value_term_RHS(4, psi_level_set);
+
+  // Terms for the equation to evolve the distance field
+  variable_list.set_scalar_value_term_RHS(5, eq_distance);
 }
 
 // =============================================================================================
@@ -266,7 +291,7 @@ customPDE<dim, degree>::nonExplicitEquationRHS(
   // Particle velocity
   scalargradType velocity;
   velocity[0] = constV(0.0);
-  velocity[1] = constV(0.0);
+  velocity[1] = constV(0.1);
 
   // Stabilization parameter
   scalarvalueType u_l2norm = 1.0e-12 + velocity.norm_square();
@@ -319,7 +344,7 @@ customPDE<dim, degree>::equationLHS(
   // Particle velocity
   scalargradType velocity;
   velocity[0] = constV(0.0);
-  velocity[1] = constV(0.0);
+  velocity[1] = constV(0.1);
 
   // Stabilization parameter
   scalarvalueType u_l2norm = 1.0e-12 + velocity.norm_square();

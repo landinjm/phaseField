@@ -99,6 +99,7 @@ set Boundary condition for variable phi =  NATURAL
 set Boundary condition for variable xi =  NATURAL
 set Boundary condition for variable psi_level_set =  NATURAL
 set Boundary condition for variable psi_level_set_old =  NATURAL
+set Boundary condition for variable distance =  NATURAL
 
 # =================================================================================
 # Set the model constants
