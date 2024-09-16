@@ -248,7 +248,7 @@ customPDE<dim, degree>::nonExplicitEquationRHS(
   // Particle velocity
   scalargradType velocity;
   velocity[0] = constV(0.0);
-  velocity[1] = constV(1.0);
+  velocity[1] = constV(0.0);
 
   // Stabilization parameter
   scalarvalueType u_l2norm = 1.0e-12 + velocity.norm_square();
@@ -301,7 +301,7 @@ customPDE<dim, degree>::equationLHS(
   // Particle velocity
   scalargradType velocity;
   velocity[0] = constV(0.0);
-  velocity[1] = constV(1.0);
+  velocity[1] = constV(0.0);
 
   // Stabilization parameter
   scalarvalueType u_l2norm = 1.0e-12 + velocity.norm_square();

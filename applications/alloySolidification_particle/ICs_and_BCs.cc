@@ -35,7 +35,7 @@ customPDE<dim, degree>::setInitialCondition(const dealii::Point<dim> &p,
   // Sphere level-set
   double             psi_level_set   = 0.0;
   double             radius_particle = 5.0;
-  dealii::Point<dim> center_particle(50.0, 50.0);
+  dealii::Point<dim> center_particle(20.0, 20.0);
 
   dealii::Functions::SignedDistance::Sphere<dim> particle(center_particle,
                                                           radius_particle);
