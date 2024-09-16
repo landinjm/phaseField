@@ -69,7 +69,7 @@ customPDE<dim, degree>::postProcessedFields(
   scalarvalueType psi;
   for (unsigned int lane = 0; lane < psi.size(); lane++)
     {
-      psi[lane] = std::tanh(psi_level_set[lane] / std::sqrt(2.0));
+      psi[lane] = 0.5 + 0.5 * std::tanh(psi_level_set[lane] / std::sqrt(2.0));
     }
 
   // --- Submitting the terms for the postprocessing expressions ---
