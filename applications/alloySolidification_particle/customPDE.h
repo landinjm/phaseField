@@ -1,3 +1,4 @@
+#include <deal.II/base/mpi.h>
 #include <deal.II/lac/solver_cg.h>
 
 #include "../../include/matrixFreePDE.h"
@@ -80,7 +81,12 @@ private:
 
   // Function to override solveIncrement from
   void
-  solveIncrement(bool skip_time_dependent);
+  solveIncrement(bool skip_time_dependent) override;
+
+  // Function to calculate the minimum value of some input vector
+  double
+  get_minimum(const dealii::LinearAlgebra::distributed::Vector<double> &solution_vector,
+              const MPI_Comm                                           &mpi_communicator);
 
   // ================================================================
   // Model constants specific to this subclass
@@ -108,6 +114,32 @@ private:
 };
 
 template <int dim, int degree>
+double
+customPDE<dim, degree>::get_minimum(
+  const dealii::LinearAlgebra::distributed::Vector<double> &solution_vector,
+  const MPI_Comm                                           &mpi_communicator)
+{
+  // Find the local minimum for this MPI process
+  double local_minimum = std::numeric_limits<double>::max();
+
+  for (auto index : solution_vector.locally_owned_elements())
+    {
+      local_minimum = std::min(local_minimum, solution_vector[index]);
+    }
+
+  // Find the global minimum for all MPI processes
+  double global_minimum;
+  MPI_Allreduce(&local_minimum,
+                &global_minimum,
+                1,
+                MPI_DOUBLE,
+                MPI_MIN,
+                mpi_communicator);
+
+  return global_minimum;
+}
+
+template <int dim, int degree>
 void
 customPDE<dim, degree>::solveIncrement(bool skip_time_dependent)
 {
@@ -115,6 +147,13 @@ customPDE<dim, degree>::solveIncrement(bool skip_time_dependent)
   this->computing_timer.enter_subsection("matrixFreePDE: solveIncrements");
   Timer time;
   char  buffer[200];
+
+  // Find the minimum distance between the particle and solidification front
+  double distance = get_minimum(*this->solutionSet[5], MPI_COMM_WORLD);
+  if (this->currentIncrement % userInputs.skip_print_steps == 0)
+    {
+      this->pcout << "Distance: " << distance << std::endl;
+    }
 
   // Get the RHS of the explicit equations
   if (this->hasExplicitEquation && !skip_time_dependent)
@@ -150,7 +189,7 @@ customPDE<dim, degree>::solveIncrement(bool skip_time_dependent)
                        this->residualSet[fieldIndex]->l2_norm());
               this->pcout << buffer;
 
-              if (!numbers::is_finite(solution_L2_norm))
+              if (!numbers::is_finite(solution_L2_norm) && fieldIndex != 5)
                 {
                   snprintf(buffer,
                            sizeof(buffer),
@@ -566,7 +605,8 @@ customPDE<dim, degree>::solveIncrement(bool skip_time_dependent)
                 }
 
               // check if solution is nan
-              if (!numbers::is_finite(this->solutionSet[fieldIndex]->l2_norm()))
+              if (!numbers::is_finite(this->solutionSet[fieldIndex]->l2_norm()) &&
+                  fieldIndex != 5)
                 {
                   snprintf(buffer,
                            sizeof(buffer),

@@ -114,7 +114,7 @@ customPDE<dim, degree>::explicitEquationRHS(
   scalargradType  psix_level_set = variable_list.get_scalar_gradient(3);
 
   // The distance between the particle and the solidification front
-  scalarvalueType distance = variable_list.get_scalar_value(5);
+  [[maybe_unused]] scalarvalueType distance = variable_list.get_scalar_value(5);
 
   // --- Setting the expressions for the terms in the governing equations ---
 
@@ -178,9 +178,9 @@ customPDE<dim, degree>::explicitEquationRHS(
     {
       threshold_phi[lane] = phi[lane] >= -width && phi[lane] <= width
                               ? 1.0
-                              : std::numeric_limits<double>::quiet_NaN();
+                              : std::numeric_limits<double>::max();
     }
-  scalarvalueType eq_distance = threshold_phi;
+  scalarvalueType eq_distance = threshold_phi * std::abs(psi_level_set);
 
   // Define required equations
   scalarvalueType eq_U = (U + val_term1 - val_term2 + val_term_SBM);
