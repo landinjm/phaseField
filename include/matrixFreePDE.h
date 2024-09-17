@@ -325,6 +325,7 @@ protected:
   explicitEquationRHS(
     variableContainer<dim, degree, dealii::VectorizedArray<double>> &variable_list,
     dealii::Point<dim, dealii::VectorizedArray<double>>              q_point_loc,
+    const unsigned int                                               n_active_entries,
     dealii::VectorizedArray<double> element_volume) const = 0;
 
   virtual void

@@ -42,6 +42,8 @@ MatrixFreePDE<dim, degree>::getExplicitRHS(
 
       unsigned int num_q_points = variable_list.get_num_q_points();
 
+      unsigned int n_active_entries = data.n_active_entries_per_cell_batch(cell);
+
       dealii::VectorizedArray<double> local_element_volume = element_volume[cell];
 
       // loop over quadrature points
@@ -53,7 +55,10 @@ MatrixFreePDE<dim, degree>::getExplicitRHS(
             variable_list.get_q_point_location();
 
           // Calculate the residuals
-          explicitEquationRHS(variable_list, q_point_loc, local_element_volume);
+          explicitEquationRHS(variable_list,
+                              q_point_loc,
+                              n_active_entries,
+                              local_element_volume);
         }
 
       variable_list.integrate_and_distribute(dst);

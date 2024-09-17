@@ -41,6 +41,7 @@ private:
   explicitEquationRHS(
     variableContainer<dim, degree, dealii::VectorizedArray<double>> &variable_list,
     dealii::Point<dim, dealii::VectorizedArray<double>>              q_point_loc,
+    const unsigned int                                               n_active_entries,
     dealii::VectorizedArray<double> element_volume) const override;
 
   // Function to set the RHS of the governing equations for all other equations
@@ -124,6 +125,9 @@ private:
   dealii::Tensor<1, dim> force = dealii::Tensor<1, dim>();
   dealii::Tensor<1, dim> vel   = dealii::Tensor<1, dim>();
 
+  // Threshold distance for order parameter
+  double width = 0.15;
+
   // Minimum distance
   mutable double local_minimum = 1000.0;
 
@@ -150,21 +154,27 @@ customPDE<dim, degree>::solveIncrement(bool skip_time_dependent)
     }
 
   // Find the minimum distance between the particle and solidification front
-  this->pcout << "Local min: " << local_minimum << std::endl;
   MPI_Allreduce(&local_minimum, &distance, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
 
   // Calculate the force on the particle & update the velocity
   // Note with the current implementation there is no directionality
   if (this->currentIncrement != 0)
     {
-      /*double force_drag = 6.0 * M_PI * eta * vel[1] * R * R / distance;
-      double force_vdw =
-        2 * M_PI * R * delta_sigma * a0 * a0 / (a0 + distance) / (a0 + distance);
-      vel[1] = vel[1] + userInputs.dtValue * (force_vdw - force_drag);*/
+      if (!(distance <= 0.25))
+        {
+          double force_drag = 6.0 * M_PI * eta * vel[1] * R * R / distance;
+          double force_vdw =
+            2 * M_PI * R * delta_sigma * a0 * a0 / (a0 + distance) / (a0 + distance);
+          vel[1] = vel[1] + userInputs.dtValue * (force_vdw - force_drag);
+        }
+      else
+        {
+          vel[1] = 0.0;
+        }
     }
 
   // Output info
-  if (this->currentIncrement % 1 == 0)
+  if (this->currentIncrement % 100 == 0)
     {
       this->pcout << "Distance: " << distance << std::endl;
       this->pcout << "Velocity: " << vel[1] << std::endl;

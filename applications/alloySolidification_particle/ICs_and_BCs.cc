@@ -45,7 +45,7 @@ customPDE<dim, degree>::setInitialCondition(const dealii::Point<dim> &p,
       scalar_IC = phi;
     }
 
-  else if (index == 3 || index == 4)
+  else if (index == 3 || index == 4 || index == 5)
     {
       scalar_IC = psi_level_set;
     }

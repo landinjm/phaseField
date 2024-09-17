@@ -94,6 +94,7 @@ void
 customPDE<dim, degree>::explicitEquationRHS(
   variableContainer<dim, degree, dealii::VectorizedArray<double>> &variable_list,
   dealii::Point<dim, dealii::VectorizedArray<double>>              q_point_loc,
+  const unsigned int                                               n_active_entries,
   dealii::VectorizedArray<double>                                  element_volume) const
 {
   // --- Getting the values and derivatives of the model variables ---
@@ -158,7 +159,7 @@ customPDE<dim, degree>::explicitEquationRHS(
 
   // SBM order parameter
   scalarvalueType psi;
-  for (unsigned int lane = 0; lane < psi.size(); lane++)
+  for (unsigned int lane = 0; lane < n_active_entries; lane++)
     {
       psi[lane] = 0.5 + 0.5 * std::tanh(psi_level_set[lane] / std::sqrt(2.0));
     }
@@ -172,12 +173,12 @@ customPDE<dim, degree>::explicitEquationRHS(
     (tau_U + psi + constV(1.0e-6));
 
   // Threshold the level-set to find the distance
-  double          width = 0.15;
   scalarvalueType eq_distance;
-  for (unsigned int lane = 0; lane < eq_distance.size(); lane++)
+  for (unsigned int lane = 0; lane < n_active_entries; lane++)
     {
       eq_distance[lane] =
         phi[lane] >= -width && phi[lane] <= width ? psi_level_set[lane] : 1000.0;
+
       if (phi[lane] >= -width && phi[lane] <= width)
         {
           local_minimum = std::min(local_minimum, psi_level_set[lane]);
