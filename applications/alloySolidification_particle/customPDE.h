@@ -83,11 +83,6 @@ private:
   void
   solveIncrement(bool skip_time_dependent) override;
 
-  // Function to calculate the minimum value of some input vector
-  double
-  get_minimum(const dealii::LinearAlgebra::distributed::Vector<double> &solution_vector,
-              const MPI_Comm                                           &mpi_communicator);
-
   // ================================================================
   // Model constants specific to this subclass
   // ================================================================
@@ -110,34 +105,30 @@ private:
   // 1/dt
   double sdt = 1.0 / userInputs.dtValue;
 
+  // Distance between the particle and solidification front
+  double distance = 0.0;
+
+  // Viscosity
+  double eta = 1.0;
+
+  // Particle radius;
+  double R = 1.0;
+
+  // Difference in surface energy
+  double delta_sigma = 1.0;
+
+  // Cutoff distance
+  double a0 = 1.0;
+
+  // Force and velocity tensors
+  dealii::Tensor<1, dim> force = dealii::Tensor<1, dim>();
+  dealii::Tensor<1, dim> vel   = dealii::Tensor<1, dim>();
+
+  // Minimum distance
+  mutable double local_minimum = 1000.0;
+
   // ================================================================
 };
-
-template <int dim, int degree>
-double
-customPDE<dim, degree>::get_minimum(
-  const dealii::LinearAlgebra::distributed::Vector<double> &solution_vector,
-  const MPI_Comm                                           &mpi_communicator)
-{
-  // Find the local minimum for this MPI process
-  double local_minimum = std::numeric_limits<double>::max();
-
-  for (auto index : solution_vector.locally_owned_elements())
-    {
-      local_minimum = std::min(local_minimum, solution_vector[index]);
-    }
-
-  // Find the global minimum for all MPI processes
-  double global_minimum;
-  MPI_Allreduce(&local_minimum,
-                &global_minimum,
-                1,
-                MPI_DOUBLE,
-                MPI_MIN,
-                mpi_communicator);
-
-  return global_minimum;
-}
 
 template <int dim, int degree>
 void
@@ -148,17 +139,35 @@ customPDE<dim, degree>::solveIncrement(bool skip_time_dependent)
   Timer time;
   char  buffer[200];
 
-  // Find the minimum distance between the particle and solidification front
-  double distance = get_minimum(*this->solutionSet[5], MPI_COMM_WORLD);
-  if (this->currentIncrement % userInputs.skip_print_steps == 0)
-    {
-      this->pcout << "Distance: " << distance << std::endl;
-    }
+  // Reset local & global minimum
+  local_minimum = 1000.0;
+  distance      = 1000.0;
 
   // Get the RHS of the explicit equations
   if (this->hasExplicitEquation && !skip_time_dependent)
     {
       this->computeExplicitRHS();
+    }
+
+  // Find the minimum distance between the particle and solidification front
+  this->pcout << "Local min: " << local_minimum << std::endl;
+  MPI_Allreduce(&local_minimum, &distance, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
+
+  // Calculate the force on the particle & update the velocity
+  // Note with the current implementation there is no directionality
+  if (this->currentIncrement != 0)
+    {
+      /*double force_drag = 6.0 * M_PI * eta * vel[1] * R * R / distance;
+      double force_vdw =
+        2 * M_PI * R * delta_sigma * a0 * a0 / (a0 + distance) / (a0 + distance);
+      vel[1] = vel[1] + userInputs.dtValue * (force_vdw - force_drag);*/
+    }
+
+  // Output info
+  if (this->currentIncrement % 1 == 0)
+    {
+      this->pcout << "Distance: " << distance << std::endl;
+      this->pcout << "Velocity: " << vel[1] << std::endl;
     }
 
   // solve for each field

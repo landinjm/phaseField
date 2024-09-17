@@ -173,14 +173,16 @@ customPDE<dim, degree>::explicitEquationRHS(
 
   // Threshold the level-set to find the distance
   double          width = 0.15;
-  scalarvalueType threshold_phi;
-  for (unsigned int lane = 0; lane < threshold_phi.size(); lane++)
+  scalarvalueType eq_distance;
+  for (unsigned int lane = 0; lane < eq_distance.size(); lane++)
     {
-      threshold_phi[lane] = phi[lane] >= -width && phi[lane] <= width
-                              ? 1.0
-                              : std::numeric_limits<double>::max();
+      eq_distance[lane] =
+        phi[lane] >= -width && phi[lane] <= width ? psi_level_set[lane] : 1000.0;
+      if (phi[lane] >= -width && phi[lane] <= width)
+        {
+          local_minimum = std::min(local_minimum, psi_level_set[lane]);
+        }
     }
-  scalarvalueType eq_distance = threshold_phi * std::abs(psi_level_set);
 
   // Define required equations
   scalarvalueType eq_U = (U + val_term1 - val_term2 + val_term_SBM);
@@ -290,8 +292,8 @@ customPDE<dim, degree>::nonExplicitEquationRHS(
 
   // Particle velocity
   scalargradType velocity;
-  velocity[0] = constV(0.0);
-  velocity[1] = constV(0.1);
+  velocity[0] = constV(vel[0]);
+  velocity[1] = constV(vel[1]);
 
   // Stabilization parameter
   scalarvalueType u_l2norm = 1.0e-12 + velocity.norm_square();
@@ -343,8 +345,8 @@ customPDE<dim, degree>::equationLHS(
 
   // Particle velocity
   scalargradType velocity;
-  velocity[0] = constV(0.0);
-  velocity[1] = constV(0.1);
+  velocity[0] = constV(vel[0]);
+  velocity[1] = constV(vel[1]);
 
   // Stabilization parameter
   scalarvalueType u_l2norm = 1.0e-12 + velocity.norm_square();
