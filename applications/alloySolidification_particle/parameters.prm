@@ -123,9 +123,6 @@ set Model constant c0 = 3.0, DOUBLE
 # Coupling constant
 set Model constant lamda = 20.0, DOUBLE
 
-# dimensionless diffusivity in the liquid
-set Model constant Dtilde = 12.534, DOUBLE
-
 # dimensionless tip velocity
 set Model constant Vtilde = 9.4536, DOUBLE
 

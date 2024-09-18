@@ -97,7 +97,7 @@ private:
   double k       = userInputs.get_model_constant_double("k");
   double lamda   = userInputs.get_model_constant_double("lamda");
 
-  double Dtilde = userInputs.get_model_constant_double("Dtilde");
+  double Dtilde = 0.6267 * lamda;
   double Vtilde = userInputs.get_model_constant_double("Vtilde");
   double ltilde = userInputs.get_model_constant_double("ltilde");
 
@@ -106,14 +106,14 @@ private:
   // 1/dt
   double sdt = 1.0 / userInputs.dtValue;
 
-  // Distance between the particle and solidification front
-  double distance = 0.0;
+  // Threshold distance for order parameter
+  double width = 0.15;
 
   // Viscosity
   double eta = 1.0;
 
   // Particle radius;
-  double R = 1.0;
+  double radius_particle = 5.0;
 
   // Difference in surface energy
   double delta_sigma = 1.0;
@@ -121,12 +121,16 @@ private:
   // Cutoff distance
   double a0 = 1.0;
 
+  // Dimensionless particle mass (assume 3d sphere)
+  double mass_tilde =
+    4.0 / 3.0 * M_PI * radius_particle * radius_particle * radius_particle;
+
   // Force and velocity tensors
   dealii::Tensor<1, dim> force = dealii::Tensor<1, dim>();
   dealii::Tensor<1, dim> vel   = dealii::Tensor<1, dim>();
 
-  // Threshold distance for order parameter
-  double width = 0.15;
+  // Distance between the particle and solidification front
+  double distance = 0.0;
 
   // Minimum distance
   mutable double local_minimum = 1000.0;
@@ -162,10 +166,12 @@ customPDE<dim, degree>::solveIncrement(bool skip_time_dependent)
     {
       if (!(distance <= 0.25))
         {
-          double force_drag = 6.0 * M_PI * eta * vel[1] * R * R / distance;
-          double force_vdw =
-            2 * M_PI * R * delta_sigma * a0 * a0 / (a0 + distance) / (a0 + distance);
-          vel[1] = vel[1] + userInputs.dtValue * (force_vdw - force_drag);
+          double force_drag =
+            6.0 * M_PI * eta * vel[1] * radius_particle * radius_particle / distance;
+          double force_vdw = 2 * M_PI * radius_particle * delta_sigma * a0 * a0 /
+                             (a0 + distance) / (a0 + distance);
+
+          vel[1] = vel[1] + userInputs.dtValue * (force_vdw - force_drag) / mass_tilde;
         }
       else
         {

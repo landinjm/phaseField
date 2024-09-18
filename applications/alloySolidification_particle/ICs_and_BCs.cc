@@ -25,8 +25,7 @@ customPDE<dim, degree>::setInitialCondition(const dealii::Point<dim> &p,
   double phi = -std::tanh((p[1] - y0) / std::sqrt(2.0));
 
   // Sphere level-set
-  double             psi_level_set   = 0.0;
-  double             radius_particle = 5.0;
+  double             psi_level_set = 0.0;
   dealii::Point<dim> center_particle(0.5 * userInputs.domain_size[0], 20.0);
 
   dealii::Functions::SignedDistance::Sphere<dim> particle(center_particle,
