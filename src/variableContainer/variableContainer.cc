@@ -307,13 +307,17 @@ variableContainer<dim, degree, T>::integrate_and_distribute_change_in_solution_L
     }
 }
 
-// Need to add index checking to these functions so that an error is thrown if
-// the index wasn't set
 template <int dim, int degree, typename T>
 T
 variableContainer<dim, degree, T>::get_scalar_value(
   unsigned int global_variable_index) const
 {
+  Assert(global_variable_index < varInfoList.size(),
+         dealii::StandardExceptions::ExcMessage(
+           "PRISMS-PF Error: Attemped access of a variable that does not exist. The "
+           "attempted access was for variable with index " +
+           std::to_string(global_variable_index) + "."));
+
   Assert(varInfoList[global_variable_index].evaluation_flags &
            dealii::EvaluationFlags::values,
          dealii::StandardExceptions::ExcMessage(
@@ -329,6 +333,12 @@ dealii::Tensor<1, dim, T>
 variableContainer<dim, degree, T>::get_scalar_gradient(
   unsigned int global_variable_index) const
 {
+  Assert(global_variable_index < varInfoList.size(),
+         dealii::StandardExceptions::ExcMessage(
+           "PRISMS-PF Error: Attemped access of a variable that does not exist. The "
+           "attempted access was for variable with index " +
+           std::to_string(global_variable_index) + "."));
+
   Assert(
     varInfoList[global_variable_index].evaluation_flags &
       dealii::EvaluationFlags::gradients,
@@ -345,6 +355,12 @@ dealii::Tensor<2, dim, T>
 variableContainer<dim, degree, T>::get_scalar_hessian(
   unsigned int global_variable_index) const
 {
+  Assert(global_variable_index < varInfoList.size(),
+         dealii::StandardExceptions::ExcMessage(
+           "PRISMS-PF Error: Attemped access of a variable that does not exist. The "
+           "attempted access was for variable with index " +
+           std::to_string(global_variable_index) + "."));
+
   Assert(
     varInfoList[global_variable_index].evaluation_flags &
       dealii::EvaluationFlags::hessians,
@@ -361,6 +377,12 @@ dealii::Tensor<1, dim, T>
 variableContainer<dim, degree, T>::get_vector_value(
   unsigned int global_variable_index) const
 {
+  Assert(global_variable_index < varInfoList.size(),
+         dealii::StandardExceptions::ExcMessage(
+           "PRISMS-PF Error: Attemped access of a variable that does not exist. The "
+           "attempted access was for variable with index " +
+           std::to_string(global_variable_index) + "."));
+
   Assert(varInfoList[global_variable_index].evaluation_flags &
            dealii::EvaluationFlags::values,
          dealii::StandardExceptions::ExcMessage(
@@ -376,6 +398,12 @@ dealii::Tensor<2, dim, T>
 variableContainer<dim, degree, T>::get_vector_gradient(
   unsigned int global_variable_index) const
 {
+  Assert(global_variable_index < varInfoList.size(),
+         dealii::StandardExceptions::ExcMessage(
+           "PRISMS-PF Error: Attemped access of a variable that does not exist. The "
+           "attempted access was for variable with index " +
+           std::to_string(global_variable_index) + "."));
+
   Assert(
     varInfoList[global_variable_index].evaluation_flags &
       dealii::EvaluationFlags::gradients,
@@ -392,6 +420,12 @@ dealii::Tensor<3, dim, T>
 variableContainer<dim, degree, T>::get_vector_hessian(
   unsigned int global_variable_index) const
 {
+  Assert(global_variable_index < varInfoList.size(),
+         dealii::StandardExceptions::ExcMessage(
+           "PRISMS-PF Error: Attemped access of a variable that does not exist. The "
+           "attempted access was for variable with index " +
+           std::to_string(global_variable_index) + "."));
+
   Assert(
     varInfoList[global_variable_index].evaluation_flags &
       dealii::EvaluationFlags::hessians,
@@ -403,13 +437,17 @@ variableContainer<dim, degree, T>::get_vector_hessian(
   return vector_vars_map.at(global_variable_index)->get_hessian(q_point);
 }
 
-// Need to add index checking to these functions so that an error is thrown if
-// the index wasn't set
 template <int dim, int degree, typename T>
 T
 variableContainer<dim, degree, T>::get_change_in_scalar_value(
   unsigned int global_variable_index) const
 {
+  Assert(global_variable_index < varChangeInfoList.size(),
+         dealii::StandardExceptions::ExcMessage(
+           "PRISMS-PF Error: Attemped access of a variable that does not exist. The "
+           "attempted access was for variable with index " +
+           std::to_string(global_variable_index) + "."));
+
   Assert(varChangeInfoList[global_variable_index].evaluation_flags &
            dealii::EvaluationFlags::values,
          dealii::StandardExceptions::ExcMessage(
@@ -426,6 +464,12 @@ dealii::Tensor<1, dim, T>
 variableContainer<dim, degree, T>::get_change_in_scalar_gradient(
   unsigned int global_variable_index) const
 {
+  Assert(global_variable_index < varChangeInfoList.size(),
+         dealii::StandardExceptions::ExcMessage(
+           "PRISMS-PF Error: Attemped access of a variable that does not exist. The "
+           "attempted access was for variable with index " +
+           std::to_string(global_variable_index) + "."));
+
   Assert(
     varChangeInfoList[global_variable_index].evaluation_flags &
       dealii::EvaluationFlags::gradients,
@@ -443,6 +487,12 @@ dealii::Tensor<2, dim, T>
 variableContainer<dim, degree, T>::get_change_in_scalar_hessian(
   unsigned int global_variable_index) const
 {
+  Assert(global_variable_index < varChangeInfoList.size(),
+         dealii::StandardExceptions::ExcMessage(
+           "PRISMS-PF Error: Attemped access of a variable that does not exist. The "
+           "attempted access was for variable with index " +
+           std::to_string(global_variable_index) + "."));
+
   Assert(
     varChangeInfoList[global_variable_index].evaluation_flags &
       dealii::EvaluationFlags::hessians,
@@ -460,6 +510,12 @@ dealii::Tensor<1, dim, T>
 variableContainer<dim, degree, T>::get_change_in_vector_value(
   unsigned int global_variable_index) const
 {
+  Assert(global_variable_index < varChangeInfoList.size(),
+         dealii::StandardExceptions::ExcMessage(
+           "PRISMS-PF Error: Attemped access of a variable that does not exist. The "
+           "attempted access was for variable with index " +
+           std::to_string(global_variable_index) + "."));
+
   Assert(varChangeInfoList[global_variable_index].evaluation_flags &
            dealii::EvaluationFlags::values,
          dealii::StandardExceptions::ExcMessage(
@@ -476,6 +532,12 @@ dealii::Tensor<2, dim, T>
 variableContainer<dim, degree, T>::get_change_in_vector_gradient(
   unsigned int global_variable_index) const
 {
+  Assert(global_variable_index < varChangeInfoList.size(),
+         dealii::StandardExceptions::ExcMessage(
+           "PRISMS-PF Error: Attemped access of a variable that does not exist. The "
+           "attempted access was for variable with index " +
+           std::to_string(global_variable_index) + "."));
+
   Assert(
     varChangeInfoList[global_variable_index].evaluation_flags &
       dealii::EvaluationFlags::gradients,
@@ -493,6 +555,12 @@ dealii::Tensor<3, dim, T>
 variableContainer<dim, degree, T>::get_change_in_vector_hessian(
   unsigned int global_variable_index) const
 {
+  Assert(global_variable_index < varChangeInfoList.size(),
+         dealii::StandardExceptions::ExcMessage(
+           "PRISMS-PF Error: Attemped access of a variable that does not exist. The "
+           "attempted access was for variable with index " +
+           std::to_string(global_variable_index) + "."));
+
   Assert(
     varChangeInfoList[global_variable_index].evaluation_flags &
       dealii::EvaluationFlags::hessians,
