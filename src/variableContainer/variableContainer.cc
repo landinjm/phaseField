@@ -314,19 +314,14 @@ T
 variableContainer<dim, degree, T>::get_scalar_value(
   unsigned int global_variable_index) const
 {
-  if (varInfoList[global_variable_index].evaluation_flags &
-      dealii::EvaluationFlags::values)
-    {
-      return scalar_vars_map.at(global_variable_index)->get_value(q_point);
-    }
-  else
-    {
-      std::cerr << "PRISMS-PF Error: Attempted access of a variable value that "
-                   "was not marked as needed in 'equations.cc'. The attempted "
-                   "access was for variable with index "
-                << global_variable_index << " ." << std::endl;
-      abort();
-    }
+  Assert(varInfoList[global_variable_index].evaluation_flags &
+           dealii::EvaluationFlags::values,
+         dealii::StandardExceptions::ExcMessage(
+           "PRISMS-PF Error: Attempted access of a variable value that was not marked as "
+           "needed in 'equations.cc'. The attempted access was for variable with index " +
+           std::to_string(global_variable_index) + "."));
+
+  return scalar_vars_map.at(global_variable_index)->get_value(q_point);
 }
 
 template <int dim, int degree, typename T>
@@ -334,19 +329,15 @@ dealii::Tensor<1, dim, T>
 variableContainer<dim, degree, T>::get_scalar_gradient(
   unsigned int global_variable_index) const
 {
-  if (varInfoList[global_variable_index].evaluation_flags &
-      dealii::EvaluationFlags::gradients)
-    {
-      return scalar_vars_map.at(global_variable_index)->get_gradient(q_point);
-    }
-  else
-    {
-      std::cerr << "PRISMS-PF Error: Attempted access of a variable gradient "
-                   "that was not marked as needed in 'equations.cc'. The "
-                   "attempted access was for variable with index "
-                << global_variable_index << " ." << std::endl;
-      abort();
-    }
+  Assert(
+    varInfoList[global_variable_index].evaluation_flags &
+      dealii::EvaluationFlags::gradients,
+    dealii::StandardExceptions::ExcMessage(
+      "PRISMS-PF Error: Attempted access of a variable gradient that was not marked as "
+      "needed in 'equations.cc'. The attempted access was for variable with index " +
+      std::to_string(global_variable_index) + "."));
+
+  return scalar_vars_map.at(global_variable_index)->get_gradient(q_point);
 }
 
 template <int dim, int degree, typename T>
@@ -354,19 +345,15 @@ dealii::Tensor<2, dim, T>
 variableContainer<dim, degree, T>::get_scalar_hessian(
   unsigned int global_variable_index) const
 {
-  if (varInfoList[global_variable_index].evaluation_flags &
-      dealii::EvaluationFlags::hessians)
-    {
-      return scalar_vars_map.at(global_variable_index)->get_hessian(q_point);
-    }
-  else
-    {
-      std::cerr << "PRISMS-PF Error: Attempted access of a variable hessian "
-                   "that was not marked as needed in 'equations.cc'. The "
-                   "attempted access was for variable with index "
-                << global_variable_index << " ." << std::endl;
-      abort();
-    }
+  Assert(
+    varInfoList[global_variable_index].evaluation_flags &
+      dealii::EvaluationFlags::hessians,
+    dealii::StandardExceptions::ExcMessage(
+      "PRISMS-PF Error: Attempted access of a variable hessian that was not marked as "
+      "needed in 'equations.cc'. The attempted access was for variable with index " +
+      std::to_string(global_variable_index) + "."));
+
+  return scalar_vars_map.at(global_variable_index)->get_hessian(q_point);
 }
 
 template <int dim, int degree, typename T>
@@ -374,19 +361,14 @@ dealii::Tensor<1, dim, T>
 variableContainer<dim, degree, T>::get_vector_value(
   unsigned int global_variable_index) const
 {
-  if (varInfoList[global_variable_index].evaluation_flags &
-      dealii::EvaluationFlags::values)
-    {
-      return vector_vars_map.at(global_variable_index)->get_value(q_point);
-    }
-  else
-    {
-      std::cerr << "PRISMS-PF Error: Attempted access of a variable value that "
-                   "was not marked as needed in 'equations.cc'. The attempted "
-                   "access was for variable with index "
-                << global_variable_index << " ." << std::endl;
-      abort();
-    }
+  Assert(varInfoList[global_variable_index].evaluation_flags &
+           dealii::EvaluationFlags::values,
+         dealii::StandardExceptions::ExcMessage(
+           "PRISMS-PF Error: Attempted access of a variable value that was not marked as "
+           "needed in 'equations.cc'. The attempted access was for variable with index " +
+           std::to_string(global_variable_index) + "."));
+
+  return vector_vars_map.at(global_variable_index)->get_value(q_point);
 }
 
 template <int dim, int degree, typename T>
@@ -394,19 +376,15 @@ dealii::Tensor<2, dim, T>
 variableContainer<dim, degree, T>::get_vector_gradient(
   unsigned int global_variable_index) const
 {
-  if (varInfoList[global_variable_index].evaluation_flags &
-      dealii::EvaluationFlags::gradients)
-    {
-      return vector_vars_map.at(global_variable_index)->get_gradient(q_point);
-    }
-  else
-    {
-      std::cerr << "PRISMS-PF Error: Attempted access of a variable gradient "
-                   "that was not marked as needed in 'equations.cc'. The "
-                   "attempted access was for variable with index "
-                << global_variable_index << " ." << std::endl;
-      abort();
-    }
+  Assert(
+    varInfoList[global_variable_index].evaluation_flags &
+      dealii::EvaluationFlags::gradients,
+    dealii::StandardExceptions::ExcMessage(
+      "PRISMS-PF Error: Attempted access of a variable gradient that was not marked as "
+      "needed in 'equations.cc'. The attempted access was for variable with index " +
+      std::to_string(global_variable_index) + "."));
+
+  return vector_vars_map.at(global_variable_index)->get_gradient(q_point);
 }
 
 template <int dim, int degree, typename T>
@@ -414,19 +392,15 @@ dealii::Tensor<3, dim, T>
 variableContainer<dim, degree, T>::get_vector_hessian(
   unsigned int global_variable_index) const
 {
-  if (varInfoList[global_variable_index].evaluation_flags &
-      dealii::EvaluationFlags::hessians)
-    {
-      return vector_vars_map.at(global_variable_index)->get_hessian(q_point);
-    }
-  else
-    {
-      std::cerr << "PRISMS-PF Error: Attempted access of a variable hessian "
-                   "that was not marked as needed in 'equations.cc'. The "
-                   "attempted access was for variable with index "
-                << global_variable_index << " ." << std::endl;
-      abort();
-    }
+  Assert(
+    varInfoList[global_variable_index].evaluation_flags &
+      dealii::EvaluationFlags::hessians,
+    dealii::StandardExceptions::ExcMessage(
+      "PRISMS-PF Error: Attempted access of a variable hessian that was not marked as "
+      "needed in 'equations.cc'. The attempted access was for variable with index " +
+      std::to_string(global_variable_index) + "."));
+
+  return vector_vars_map.at(global_variable_index)->get_hessian(q_point);
 }
 
 // Need to add index checking to these functions so that an error is thrown if
@@ -436,19 +410,15 @@ T
 variableContainer<dim, degree, T>::get_change_in_scalar_value(
   unsigned int global_variable_index) const
 {
-  if (varChangeInfoList[global_variable_index].evaluation_flags &
-      dealii::EvaluationFlags::values)
-    {
-      return scalar_change_in_vars_map.at(global_variable_index)->get_value(q_point);
-    }
-  else
-    {
-      std::cerr << "PRISMS-PF Error: Attempted access of a change in variable "
-                   "value that was not marked as needed in 'equations.cc'. The "
-                   "attempted access was for variable with index "
-                << global_variable_index << " ." << std::endl;
-      abort();
-    }
+  Assert(varChangeInfoList[global_variable_index].evaluation_flags &
+           dealii::EvaluationFlags::values,
+         dealii::StandardExceptions::ExcMessage(
+           "PRISMS-PF Error: Attempted access of a change in variable value that was not "
+           "marked as needed in 'equations.cc'. The attempted access was for variable "
+           "with index " +
+           std::to_string(global_variable_index) + "."));
+
+  return scalar_change_in_vars_map.at(global_variable_index)->get_value(q_point);
 }
 
 template <int dim, int degree, typename T>
@@ -456,19 +426,16 @@ dealii::Tensor<1, dim, T>
 variableContainer<dim, degree, T>::get_change_in_scalar_gradient(
   unsigned int global_variable_index) const
 {
-  if (varChangeInfoList[global_variable_index].evaluation_flags &
-      dealii::EvaluationFlags::gradients)
-    {
-      return scalar_change_in_vars_map.at(global_variable_index)->get_gradient(q_point);
-    }
-  else
-    {
-      std::cerr << "PRISMS-PF Error: Attempted access of a change in variable "
-                   "gradient that was not marked as needed in 'equations.cc'. "
-                   "The attempted access was for variable with index "
-                << global_variable_index << " ." << std::endl;
-      abort();
-    }
+  Assert(
+    varChangeInfoList[global_variable_index].evaluation_flags &
+      dealii::EvaluationFlags::gradients,
+    dealii::StandardExceptions::ExcMessage(
+      "PRISMS-PF Error: Attempted access of a change in variable gradient that was not "
+      "marked as needed in 'equations.cc'. The attempted access was for variable "
+      "with index " +
+      std::to_string(global_variable_index) + "."));
+
+  return scalar_change_in_vars_map.at(global_variable_index)->get_gradient(q_point);
 }
 
 template <int dim, int degree, typename T>
@@ -476,19 +443,16 @@ dealii::Tensor<2, dim, T>
 variableContainer<dim, degree, T>::get_change_in_scalar_hessian(
   unsigned int global_variable_index) const
 {
-  if (varChangeInfoList[global_variable_index].evaluation_flags &
-      dealii::EvaluationFlags::hessians)
-    {
-      return scalar_change_in_vars_map.at(global_variable_index)->get_hessian(q_point);
-    }
-  else
-    {
-      std::cerr << "PRISMS-PF Error: Attempted access of a change in variable "
-                   "hessian that was not marked as needed in 'equations.cc'. "
-                   "The attempted access was for variable with index "
-                << global_variable_index << " ." << std::endl;
-      abort();
-    }
+  Assert(
+    varChangeInfoList[global_variable_index].evaluation_flags &
+      dealii::EvaluationFlags::hessians,
+    dealii::StandardExceptions::ExcMessage(
+      "PRISMS-PF Error: Attempted access of a change in variable hessian that was not "
+      "marked as needed in 'equations.cc'. The attempted access was for variable "
+      "with index " +
+      std::to_string(global_variable_index) + "."));
+
+  return scalar_change_in_vars_map.at(global_variable_index)->get_hessian(q_point);
 }
 
 template <int dim, int degree, typename T>
@@ -496,19 +460,15 @@ dealii::Tensor<1, dim, T>
 variableContainer<dim, degree, T>::get_change_in_vector_value(
   unsigned int global_variable_index) const
 {
-  if (varChangeInfoList[global_variable_index].evaluation_flags &
-      dealii::EvaluationFlags::values)
-    {
-      return vector_change_in_vars_map.at(global_variable_index)->get_value(q_point);
-    }
-  else
-    {
-      std::cerr << "PRISMS-PF Error: Attempted access of a change in variable "
-                   "value that was not marked as needed in 'equations.cc'. The "
-                   "attempted access was for variable with index "
-                << global_variable_index << " ." << std::endl;
-      abort();
-    }
+  Assert(varChangeInfoList[global_variable_index].evaluation_flags &
+           dealii::EvaluationFlags::values,
+         dealii::StandardExceptions::ExcMessage(
+           "PRISMS-PF Error: Attempted access of a change in variable value that was not "
+           "marked as needed in 'equations.cc'. The attempted access was for variable "
+           "with index " +
+           std::to_string(global_variable_index) + "."));
+
+  return vector_change_in_vars_map.at(global_variable_index)->get_value(q_point);
 }
 
 template <int dim, int degree, typename T>
@@ -516,19 +476,16 @@ dealii::Tensor<2, dim, T>
 variableContainer<dim, degree, T>::get_change_in_vector_gradient(
   unsigned int global_variable_index) const
 {
-  if (varChangeInfoList[global_variable_index].evaluation_flags &
-      dealii::EvaluationFlags::gradients)
-    {
-      return vector_change_in_vars_map.at(global_variable_index)->get_gradient(q_point);
-    }
-  else
-    {
-      std::cerr << "PRISMS-PF Error: Attempted access of a change in variable "
-                   "gradient that was not marked as needed in 'equations.cc'. "
-                   "The attempted access was for variable with index "
-                << global_variable_index << " ." << std::endl;
-      abort();
-    }
+  Assert(
+    varChangeInfoList[global_variable_index].evaluation_flags &
+      dealii::EvaluationFlags::gradients,
+    dealii::StandardExceptions::ExcMessage(
+      "PRISMS-PF Error: Attempted access of a change in variable gradient that was not "
+      "marked as needed in 'equations.cc'. The attempted access was for variable "
+      "with index " +
+      std::to_string(global_variable_index) + "."));
+
+  return vector_change_in_vars_map.at(global_variable_index)->get_gradient(q_point);
 }
 
 template <int dim, int degree, typename T>
@@ -536,19 +493,16 @@ dealii::Tensor<3, dim, T>
 variableContainer<dim, degree, T>::get_change_in_vector_hessian(
   unsigned int global_variable_index) const
 {
-  if (varChangeInfoList[global_variable_index].evaluation_flags &
-      dealii::EvaluationFlags::hessians)
-    {
-      return vector_change_in_vars_map.at(global_variable_index)->get_hessian(q_point);
-    }
-  else
-    {
-      std::cerr << "PRISMS-PF Error: Attempted access of a change in variable "
-                   "hessian that was not marked as needed in 'equations.cc'. "
-                   "The attempted access was for variable with index "
-                << global_variable_index << " ." << std::endl;
-      abort();
-    }
+  Assert(
+    varChangeInfoList[global_variable_index].evaluation_flags &
+      dealii::EvaluationFlags::hessians,
+    dealii::StandardExceptions::ExcMessage(
+      "PRISMS-PF Error: Attempted access of a change in variable hessian that was not "
+      "marked as needed in 'equations.cc'. The attempted access was for variable "
+      "with index " +
+      std::to_string(global_variable_index) + "."));
+
+  return vector_change_in_vars_map.at(global_variable_index)->get_hessian(q_point);
 }
 
 // The methods to set the residual terms
