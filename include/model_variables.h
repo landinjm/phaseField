@@ -33,11 +33,41 @@ public:
 
 struct variable_info
 {
-  bool                                     is_scalar;
-  unsigned int                             global_var_index;
+  // Whether field is scalar
+  bool is_scalar;
+
+  // Global index of the field
+  unsigned int global_var_index;
+
+  // Time index of the field. The default value is 0, which is the value at the current
+  // index. To access the previous timestep, a value of -1 would be set.
+  int time_index;
+
+  // Evaluation flags for the field (value/gradient/hessian)
   dealii::EvaluationFlags::EvaluationFlags evaluation_flags;
+
+  // Residual flags for the field (value/gradient). Currently, hessian residuals are
+  // unsupported
   dealii::EvaluationFlags::EvaluationFlags residual_flags;
-  bool                                     var_needed;
+
+  // Whether the variable is needed
+  bool var_needed;
+
+  // Constructor with default values
+  variable_info(
+    bool                                     scalar   = true,
+    unsigned int                             global_i = 0,
+    int                                      time_i   = 0,
+    dealii::EvaluationFlags::EvaluationFlags eval     = dealii::EvaluationFlags::nothing,
+    dealii::EvaluationFlags::EvaluationFlags res      = dealii::EvaluationFlags::nothing,
+    bool                                     need_var = false)
+    : is_scalar(scalar)
+    , global_var_index(global_i)
+    , time_index(time_i)
+    , evaluation_flags(eval)
+    , residual_flags(res)
+    , var_needed(need_var)
+  {}
 };
 
 #endif /* INCLUDE_MODELVARIABLE_H_ */
