@@ -4,7 +4,7 @@
 template <int dim>
 void
 userInputParameters<dim>::loadVariableAttributes(
-  variableAttributeLoader variable_attributes)
+  const variableAttributeLoader &variable_attributes)
 {
   // Pull some variable values from variable_attributes
   number_of_variables = variable_attributes.number_of_variables;

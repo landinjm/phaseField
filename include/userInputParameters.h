@@ -96,7 +96,7 @@ public:
 
   // Method to load in the variable attributes
   void
-  loadVariableAttributes(variableAttributeLoader variable_attributes);
+  loadVariableAttributes(const variableAttributeLoader &variable_attributes);
 
   // Nucleation attribute methods
   std::vector<double>
