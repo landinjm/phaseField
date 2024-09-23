@@ -18,71 +18,103 @@ class variableContainer
 {
 public:
 #include "typeDefs.h"
-  // Constructors
 
-  // Standard contructor, used for most situations
+  // Contructor of variable container for nonexplicit equations
   variableContainer(const dealii::MatrixFree<dim, double> &data,
                     const std::vector<variable_info>      &_varInfoList,
                     const std::vector<variable_info>      &_varChangeInfoList);
 
+  // Contructor of variable container for explicit equations
   variableContainer(const dealii::MatrixFree<dim, double> &data,
                     const std::vector<variable_info>      &_varInfoList);
-  // Nonstandard constructor, used when only one index of "data" should be used,
-  // use with care!
+
+  // Contructor of variable container for postprocessing
   variableContainer(const dealii::MatrixFree<dim, double> &data,
                     const std::vector<variable_info>      &_varInfoList,
                     const unsigned int                    &fixed_index);
 
-  // Methods to get the value/grad/hess in the residual method (this is how the
-  // user gets these values in equations.h)
+  // Return the value of the scalar field at this index
   T
   get_scalar_value(unsigned int global_variable_index) const;
+
+  // Return the gradient of the scalar field at this index
   dealii::Tensor<1, dim, T>
   get_scalar_gradient(unsigned int global_variable_index) const;
+
+  // Return the hessian of the scalar field at this index
   dealii::Tensor<2, dim, T>
   get_scalar_hessian(unsigned int global_variable_index) const;
+
+  // Return the value of the vector field at this index
   dealii::Tensor<1, dim, T>
   get_vector_value(unsigned int global_variable_index) const;
+
+  // Return the gradient of the vector field at this index
   dealii::Tensor<2, dim, T>
   get_vector_gradient(unsigned int global_variable_index) const;
+
+  // Return the hessian of the vector field at this index
   dealii::Tensor<3, dim, T>
   get_vector_hessian(unsigned int global_variable_index) const;
 
+  // Return the change in value of the scalar field at this index
   T
   get_change_in_scalar_value(unsigned int global_variable_index) const;
+
+  // Return the change in gradient of the scalar field at this index
   dealii::Tensor<1, dim, T>
   get_change_in_scalar_gradient(unsigned int global_variable_index) const;
+
+  // Return the change in hessian of the scalar field at this index
   dealii::Tensor<2, dim, T>
   get_change_in_scalar_hessian(unsigned int global_variable_index) const;
+
+  // Return the change in value of the vector field at this index
   dealii::Tensor<1, dim, T>
   get_change_in_vector_value(unsigned int global_variable_index) const;
+
+  // Return the change in gradient of the vector field at this index
   dealii::Tensor<2, dim, T>
   get_change_in_vector_gradient(unsigned int global_variable_index) const;
+
+  // Return the change in hessian of the vector field at this index
   dealii::Tensor<3, dim, T>
   get_change_in_vector_hessian(unsigned int global_variable_index) const;
 
-  // Methods to set the value residual and the gradient residual (this is how
-  // the user sets these values in equations.h)
+  // Set the RHS value residual term of the scalar field at this index
   void
   set_scalar_value_term_RHS(unsigned int global_variable_index, T val);
+
+  // Set the RHS gradient residual term of the scalar field at this index
   void
   set_scalar_gradient_term_RHS(unsigned int              global_variable_index,
                                dealii::Tensor<1, dim, T> grad);
+
+  // Set the RHS value residual term of the vector field at this index
   void
   set_vector_value_term_RHS(unsigned int              global_variable_index,
                             dealii::Tensor<1, dim, T> val);
+
+  // Set the RHS gradient residual term of the vector field at this index
   void
   set_vector_gradient_term_RHS(unsigned int              global_variable_index,
                                dealii::Tensor<2, dim, T> grad);
 
+  // Set the LHS value residual term of the scalar field at this index
   void
   set_scalar_value_term_LHS(unsigned int global_variable_index, T val);
+
+  // Set the LHS gradient residual term of the scalar field at this index
   void
   set_scalar_gradient_term_LHS(unsigned int              global_variable_index,
                                dealii::Tensor<1, dim, T> grad);
+
+  // Set the LHS value residual term of the vector field at this index
   void
   set_vector_value_term_LHS(unsigned int              global_variable_index,
                             dealii::Tensor<1, dim, T> val);
+
+  // Set the LHS gradient residual term of the vector field at this index
   void
   set_vector_gradient_term_LHS(unsigned int              global_variable_index,
                                dealii::Tensor<2, dim, T> grad);
@@ -90,53 +122,66 @@ public:
   // Initialize, read DOFs, and set evaulation flags for each variable
   void
   reinit_and_eval(const std::vector<vectorType *> &src, unsigned int cell);
+
+  // Initialize, read DOFs, and set evaulation flags for a specified variable
   void
   reinit_and_eval_change_in_solution(const vectorType &src,
                                      unsigned int      cell,
                                      unsigned int      var_being_solved);
 
-  // Only initialize the FEEvaluation object for each variable (used for
-  // post-processing)
+  // Initialize the FEEvaluation object for each variable (used for post-processing)
   void
   reinit(unsigned int cell);
 
-  // Integrate the residuals and distribute from local to global
+  // Integrate the residuals for all variables and distribute from local to global
   void
   integrate_and_distribute(std::vector<vectorType *> &dst);
+
+  // Integrate the residuals for a specified variable and distribute from local to global
   void
   integrate_and_distribute_change_in_solution_LHS(vectorType        &dst,
                                                   const unsigned int var_being_solved);
 
-  // The quadrature point index, a method to get the number of quadrature points
-  // per cell, and a method to get the xyz coordinates for the quadrature point
+  // Quadrature point index
   unsigned int q_point;
 
+  // Return the number of quadrature points per cell
   unsigned int
   get_num_q_points() const;
 
+  // Return the xyz coordinates of the quadrature point
   dealii::Point<dim, T>
   get_q_point_location() const;
 
 private:
-  // Vectors of the actual FEEvaluation objects for each active variable, split
-  // into scalar variables and vector variables for type reasons
   using scalar_FEEval = dealii::FEEvaluation<dim, degree, degree + 1, 1, double>;
   using vector_FEEval = dealii::FEEvaluation<dim, degree, degree + 1, dim, double>;
 
+  // Unordered map of FEEvaluation objects for each active scalar variable
   boost::unordered_map<unsigned int, std::unique_ptr<scalar_FEEval>> scalar_vars_map;
+
+  // Unordered map of FEEvaluation objects for each active vector variable
   boost::unordered_map<unsigned int, std::unique_ptr<vector_FEEval>> vector_vars_map;
 
+  // Unordered map of FEEvaluation objects for each active scalar variable where the
+  // change in value is needed
   boost::unordered_map<unsigned int, std::unique_ptr<scalar_FEEval>>
     scalar_change_in_vars_map;
+
+  // Unordered map of FEEvaluation objects for each active vector variable where the
+  // change in value is needed
   boost::unordered_map<unsigned int, std::unique_ptr<vector_FEEval>>
     vector_change_in_vars_map;
 
-  // Object containing some information about each variable (indices, whether
-  // the val/grad/hess is needed, etc)
+  // Vector of struct containing relevant information at each variable (index, evaluation
+  // flags, etc.)
   std::vector<variable_info> varInfoList;
+
+  // Vector of struct containing relevant information at each variable where the change in
+  // value is needed(index, evaluation flags, etc.)
   std::vector<variable_info> varChangeInfoList;
 
-  // The number of variables
+  // Number of variables
   unsigned int num_var;
 };
 

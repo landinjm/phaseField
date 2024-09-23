@@ -77,8 +77,6 @@ variableContainer<dim, degree, T>::variableContainer(
     }
 }
 
-// Variant of the constructor where it reads from a fixed index of "data", used
-// for post-processing
 template <int dim, int degree, typename T>
 variableContainer<dim, degree, T>::variableContainer(
   const dealii::MatrixFree<dim, double> &data,
@@ -202,10 +200,6 @@ variableContainer<dim, degree, T>::reinit_and_eval(const std::vector<vectorType 
     }
 }
 
-/**
- * This is specialized for the LHS where a change in solution is needed. The RHS method
- * takes the src as a vector of vectorTypes.
- */
 template <int dim, int degree, typename T>
 void
 variableContainer<dim, degree, T>::reinit_and_eval_change_in_solution(
@@ -573,7 +567,6 @@ variableContainer<dim, degree, T>::get_change_in_vector_hessian(
   return vector_change_in_vars_map.at(global_variable_index)->get_hessian(q_point);
 }
 
-// The methods to set the residual terms
 template <int dim, int degree, typename T>
 void
 variableContainer<dim, degree, T>::set_scalar_value_term_RHS(
