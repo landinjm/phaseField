@@ -35,27 +35,27 @@ public:
 
   // Return the value of the scalar field at this index
   T
-  get_scalar_value(unsigned int global_variable_index) const;
+  get_scalar_value(unsigned int global_variable_index, int time_index = 0) const;
 
   // Return the gradient of the scalar field at this index
   dealii::Tensor<1, dim, T>
-  get_scalar_gradient(unsigned int global_variable_index) const;
+  get_scalar_gradient(unsigned int global_variable_index, int time_index = 0) const;
 
   // Return the hessian of the scalar field at this index
   dealii::Tensor<2, dim, T>
-  get_scalar_hessian(unsigned int global_variable_index) const;
+  get_scalar_hessian(unsigned int global_variable_index, int time_index = 0) const;
 
   // Return the value of the vector field at this index
   dealii::Tensor<1, dim, T>
-  get_vector_value(unsigned int global_variable_index) const;
+  get_vector_value(unsigned int global_variable_index, int time_index = 0) const;
 
   // Return the gradient of the vector field at this index
   dealii::Tensor<2, dim, T>
-  get_vector_gradient(unsigned int global_variable_index) const;
+  get_vector_gradient(unsigned int global_variable_index, int time_index = 0) const;
 
   // Return the hessian of the vector field at this index
   dealii::Tensor<3, dim, T>
-  get_vector_hessian(unsigned int global_variable_index) const;
+  get_vector_hessian(unsigned int global_variable_index, int time_index = 0) const;
 
   // Return the change in value of the scalar field at this index
   T
@@ -83,22 +83,27 @@ public:
 
   // Set the RHS value residual term of the scalar field at this index
   void
-  set_scalar_value_term_RHS(unsigned int global_variable_index, T val);
+  set_scalar_value_term_RHS(unsigned int global_variable_index,
+                            T            val,
+                            int          time_index = 0);
 
   // Set the RHS gradient residual term of the scalar field at this index
   void
   set_scalar_gradient_term_RHS(unsigned int              global_variable_index,
-                               dealii::Tensor<1, dim, T> grad);
+                               dealii::Tensor<1, dim, T> grad,
+                               int                       time_index = 0);
 
   // Set the RHS value residual term of the vector field at this index
   void
   set_vector_value_term_RHS(unsigned int              global_variable_index,
-                            dealii::Tensor<1, dim, T> val);
+                            dealii::Tensor<1, dim, T> val,
+                            int                       time_index = 0);
 
   // Set the RHS gradient residual term of the vector field at this index
   void
   set_vector_gradient_term_RHS(unsigned int              global_variable_index,
-                               dealii::Tensor<2, dim, T> grad);
+                               dealii::Tensor<2, dim, T> grad,
+                               int                       time_index = 0);
 
   // Set the LHS value residual term of the scalar field at this index
   void
@@ -158,10 +163,12 @@ private:
   using vector_FEEval = dealii::FEEvaluation<dim, degree, degree + 1, dim, double>;
 
   // Unordered map of FEEvaluation objects for each active scalar variable
-  boost::unordered_map<unsigned int, std::unique_ptr<scalar_FEEval>> scalar_vars_map;
+  boost::unordered_map<std::pair<unsigned int, int>, std::unique_ptr<scalar_FEEval>>
+    scalar_vars_map;
 
   // Unordered map of FEEvaluation objects for each active vector variable
-  boost::unordered_map<unsigned int, std::unique_ptr<vector_FEEval>> vector_vars_map;
+  boost::unordered_map<std::pair<unsigned int, int>, std::unique_ptr<vector_FEEval>>
+    vector_vars_map;
 
   // Unordered map of FEEvaluation objects for each active scalar variable where the
   // change in value is needed

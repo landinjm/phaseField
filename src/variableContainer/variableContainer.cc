@@ -16,17 +16,17 @@ variableContainer<dim, degree, T>::variableContainer(
 
       if (var_info.var_needed)
         {
-          const unsigned int var_index = var_info.global_var_index;
+          const unsigned int var_index  = var_info.global_var_index;
+          const int          time_index = var_info.time_index;
+          const auto         pair_key   = std::make_pair(var_index, time_index);
 
           if (var_info.is_scalar)
             {
-              scalar_vars_map.emplace(var_index,
-                                      std::make_unique<scalar_FEEval>(data, i));
+              scalar_vars_map.emplace(pair_key, std::make_unique<scalar_FEEval>(data, i));
             }
           else
             {
-              vector_vars_map.emplace(var_index,
-                                      std::make_unique<vector_FEEval>(data, i));
+              vector_vars_map.emplace(pair_key, std::make_unique<vector_FEEval>(data, i));
             }
         }
 
@@ -64,15 +64,17 @@ variableContainer<dim, degree, T>::variableContainer(
           continue;
         }
 
-      const unsigned int var_index = var_info.global_var_index;
+      const unsigned int var_index  = var_info.global_var_index;
+      const int          time_index = var_info.time_index;
+      const auto         pair_key   = std::make_pair(var_index, time_index);
 
       if (var_info.is_scalar)
         {
-          scalar_vars_map.emplace(var_index, std::make_unique<scalar_FEEval>(data, i));
+          scalar_vars_map.emplace(pair_key, std::make_unique<scalar_FEEval>(data, i));
         }
       else
         {
-          vector_vars_map.emplace(var_index, std::make_unique<vector_FEEval>(data, i));
+          vector_vars_map.emplace(pair_key, std::make_unique<vector_FEEval>(data, i));
         }
     }
 }
@@ -94,16 +96,18 @@ variableContainer<dim, degree, T>::variableContainer(
           continue;
         }
 
-      const unsigned int var_index = var_info.global_var_index;
+      const unsigned int var_index  = var_info.global_var_index;
+      const int          time_index = var_info.time_index;
+      const auto         pair_key   = std::make_pair(var_index, time_index);
 
       if (var_info.is_scalar)
         {
-          scalar_vars_map.emplace(var_index,
+          scalar_vars_map.emplace(pair_key,
                                   std::make_unique<scalar_FEEval>(data, fixed_index));
         }
       else
         {
-          vector_vars_map.emplace(var_index,
+          vector_vars_map.emplace(pair_key,
                                   std::make_unique<vector_FEEval>(data, fixed_index));
         }
     }
@@ -181,18 +185,20 @@ variableContainer<dim, degree, T>::reinit_and_eval(const std::vector<vectorType 
           continue;
         }
 
-      const unsigned int var_index = var_info.global_var_index;
+      const unsigned int var_index  = var_info.global_var_index;
+      const int          time_index = var_info.time_index;
+      const auto         pair_key   = std::make_pair(var_index, time_index);
 
       if (var_info.is_scalar)
         {
-          auto *scalar_FEEval_ptr = scalar_vars_map[var_index].get();
+          auto *scalar_FEEval_ptr = scalar_vars_map[pair_key].get();
           scalar_FEEval_ptr->reinit(cell);
           scalar_FEEval_ptr->read_dof_values(*src[i]);
           scalar_FEEval_ptr->evaluate(var_info.evaluation_flags);
         }
       else
         {
-          auto *vector_FEEval_ptr = vector_vars_map[var_index].get();
+          auto *vector_FEEval_ptr = vector_vars_map[pair_key].get();
           vector_FEEval_ptr->reinit(cell);
           vector_FEEval_ptr->read_dof_values(*src[i]);
           vector_FEEval_ptr->evaluate(var_info.evaluation_flags);
@@ -236,15 +242,17 @@ variableContainer<dim, degree, T>::reinit(unsigned int cell)
           continue;
         }
 
-      const unsigned int var_index = var_info.global_var_index;
+      const unsigned int var_index  = var_info.global_var_index;
+      const int          time_index = var_info.time_index;
+      const auto         pair_key   = std::make_pair(var_index, time_index);
 
       if (var_info.is_scalar)
         {
-          scalar_vars_map[var_index]->reinit(cell);
+          scalar_vars_map[pair_key]->reinit(cell);
         }
       else
         {
-          vector_vars_map[var_index]->reinit(cell);
+          vector_vars_map[pair_key]->reinit(cell);
         }
     }
 }
@@ -263,17 +271,19 @@ variableContainer<dim, degree, T>::integrate_and_distribute(
           continue;
         }
 
-      const unsigned int var_index = var_info.global_var_index;
+      const unsigned int var_index  = var_info.global_var_index;
+      const int          time_index = var_info.time_index;
+      const auto         pair_key   = std::make_pair(var_index, time_index);
 
       if (var_info.is_scalar)
         {
-          auto *scalar_FEEval_ptr = scalar_vars_map[var_index].get();
+          auto *scalar_FEEval_ptr = scalar_vars_map[pair_key].get();
           scalar_FEEval_ptr->integrate(var_info.residual_flags);
           scalar_FEEval_ptr->distribute_local_to_global(*dst[i]);
         }
       else
         {
-          auto *vector_FEEval_ptr = vector_vars_map[var_index].get();
+          auto *vector_FEEval_ptr = vector_vars_map[pair_key].get();
           vector_FEEval_ptr->integrate(var_info.residual_flags);
           vector_FEEval_ptr->distribute_local_to_global(*dst[i]);
         }
@@ -303,8 +313,8 @@ variableContainer<dim, degree, T>::integrate_and_distribute_change_in_solution_L
 
 template <int dim, int degree, typename T>
 T
-variableContainer<dim, degree, T>::get_scalar_value(
-  unsigned int global_variable_index) const
+variableContainer<dim, degree, T>::get_scalar_value(unsigned int global_variable_index,
+                                                    int          time_index) const
 {
   Assert(global_variable_index < varInfoList.size(),
          dealii::StandardExceptions::ExcMessage(
@@ -319,13 +329,14 @@ variableContainer<dim, degree, T>::get_scalar_value(
            "needed in 'equations.cc'. The attempted access was for variable with index " +
            std::to_string(global_variable_index) + "."));
 
-  return scalar_vars_map.at(global_variable_index)->get_value(q_point);
+  return scalar_vars_map.at(std::make_pair(global_variable_index, time_index))
+    ->get_value(q_point);
 }
 
 template <int dim, int degree, typename T>
 dealii::Tensor<1, dim, T>
-variableContainer<dim, degree, T>::get_scalar_gradient(
-  unsigned int global_variable_index) const
+variableContainer<dim, degree, T>::get_scalar_gradient(unsigned int global_variable_index,
+                                                       int          time_index) const
 {
   Assert(global_variable_index < varInfoList.size(),
          dealii::StandardExceptions::ExcMessage(
@@ -341,13 +352,14 @@ variableContainer<dim, degree, T>::get_scalar_gradient(
       "needed in 'equations.cc'. The attempted access was for variable with index " +
       std::to_string(global_variable_index) + "."));
 
-  return scalar_vars_map.at(global_variable_index)->get_gradient(q_point);
+  return scalar_vars_map.at(std::make_pair(global_variable_index, time_index))
+    ->get_gradient(q_point);
 }
 
 template <int dim, int degree, typename T>
 dealii::Tensor<2, dim, T>
-variableContainer<dim, degree, T>::get_scalar_hessian(
-  unsigned int global_variable_index) const
+variableContainer<dim, degree, T>::get_scalar_hessian(unsigned int global_variable_index,
+                                                      int          time_index) const
 {
   Assert(global_variable_index < varInfoList.size(),
          dealii::StandardExceptions::ExcMessage(
@@ -363,13 +375,14 @@ variableContainer<dim, degree, T>::get_scalar_hessian(
       "needed in 'equations.cc'. The attempted access was for variable with index " +
       std::to_string(global_variable_index) + "."));
 
-  return scalar_vars_map.at(global_variable_index)->get_hessian(q_point);
+  return scalar_vars_map.at(std::make_pair(global_variable_index, time_index))
+    ->get_hessian(q_point);
 }
 
 template <int dim, int degree, typename T>
 dealii::Tensor<1, dim, T>
-variableContainer<dim, degree, T>::get_vector_value(
-  unsigned int global_variable_index) const
+variableContainer<dim, degree, T>::get_vector_value(unsigned int global_variable_index,
+                                                    int          time_index) const
 {
   Assert(global_variable_index < varInfoList.size(),
          dealii::StandardExceptions::ExcMessage(
@@ -384,13 +397,14 @@ variableContainer<dim, degree, T>::get_vector_value(
            "needed in 'equations.cc'. The attempted access was for variable with index " +
            std::to_string(global_variable_index) + "."));
 
-  return vector_vars_map.at(global_variable_index)->get_value(q_point);
+  return vector_vars_map.at(std::make_pair(global_variable_index, time_index))
+    ->get_value(q_point);
 }
 
 template <int dim, int degree, typename T>
 dealii::Tensor<2, dim, T>
-variableContainer<dim, degree, T>::get_vector_gradient(
-  unsigned int global_variable_index) const
+variableContainer<dim, degree, T>::get_vector_gradient(unsigned int global_variable_index,
+                                                       int          time_index) const
 {
   Assert(global_variable_index < varInfoList.size(),
          dealii::StandardExceptions::ExcMessage(
@@ -406,13 +420,14 @@ variableContainer<dim, degree, T>::get_vector_gradient(
       "needed in 'equations.cc'. The attempted access was for variable with index " +
       std::to_string(global_variable_index) + "."));
 
-  return vector_vars_map.at(global_variable_index)->get_gradient(q_point);
+  return vector_vars_map.at(std::make_pair(global_variable_index, time_index))
+    ->get_gradient(q_point);
 }
 
 template <int dim, int degree, typename T>
 dealii::Tensor<3, dim, T>
-variableContainer<dim, degree, T>::get_vector_hessian(
-  unsigned int global_variable_index) const
+variableContainer<dim, degree, T>::get_vector_hessian(unsigned int global_variable_index,
+                                                      int          time_index) const
 {
   Assert(global_variable_index < varInfoList.size(),
          dealii::StandardExceptions::ExcMessage(
@@ -428,7 +443,8 @@ variableContainer<dim, degree, T>::get_vector_hessian(
       "needed in 'equations.cc'. The attempted access was for variable with index " +
       std::to_string(global_variable_index) + "."));
 
-  return vector_vars_map.at(global_variable_index)->get_hessian(q_point);
+  return vector_vars_map.at(std::make_pair(global_variable_index, time_index))
+    ->get_hessian(q_point);
 }
 
 template <int dim, int degree, typename T>
@@ -571,36 +587,64 @@ template <int dim, int degree, typename T>
 void
 variableContainer<dim, degree, T>::set_scalar_value_term_RHS(
   unsigned int global_variable_index,
-  T            val)
+  T            val,
+  int          time_index)
 {
-  scalar_vars_map[global_variable_index]->submit_value(val, q_point);
+  Assert(
+    time_index == 0,
+    dealii::StandardExceptions::ExcMessage(
+      "PRISMS-PF Error: Only time indices of 0 are allowed for submission variables."));
+
+  scalar_vars_map[std::make_pair(global_variable_index, time_index)]
+    ->submit_value(val, q_point);
 }
 
 template <int dim, int degree, typename T>
 void
 variableContainer<dim, degree, T>::set_scalar_gradient_term_RHS(
   unsigned int              global_variable_index,
-  dealii::Tensor<1, dim, T> grad)
+  dealii::Tensor<1, dim, T> grad,
+  int                       time_index)
 {
-  scalar_vars_map[global_variable_index]->submit_gradient(grad, q_point);
+  Assert(
+    time_index == 0,
+    dealii::StandardExceptions::ExcMessage(
+      "PRISMS-PF Error: Only time indices of 0 are allowed for submission variables."));
+
+  scalar_vars_map[std::make_pair(global_variable_index, time_index)]
+    ->submit_gradient(grad, q_point);
 }
 
 template <int dim, int degree, typename T>
 void
 variableContainer<dim, degree, T>::set_vector_value_term_RHS(
   unsigned int              global_variable_index,
-  dealii::Tensor<1, dim, T> val)
+  dealii::Tensor<1, dim, T> val,
+  int                       time_index)
 {
-  vector_vars_map[global_variable_index]->submit_value(val, q_point);
+  Assert(
+    time_index == 0,
+    dealii::StandardExceptions::ExcMessage(
+      "PRISMS-PF Error: Only time indices of 0 are allowed for submission variables."));
+
+  vector_vars_map[std::make_pair(global_variable_index, time_index)]
+    ->submit_value(val, q_point);
 }
 
 template <int dim, int degree, typename T>
 void
 variableContainer<dim, degree, T>::set_vector_gradient_term_RHS(
   unsigned int              global_variable_index,
-  dealii::Tensor<2, dim, T> grad)
+  dealii::Tensor<2, dim, T> grad,
+  int                       time_index)
 {
-  vector_vars_map[global_variable_index]->submit_gradient(grad, q_point);
+  Assert(
+    time_index == 0,
+    dealii::StandardExceptions::ExcMessage(
+      "PRISMS-PF Error: Only time indices of 0 are allowed for submission variables."));
+
+  vector_vars_map[std::make_pair(global_variable_index, time_index)]
+    ->submit_gradient(grad, q_point);
 }
 
 template <int dim, int degree, typename T>
