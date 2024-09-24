@@ -12,8 +12,6 @@ MatrixFreePDE<dim, degree>::init()
 {
   computing_timer.enter_subsection("matrixFreePDE: initialization");
 
-  // creating mesh
-
   pcout << "creating problem mesh...\n";
   // Create the coarse mesh and mark the boundaries
   makeTriangulation(triangulation);
@@ -21,60 +19,55 @@ MatrixFreePDE<dim, degree>::init()
   // Set which (if any) faces of the triangulation are periodic
   setPeriodicity();
 
-  // If resuming from a checkpoint, load the refined triangulation, otherwise
-  // refine globally per the parameters.in file
-  if (userInputs.resume_from_checkpoint)
-    {
-      load_checkpoint_triangulation();
-    }
-  else
-    {
-      // Do the initial global refinement
-      triangulation.refine_global(userInputs.refine_factor);
-    }
+  // If resuming from a checkpoint, load the refined triangulation, otherwise refine
+  // globally per the parameters.in file
+  userInputs.resume_from_checkpoint
+    ? load_checkpoint_triangulation()
+    : triangulation.refine_global(userInputs.refine_factor);
 
-  // Write out the size of the computational domain and the total number of
-  // elements
-  if (dim < 3)
+  // Write out the size of the computational domain and the total number of elements
+  pcout << "problem dimensions: " << userInputs.domain_size[0] << "x"
+        << userInputs.domain_size[1];
+  if (dim == 3)
     {
-      pcout << "problem dimensions: " << userInputs.domain_size[0] << "x"
-            << userInputs.domain_size[1] << std::endl;
+      pcout << "x" << userInputs.domain_size[2];
     }
-  else
-    {
-      pcout << "problem dimensions: " << userInputs.domain_size[0] << "x"
-            << userInputs.domain_size[1] << "x" << userInputs.domain_size[2] << std::endl;
-    }
-  pcout << "number of elements: " << triangulation.n_global_active_cells() << std::endl;
-  pcout << std::endl;
+  pcout << std::endl
+        << "number of elements: " << triangulation.n_global_active_cells() << std::endl
+        << std::endl;
 
   // Setup system
   pcout << "initializing matrix free object\n";
   totalDOFs = 0;
   for (auto &field : fields)
     {
+      std::string var_type;
+      switch (field.pdetype)
+        {
+          case (EXPLICIT_TIME_DEPENDENT):
+            var_type            = "EXPLICIT_TIME_DEPENDENT";
+            isTimeDependentBVP  = true;
+            hasExplicitEquation = true;
+            break;
+          case (IMPLICIT_TIME_DEPENDENT):
+            var_type               = "IMPLICIT_TIME_DEPENDENT";
+            isTimeDependentBVP     = true;
+            hasNonExplicitEquation = true;
+            break;
+          case (TIME_INDEPENDENT):
+            var_type               = "TIME_INDEPENDENT";
+            isEllipticBVP          = true;
+            hasNonExplicitEquation = true;
+            break;
+          case (AUXILIARY):
+            var_type               = "AUXILIARY";
+            hasNonExplicitEquation = true;
+            break;
+        }
+
       currentFieldIndex = field.index;
 
       char buffer[100];
-
-      // print to std::out
-      std::string var_type;
-      if (field.pdetype == EXPLICIT_TIME_DEPENDENT)
-        {
-          var_type = "EXPLICIT_TIME_DEPENDENT";
-        }
-      else if (field.pdetype == IMPLICIT_TIME_DEPENDENT)
-        {
-          var_type = "IMPLICIT_TIME_DEPENDENT";
-        }
-      else if (field.pdetype == TIME_INDEPENDENT)
-        {
-          var_type = "TIME_INDEPENDENT";
-        }
-      else if (field.pdetype == AUXILIARY)
-        {
-          var_type = "AUXILIARY";
-        }
 
       snprintf(buffer,
                sizeof(buffer),
@@ -84,31 +77,6 @@ MatrixFreePDE<dim, degree>::init()
                (field.type == SCALAR ? "SCALAR" : "VECTOR"),
                field.name.c_str());
       pcout << buffer;
-
-      // Check if any time dependent fields present
-      if (field.pdetype == EXPLICIT_TIME_DEPENDENT)
-        {
-          isTimeDependentBVP  = true;
-          hasExplicitEquation = true;
-        }
-      else if (field.pdetype == IMPLICIT_TIME_DEPENDENT)
-        {
-          isTimeDependentBVP     = true;
-          hasNonExplicitEquation = true;
-          std::cerr << "PRISMS-PF Error: IMPLICIT_TIME_DEPENDENT equation "
-                       "types are not currently supported"
-                    << std::endl;
-          abort();
-        }
-      else if (field.pdetype == AUXILIARY)
-        {
-          hasNonExplicitEquation = true;
-        }
-      else if (field.pdetype == TIME_INDEPENDENT)
-        {
-          isEllipticBVP          = true;
-          hasNonExplicitEquation = true;
-        }
 
       // create FESystem
       FESystem<dim> *fe;
