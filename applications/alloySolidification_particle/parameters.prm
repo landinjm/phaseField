@@ -70,7 +70,7 @@ set Time step = 0.002
 
 # The simulation ends when either the number of time steps is reached or the
 # simulation time is reached.
-set Number of time steps = 30000
+set Number of time steps = 50000
 
 # =================================================================================
 # Set the boundary conditions
@@ -94,12 +94,12 @@ set Number of time steps = 30000
 # PERIODIC, NATURAL, PERIODIC, NATURAL
 # PERIODIC, PERIODIC, NATURAL, NATURAL
 
-set Boundary condition for variable U =  NATURAL
-set Boundary condition for variable phi =  NATURAL
-set Boundary condition for variable xi =  NATURAL
-set Boundary condition for variable psi_level_set =  NATURAL
-set Boundary condition for variable psi_level_set_old =  NATURAL
-set Boundary condition for variable distance =  NATURAL
+set Boundary condition for variable U = PERIODIC, PERIODIC, NATURAL, NATURAL
+set Boundary condition for variable phi =  PERIODIC, PERIODIC, NATURAL, NATURAL
+set Boundary condition for variable xi =  PERIODIC, PERIODIC, NATURAL, NATURAL
+set Boundary condition for variable psi_level_set =  PERIODIC, PERIODIC, NATURAL, NATURAL
+set Boundary condition for variable psi_level_set_old =  PERIODIC, PERIODIC, NATURAL, NATURAL
+set Boundary condition for variable distance =  PERIODIC, PERIODIC, NATURAL, NATURAL
 
 # =================================================================================
 # Set the model constants
@@ -132,7 +132,7 @@ set Model constant ltilde = 21175.7186, DOUBLE
 # Initial constitutional undercooling of the system
 # (U0 = −1 sets the concentration of the liquid as c_infinity
 # and of the solid as k*c_infinity)
-set Model constant U0 = -1.0, DOUBLE
+set Model constant U0 = -0.975, DOUBLE
 
 # Undercooling offset that determines the initial temperature at the
 # interface (Uoff = 0 sets it to the solidus temperature,
@@ -170,7 +170,7 @@ set Output condition = EQUAL_SPACING
 
 # Number of times the program outputs the fields (total number for "EQUAL_SPACING"
 # and "LOG_SPACING", number per decade for "N_PER_DECADE", ignored for "LIST")
-set Number of outputs = 30
+set Number of outputs = 50
 
 # The number of time steps between updates being printed to the screen
 set Skip print steps = 1000

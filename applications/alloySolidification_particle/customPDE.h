@@ -110,16 +110,16 @@ private:
   double width = 0.15;
 
   // Viscosity
-  double eta = 1.0;
+  double eta = 4.18e2;
 
   // Particle radius;
   double radius_particle = 5.0;
 
   // Difference in surface energy
-  double delta_sigma = 1.0;
+  double delta_sigma = 1.84e-3;
 
   // Cutoff distance
-  double a0 = 1.0;
+  double a0 = 2.36e-3;
 
   // Dimensionless particle mass (assume 3d sphere)
   double mass_tilde =
