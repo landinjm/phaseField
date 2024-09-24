@@ -204,8 +204,6 @@ MatrixFreePDE<dim, degree>::init()
 #endif
   additional_data.tasks_parallel_scheme =
     MatrixFree<dim, double>::AdditionalData::partition_partition;
-  // additional_data.tasks_parallel_scheme =
-  // MatrixFree<dim,double>::AdditionalData::none;
   additional_data.mapping_update_flags =
     (update_values | update_gradients | update_JxW_values | update_quadrature_points);
   QGaussLobatto<1> quadrature(degree + 1);
@@ -227,18 +225,22 @@ MatrixFreePDE<dim, degree>::init()
 
   // Setup solution vectors
   pcout << "initializing parallel::distributed residual and solution vectors\n";
+
+  solutionSet.reserve(fields.size());
+  residualSet.reserve(fields.size());
+
   for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++)
     {
-      vectorType *U, *R;
+      vectorType *U = new vectorType;
+      vectorType *R = new vectorType;
 
-      U = new vectorType;
-      R = new vectorType;
+      matrixFreeObject.initialize_dof_vector(*R, fieldIndex);
+      matrixFreeObject.initialize_dof_vector(*U, fieldIndex);
+
       solutionSet.push_back(U);
       residualSet.push_back(R);
-      matrixFreeObject.initialize_dof_vector(*R, fieldIndex);
-      *R = 0;
 
-      matrixFreeObject.initialize_dof_vector(*U, fieldIndex);
+      *R = 0;
       *U = 0;
 
       // Initializing temporary dU vector required for implicit solves of the
@@ -248,21 +250,15 @@ MatrixFreePDE<dim, degree>::init()
           (fields[fieldIndex].pdetype == AUXILIARY &&
            userInputs.var_nonlinear[fieldIndex]))
         {
-          if (fields[fieldIndex].type == SCALAR)
+          if (fields[fieldIndex].type == SCALAR && !dU_scalar_init)
             {
-              if (dU_scalar_init == false)
-                {
-                  matrixFreeObject.initialize_dof_vector(dU_scalar, fieldIndex);
-                  dU_scalar_init = true;
-                }
+              matrixFreeObject.initialize_dof_vector(dU_scalar, fieldIndex);
+              dU_scalar_init = true;
             }
-          else
+          else if (fields[fieldIndex].type == SCALAR && !dU_vector_init)
             {
-              if (dU_vector_init == false)
-                {
-                  matrixFreeObject.initialize_dof_vector(dU_vector, fieldIndex);
-                  dU_vector_init = true;
-                }
+              matrixFreeObject.initialize_dof_vector(dU_vector, fieldIndex);
+              dU_vector_init = true;
             }
         }
     }
@@ -339,30 +335,18 @@ void
 MatrixFreePDE<dim, degree>::makeTriangulation(
   parallel::distributed::Triangulation<dim> &tria) const
 {
-  if (dim == 3)
+  Point<dim> origin;
+  Point<dim> upper_corner;
+
+  for (unsigned int i = 0; i < dim; ++i)
     {
-      GridGenerator::subdivided_hyper_rectangle(tria,
-                                                userInputs.subdivisions,
-                                                Point<dim>(),
-                                                Point<dim>(userInputs.domain_size[0],
-                                                           userInputs.domain_size[1],
-                                                           userInputs.domain_size[2]));
+      upper_corner[i] = userInputs.domain_size[i];
     }
-  else if (dim == 2)
-    {
-      GridGenerator::subdivided_hyper_rectangle(tria,
-                                                userInputs.subdivisions,
-                                                Point<dim>(),
-                                                Point<dim>(userInputs.domain_size[0],
-                                                           userInputs.domain_size[1]));
-    }
-  else
-    {
-      GridGenerator::subdivided_hyper_rectangle(tria,
-                                                userInputs.subdivisions,
-                                                Point<dim>(),
-                                                Point<dim>(userInputs.domain_size[0]));
-    }
+
+  GridGenerator::subdivided_hyper_rectangle(tria,
+                                            userInputs.subdivisions,
+                                            origin,
+                                            upper_corner);
 
   // Mark boundaries for applying the boundary conditions
   markBoundaries(tria);
