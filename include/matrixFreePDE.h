@@ -225,7 +225,7 @@ protected:
    * by the current processor and the surrounding ghost nodes which are required for the
    * field computations in this processor.
    */
-  std::vector<const IndexSet *> locally_relevant_dofsSet;
+  std::vector<std::shared_ptr<const IndexSet>> locally_relevant_dofsSet;
 
   /**
    * Copies of constraintSet elements, but stored as non-const to enable application of
@@ -242,7 +242,7 @@ protected:
   /**
    * Copies of locally_relevant_dofsSet elements, but stored as non-const.
    */
-  std::vector<IndexSet *> locally_relevant_dofsSet_nonconst;
+  std::vector<std::shared_ptr<IndexSet>> locally_relevant_dofsSet_nonconst;
 
   /**
    * Vector all the solution vectors in the problem. In a multi-field problem, each primal

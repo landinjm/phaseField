@@ -106,9 +106,9 @@ MatrixFreePDE<dim, degree>::init()
       n_dofs += dof_handler->n_dofs();
 
       // Extract locally_relevant_dofs
-      IndexSet *locally_relevant_dofs;
+      std::shared_ptr<IndexSet> locally_relevant_dofs;
 
-      locally_relevant_dofs = new IndexSet;
+      locally_relevant_dofs = std::make_shared<IndexSet>();
       locally_relevant_dofsSet.push_back(locally_relevant_dofs);
       locally_relevant_dofsSet_nonconst.push_back(locally_relevant_dofs);
 

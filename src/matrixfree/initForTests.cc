@@ -61,8 +61,9 @@ MatrixFreePDE<dim, degree>::initForTests(std::vector<Field<dim>> fields)
       dof_handler->distribute_dofs(*FE_set.back());
 
       // extract locally_relevant_dofs
-      IndexSet *locally_relevant_dofs;
-      locally_relevant_dofs = new IndexSet;
+      std::shared_ptr<IndexSet> locally_relevant_dofs;
+
+      locally_relevant_dofs = std::make_shared<IndexSet>();
       locally_relevant_dofsSet.push_back(locally_relevant_dofs);
       locally_relevant_dofsSet_nonconst.push_back(locally_relevant_dofs);
       locally_relevant_dofs->clear();
