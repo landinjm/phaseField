@@ -38,7 +38,7 @@ MatrixFreePDE<dim, degree>::init()
 
   // Setup system
   pcout << "initializing matrix free object\n";
-  totalDOFs = 0;
+  n_dofs = 0;
   for (auto &field : fields)
     {
       std::string var_type;
@@ -85,12 +85,12 @@ MatrixFreePDE<dim, degree>::init()
 
       if (field.type == SCALAR)
         {
-          FESet.push_back(
+          FE_set.push_back(
             std::make_unique<FESystem<dim>>(FE_Q<dim>(QGaussLobatto<1>(degree + 1)), 1));
         }
       else if (field.type == VECTOR)
         {
-          FESet.push_back(
+          FE_set.push_back(
             std::make_unique<FESystem<dim>>(FE_Q<dim>(QGaussLobatto<1>(degree + 1)),
                                             dim));
         }
@@ -99,11 +99,11 @@ MatrixFreePDE<dim, degree>::init()
       DoFHandler<dim> *dof_handler;
 
       dof_handler = new DoFHandler<dim>(triangulation);
-      dofHandlersSet.push_back(dof_handler);
-      dofHandlersSet_nonconst.push_back(dof_handler);
+      dof_handler_set.push_back(dof_handler);
+      dof_handler_set_nonconst.push_back(dof_handler);
 
-      dof_handler->distribute_dofs(*FESet.back());
-      totalDOFs += dof_handler->n_dofs();
+      dof_handler->distribute_dofs(*FE_set.back());
+      n_dofs += dof_handler->n_dofs();
 
       // Extract locally_relevant_dofs
       IndexSet *locally_relevant_dofs;
@@ -192,7 +192,7 @@ MatrixFreePDE<dim, degree>::init()
                constraintsDirichlet->n_constraints());
       pcout << buffer;
     }
-  pcout << "total DOF : " << totalDOFs << std::endl;
+  pcout << "total DOF : " << n_dofs << std::endl;
 
   // Setup the matrix free object
   typename MatrixFree<dim, double>::AdditionalData additional_data;
@@ -208,13 +208,13 @@ MatrixFreePDE<dim, degree>::init()
   QGaussLobatto<1> quadrature(degree + 1);
   matrixFreeObject.clear();
 #if (DEAL_II_VERSION_MAJOR == 9 && DEAL_II_VERSION_MINOR < 4)
-  matrixFreeObject.reinit(dofHandlersSet,
+  matrixFreeObject.reinit(dof_handler_set,
                           constraintsOtherSet,
                           quadrature,
                           additional_data);
 #else
   matrixFreeObject.reinit(MappingFE<dim, dim>(FE_Q<dim>(QGaussLobatto<1>(degree + 1))),
-                          dofHandlersSet,
+                          dof_handler_set,
                           constraintsOtherSet,
                           quadrature,
                           additional_data);
@@ -225,8 +225,8 @@ MatrixFreePDE<dim, degree>::init()
   // Setup solution vectors
   pcout << "initializing parallel::distributed residual and solution vectors\n";
 
-  solutionSet.reserve(fields.size());
-  residualSet.reserve(fields.size());
+  solution_set.reserve(fields.size());
+  residual_set.reserve(fields.size());
 
   for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++)
     {
@@ -236,8 +236,8 @@ MatrixFreePDE<dim, degree>::init()
       matrixFreeObject.initialize_dof_vector(*R, fieldIndex);
       matrixFreeObject.initialize_dof_vector(*U, fieldIndex);
 
-      solutionSet.push_back(U);
-      residualSet.push_back(R);
+      solution_set.push_back(U);
+      residual_set.push_back(R);
 
       *R = 0;
       *U = 0;
@@ -282,20 +282,21 @@ MatrixFreePDE<dim, degree>::init()
 
   // Create new solution transfer sets (needed for the "refine_grid" call, might
   // be able to move this elsewhere)
-  soltransSet.clear();
+  solution_transfer_set.clear();
   for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++)
     {
-      soltransSet.push_back(new parallel::distributed::SolutionTransfer<dim, vectorType>(
-        *dofHandlersSet_nonconst[fieldIndex]));
+      solution_transfer_set.push_back(
+        new parallel::distributed::SolutionTransfer<dim, vectorType>(
+          *dof_handler_set_nonconst[fieldIndex]));
     }
 
   // Ghost the solution vectors. Also apply the constraints (if any) on the
   // solution vectors
   for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++)
     {
-      constraintsDirichletSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
-      constraintsOtherSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
-      solutionSet[fieldIndex]->update_ghost_values();
+      constraintsDirichletSet[fieldIndex]->distribute(*solution_set[fieldIndex]);
+      constraintsOtherSet[fieldIndex]->distribute(*solution_set[fieldIndex]);
+      solution_set[fieldIndex]->update_ghost_values();
     }
 
   // If not resuming from a checkpoint, check and perform adaptive mesh refinement, which
@@ -304,7 +305,7 @@ MatrixFreePDE<dim, degree>::init()
     {
       computing_timer.enter_subsection("matrixFreePDE: AMR");
 
-      unsigned int numDoF_preremesh = totalDOFs;
+      unsigned int numDoF_preremesh = n_dofs;
       for (unsigned int remesh_index = 0;
            remesh_index <
            (userInputs.max_refinement_level - userInputs.min_refinement_level);
@@ -312,9 +313,9 @@ MatrixFreePDE<dim, degree>::init()
         {
           AMR.do_adaptive_refinement(currentIncrement);
           reinit();
-          if (totalDOFs == numDoF_preremesh)
+          if (n_dofs == numDoF_preremesh)
             break;
-          numDoF_preremesh = totalDOFs;
+          numDoF_preremesh = n_dofs;
         }
 
       computing_timer.leave_subsection("matrixFreePDE: AMR");

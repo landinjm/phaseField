@@ -26,7 +26,7 @@ MatrixFreePDE<dim, degree>::computePostProcessedFields(
   matrixFreeObject.cell_loop(&MatrixFreePDE<dim, degree>::getPostProcessedFields,
                              this,
                              postProcessedSet,
-                             solutionSet,
+                             solution_set,
                              true);
 }
 

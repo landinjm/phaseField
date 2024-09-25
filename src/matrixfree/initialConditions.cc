@@ -57,7 +57,7 @@ MatrixFreePDE<dim, degree>::applyInitialConditions()
             {
               if (var_index == userInputs.variables_for_remapping.at(op_list_index))
                 {
-                  *solutionSet[var_index] = 0.0;
+                  *solution_set[var_index] = 0.0;
                   op_list_index++;
                 }
             }
@@ -95,7 +95,7 @@ MatrixFreePDE<dim, degree>::applyInitialConditions()
 
       pcout << "Applying PField initial condition...\n";
 
-      VectorTools::interpolate(*dofHandlersSet[scalar_field_index],
+      VectorTools::interpolate(*dof_handler_set[scalar_field_index],
                                InitialConditionPField<dim>(0, id_field),
                                grain_index_field);
 
@@ -108,7 +108,7 @@ MatrixFreePDE<dim, degree>::applyInitialConditions()
       // Now locate all of the grains and create simplified representations of
       // them
       QGaussLobatto<dim>       quadrature2(degree + 1);
-      FloodFiller<dim, degree> flood_filler(*FESet.at(scalar_field_index), quadrature2);
+      FloodFiller<dim, degree> flood_filler(*FE_set.at(scalar_field_index), quadrature2);
 
       pcout << "Locating the grains...\n";
       std::vector<GrainSet<dim>> grain_sets;
@@ -118,8 +118,8 @@ MatrixFreePDE<dim, degree>::applyInitialConditions()
 
           std::vector<GrainSet<dim>> grain_sets_single_id;
 
-          flood_filler.calcGrainSets(*FESet.at(scalar_field_index),
-                                     *dofHandlersSet_nonconst.at(scalar_field_index),
+          flood_filler.calcGrainSets(*FE_set.at(scalar_field_index),
+                                     *dof_handler_set_nonconst.at(scalar_field_index),
                                      &grain_index_field,
                                      (double) id - userInputs.order_parameter_threshold,
                                      (double) id + userInputs.order_parameter_threshold,
@@ -212,9 +212,9 @@ MatrixFreePDE<dim, degree>::applyInitialConditions()
       order_parameter_remapper.remap_from_index_field(
         simplified_grain_representations,
         &grain_index_field,
-        solutionSet,
-        *dofHandlersSet_nonconst.at(scalar_field_index),
-        FESet.at(scalar_field_index)->dofs_per_cell,
+        solution_set,
+        *dof_handler_set_nonconst.at(scalar_field_index),
+        FE_set.at(scalar_field_index)->dofs_per_cell,
         userInputs.buffer_between_grains);
 
       // Smooth the order parameters according to Fick's 2nd Law
@@ -241,27 +241,27 @@ MatrixFreePDE<dim, degree>::applyInitialConditions()
                        cycle++)
                     {
                       // Calculates the Laplace RHS and stores the information
-                      // in residualSet
+                      // in residual_set
                       computeLaplaceRHS(fieldIndex);
                       if (fields[fieldIndex].type == SCALAR)
                         {
 #if (DEAL_II_VERSION_MAJOR == 9 && DEAL_II_VERSION_MINOR < 4)
                           unsigned int invM_size = invMscalar.local_size();
                           for (unsigned int dof = 0;
-                               dof < solutionSet[fieldIndex]->local_size();
+                               dof < solution_set[fieldIndex]->local_size();
                                ++dof)
                             {
 #else
                           unsigned int invM_size = invMscalar.locally_owned_size();
                           for (unsigned int dof = 0;
-                               dof < solutionSet[fieldIndex]->locally_owned_size();
+                               dof < solution_set[fieldIndex]->locally_owned_size();
                                ++dof)
                             {
 #endif
-                              solutionSet[fieldIndex]->local_element(dof) =
-                                solutionSet[fieldIndex]->local_element(dof) -
+                              solution_set[fieldIndex]->local_element(dof) =
+                                solution_set[fieldIndex]->local_element(dof) -
                                 invMscalar.local_element(dof % invM_size) *
-                                  residualSet[fieldIndex]->local_element(dof) *
+                                  residual_set[fieldIndex]->local_element(dof) *
                                   dt_for_smoothing;
                             }
                         }
@@ -270,25 +270,25 @@ MatrixFreePDE<dim, degree>::applyInitialConditions()
 #if (DEAL_II_VERSION_MAJOR == 9 && DEAL_II_VERSION_MINOR < 4)
                           unsigned int invM_size = invMvector.local_size();
                           for (unsigned int dof = 0;
-                               dof < solutionSet[fieldIndex]->local_size();
+                               dof < solution_set[fieldIndex]->local_size();
                                ++dof)
                             {
 #else
                           unsigned int invM_size = invMvector.locally_owned_size();
                           for (unsigned int dof = 0;
-                               dof < solutionSet[fieldIndex]->locally_owned_size();
+                               dof < solution_set[fieldIndex]->locally_owned_size();
                                ++dof)
                             {
 #endif
-                              solutionSet[fieldIndex]->local_element(dof) =
-                                solutionSet[fieldIndex]->local_element(dof) -
+                              solution_set[fieldIndex]->local_element(dof) =
+                                solution_set[fieldIndex]->local_element(dof) -
                                 invMvector.local_element(dof % invM_size) *
-                                  residualSet[fieldIndex]->local_element(dof) *
+                                  residual_set[fieldIndex]->local_element(dof) *
                                   dt_for_smoothing;
                             }
                         }
 
-                      solutionSet[fieldIndex]->update_ghost_values();
+                      solution_set[fieldIndex]->update_ghost_values();
                     }
 
                   op_list_index++;
@@ -319,19 +319,19 @@ MatrixFreePDE<dim, degree>::applyInitialConditions()
 
               if (userInputs.var_type[var_index] == SCALAR)
                 {
-                  VectorTools::interpolate(*dofHandlersSet[var_index],
+                  VectorTools::interpolate(*dof_handler_set[var_index],
                                            InitialCondition<dim, degree>(var_index,
                                                                          userInputs,
                                                                          this),
-                                           *solutionSet[var_index]);
+                                           *solution_set[var_index]);
                 }
               else if (userInputs.var_type[var_index] == VECTOR)
                 {
-                  VectorTools::interpolate(*dofHandlersSet[var_index],
+                  VectorTools::interpolate(*dof_handler_set[var_index],
                                            InitialConditionVector<dim, degree>(var_index,
                                                                                userInputs,
                                                                                this),
-                                           *solutionSet[var_index]);
+                                           *solution_set[var_index]);
                 }
             }
 
@@ -365,9 +365,9 @@ MatrixFreePDE<dim, degree>::applyInitialConditions()
               if (userInputs.var_type[var_index] == SCALAR)
                 {
                   pcout << "Applying PField initial condition...\n";
-                  VectorTools::interpolate(*dofHandlersSet[var_index],
+                  VectorTools::interpolate(*dof_handler_set[var_index],
                                            InitialConditionPField<dim>(var_index, conc),
-                                           *solutionSet[var_index]);
+                                           *solution_set[var_index]);
                 }
               else
                 {

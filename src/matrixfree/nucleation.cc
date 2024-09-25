@@ -27,9 +27,9 @@ MatrixFreePDE<dim, degree>::updateNucleiList()
               for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++)
                 {
                   constraintsDirichletSet[fieldIndex]->distribute(
-                    *solutionSet[fieldIndex]);
-                  constraintsOtherSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
-                  solutionSet[fieldIndex]->update_ghost_values();
+                    *solution_set[fieldIndex]);
+                  constraintsOtherSet[fieldIndex]->distribute(*solution_set[fieldIndex]);
+                  solution_set[fieldIndex]->update_ghost_values();
                 }
 
               std::vector<nucleus<dim>> new_nuclei;
@@ -119,7 +119,7 @@ MatrixFreePDE<dim, degree>::getLocalNucleiList(std::vector<nucleus<dim>> &newnuc
 
   // QGauss<dim>  quadrature(degree+1);
   QGaussLobatto<dim>               quadrature(degree + 1);
-  FEValues<dim>                    fe_values(*(FESet[0]),
+  FEValues<dim>                    fe_values(*(FE_set[0]),
                           quadrature,
                           update_values | update_quadrature_points | update_JxW_values);
   const unsigned int               num_quad_points = quadrature.size();
@@ -137,7 +137,7 @@ MatrixFreePDE<dim, degree>::getLocalNucleiList(std::vector<nucleus<dim>> &newnuc
   std::uniform_real_distribution<> distr(0.0, 1.0);
 
   // Element cycle
-  for (const auto &dof : dofHandlersSet_nonconst[0]->active_cell_iterators())
+  for (const auto &dof : dof_handler_set_nonconst[0]->active_cell_iterators())
     {
       if (dof->is_locally_owned())
         {
@@ -147,7 +147,7 @@ MatrixFreePDE<dim, degree>::getLocalNucleiList(std::vector<nucleus<dim>> &newnuc
           for (unsigned int var = 0; var < userInputs.nucleation_need_value.size(); var++)
             {
               fe_values.get_function_values(
-                *(solutionSet[userInputs.nucleation_need_value[var]]),
+                *(solution_set[userInputs.nucleation_need_value[var]]),
                 var_values[var]);
             }
           q_point_list = fe_values.get_quadrature_points();
@@ -331,7 +331,7 @@ MatrixFreePDE<dim, degree>::safetyCheckNewNuclei(std::vector<nucleus<dim>>  newn
 {
   // QGauss<dim>  quadrature(degree+1);
   QGaussLobatto<dim>               quadrature(degree + 1);
-  FEValues<dim>                    fe_values(*(FESet[0]),
+  FEValues<dim>                    fe_values(*(FE_set[0]),
                           quadrature,
                           update_values | update_quadrature_points | update_JxW_values);
   const unsigned int               num_quad_points = quadrature.size();
@@ -347,7 +347,7 @@ MatrixFreePDE<dim, degree>::safetyCheckNewNuclei(std::vector<nucleus<dim>>  newn
 
       // Element cycle
 
-      for (const auto &dof : dofHandlersSet_nonconst[0]->active_cell_iterators())
+      for (const auto &dof : dof_handler_set_nonconst[0]->active_cell_iterators())
         {
           if (dof->is_locally_owned())
             {
@@ -357,7 +357,7 @@ MatrixFreePDE<dim, degree>::safetyCheckNewNuclei(std::vector<nucleus<dim>>  newn
                    var++)
                 {
                   fe_values.get_function_values(
-                    *(solutionSet[userInputs.nucleating_variable_indices[var]]),
+                    *(solution_set[userInputs.nucleating_variable_indices[var]]),
                     op_values[var]);
                 }
               q_point_list = fe_values.get_quadrature_points();
@@ -410,7 +410,7 @@ MatrixFreePDE<dim, degree>::refineMeshNearNuclei(std::vector<nucleus<dim>> newnu
 {
   // QGauss<dim>  quadrature(degree+1);
   QGaussLobatto<dim>              quadrature(degree + 1);
-  FEValues<dim>                   fe_values(*(FESet[0]),
+  FEValues<dim>                   fe_values(*(FE_set[0]),
                           quadrature,
                           update_values | update_quadrature_points | update_JxW_values);
   const unsigned int              num_quad_points = quadrature.size();
@@ -418,14 +418,14 @@ MatrixFreePDE<dim, degree>::refineMeshNearNuclei(std::vector<nucleus<dim>> newnu
 
   typename Triangulation<dim>::active_cell_iterator ti;
 
-  unsigned int numDoF_preremesh = totalDOFs;
+  unsigned int numDoF_preremesh = n_dofs;
 
   for (unsigned int remesh_index = 0;
        remesh_index < (userInputs.max_refinement_level - userInputs.min_refinement_level);
        remesh_index++)
     {
       ti = triangulation.begin_active();
-      for (const auto &dof : dofHandlersSet_nonconst[0]->active_cell_iterators())
+      for (const auto &dof : dof_handler_set_nonconst[0]->active_cell_iterators())
         {
           if (dof->is_locally_owned())
             {
@@ -485,9 +485,9 @@ MatrixFreePDE<dim, degree>::refineMeshNearNuclei(std::vector<nucleus<dim>> newnu
       reinit();
 
       // If the mesh hasn't changed from the previous cycle, stop remeshing
-      if (totalDOFs == numDoF_preremesh)
+      if (n_dofs == numDoF_preremesh)
         break;
-      numDoF_preremesh = totalDOFs;
+      numDoF_preremesh = n_dofs;
     }
 }
 

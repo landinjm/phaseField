@@ -21,7 +21,7 @@ MatrixFreePDE<dim, degree>::computeIntegral(double                   &integrated
 
   double value = 0.0;
 
-  for (const auto &cell : dofHandlersSet[0]->active_cell_iterators())
+  for (const auto &cell : dof_handler_set[0]->active_cell_iterators())
     {
       if (cell->is_locally_owned())
         {

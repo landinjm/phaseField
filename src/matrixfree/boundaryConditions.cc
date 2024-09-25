@@ -39,7 +39,7 @@ MatrixFreePDE<dim, degree>::applyNeumannBCs()
           if (userInputs.BC_list[starting_BC_list_index].var_BC_type[direction] ==
               NEUMANN)
             {
-              FESystem<dim>         *fe = FESet[currentFieldIndex].get();
+              FESystem<dim>         *fe = FE_set[currentFieldIndex].get();
               QGaussLobatto<dim - 1> face_quadrature_formula(degree + 1);
               FEFaceValues<dim>      fe_face_values(*fe,
                                                face_quadrature_formula,
@@ -50,7 +50,7 @@ MatrixFreePDE<dim, degree>::applyNeumannBCs()
               std::vector<types::global_dof_index> local_dof_indices(dofs_per_cell);
 
               // Loop over each face on a boundary
-              for (const auto &cell : dofHandlersSet[0]->active_cell_iterators())
+              for (const auto &cell : dof_handler_set[0]->active_cell_iterators())
                 {
                   for (unsigned int f = 0; f < GeometryInfo<dim>::faces_per_cell; ++f)
                     {
@@ -78,7 +78,7 @@ MatrixFreePDE<dim, degree>::applyNeumannBCs()
                               // assemble
                               for (unsigned int i = 0; i < dofs_per_cell; ++i)
                                 {
-                                  (*(residualSet[currentFieldIndex]))
+                                  (*(residual_set[currentFieldIndex]))
                                     [local_dof_indices[i]] += cell_rhs(i);
                                 }
                             }
@@ -120,7 +120,7 @@ MatrixFreePDE<dim, degree>::applyDirichletBCs()
               DIRICHLET)
             {
               VectorTools::interpolate_boundary_values(
-                *dofHandlersSet[currentFieldIndex],
+                *dof_handler_set[currentFieldIndex],
                 direction,
                 Functions::ConstantFunction<dim>(
                   userInputs.BC_list[starting_BC_list_index].var_BC_val[direction],
@@ -132,7 +132,7 @@ MatrixFreePDE<dim, degree>::applyDirichletBCs()
                    NON_UNIFORM_DIRICHLET)
             {
               VectorTools::interpolate_boundary_values(
-                *dofHandlersSet[currentFieldIndex],
+                *dof_handler_set[currentFieldIndex],
                 direction,
                 NonUniformDirichletBC<dim, degree>(currentFieldIndex,
                                                    direction,
@@ -169,7 +169,7 @@ MatrixFreePDE<dim, degree>::applyDirichletBCs()
             }
 
           VectorTools::interpolate_boundary_values(
-            *dofHandlersSet[currentFieldIndex],
+            *dof_handler_set[currentFieldIndex],
             direction,
             vectorBCFunction<dim>(BC_values),
             *(AffineConstraints<double> *) constraintsDirichletSet[currentFieldIndex],
@@ -191,11 +191,11 @@ MatrixFreePDE<dim, degree>::applyDirichletBCs()
             }
 
           // VectorTools::interpolate_boundary_values
-          // (*dofHandlersSet[currentFieldIndex],direction,
+          // (*dof_handler_set[currentFieldIndex],direction,
           // NonUniformDirichletBC<dim,degree>(currentFieldIndex,direction,currentTime,this),
           // *(AffineConstraints<double>*)constraintsDirichletSet[currentFieldIndex],mask);
           VectorTools::interpolate_boundary_values(
-            *dofHandlersSet[currentFieldIndex],
+            *dof_handler_set[currentFieldIndex],
             direction,
             NonUniformDirichletBCVector<dim, degree>(currentFieldIndex,
                                                      direction,

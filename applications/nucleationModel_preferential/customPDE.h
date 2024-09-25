@@ -134,7 +134,7 @@ customPDE<dim, degree>::adaptive_refinement_criterion()
 
   QGaussLobatto<dim> quadrature(degree + 1);
   FEValues<dim>      fe_values(
-    *(this->FESet[userInputs.refinement_criteria[0].variable_index]),
+    *(this->FE_set[userInputs.refinement_criteria[0].variable_index]),
     quadrature,
     update_values | update_quadrature_points);
   const unsigned int      num_quad_points = quadrature.size();
@@ -143,10 +143,12 @@ customPDE<dim, degree>::adaptive_refinement_criterion()
   std::vector<double> errorOut(num_quad_points);
 
   typename DoFHandler<dim>::active_cell_iterator
-    cell = this->dofHandlersSet_nonconst[userInputs.refinement_criteria[0].variable_index]
-             ->begin_active(),
-    endc = this->dofHandlersSet_nonconst[userInputs.refinement_criteria[0].variable_index]
-             ->end();
+    cell =
+      this->dof_handler_set_nonconst[userInputs.refinement_criteria[0].variable_index]
+        ->begin_active(),
+    endc =
+      this->dof_handler_set_nonconst[userInputs.refinement_criteria[0].variable_index]
+        ->end();
 
   typename parallel::distributed::Triangulation<dim>::active_cell_iterator t_cell =
     this->triangulation.begin_active();
@@ -162,8 +164,8 @@ customPDE<dim, degree>::adaptive_refinement_criterion()
                field_index++)
             {
               fe_values.get_function_values(
-                *(this->solutionSet[userInputs.refinement_criteria[field_index]
-                                      .variable_index]),
+                *(this->solution_set[userInputs.refinement_criteria[field_index]
+                                       .variable_index]),
                 errorOut);
               errorOutV.push_back(errorOut);
             }

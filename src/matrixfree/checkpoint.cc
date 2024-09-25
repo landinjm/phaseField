@@ -59,11 +59,11 @@ MatrixFreePDE<dim, degree>::save_checkpoint()
       {
         if (userInputs.var_type[var] == SCALAR)
           {
-            solSet_transfer_scalars.push_back(solutionSet[var]);
+            solSet_transfer_scalars.push_back(solution_set[var]);
           }
         else
           {
-            solSet_transfer_vectors.push_back(solutionSet[var]);
+            solSet_transfer_vectors.push_back(solution_set[var]);
           }
       }
 
@@ -71,7 +71,7 @@ MatrixFreePDE<dim, degree>::save_checkpoint()
     if (scalar_var_indices.size() > 0 && vector_var_indices.size() == 0)
       {
         parallel::distributed::SolutionTransfer<dim, vectorType> system_trans_scalars(
-          *dofHandlersSet[scalar_var_indices[0]]);
+          *dof_handler_set[scalar_var_indices[0]]);
         system_trans_scalars.prepare_for_serialization(solSet_transfer_scalars);
 
         triangulation.save("restart.mesh");
@@ -79,7 +79,7 @@ MatrixFreePDE<dim, degree>::save_checkpoint()
     else if (scalar_var_indices.size() == 0 && vector_var_indices.size() > 0)
       {
         parallel::distributed::SolutionTransfer<dim, vectorType> system_trans_vectors(
-          *dofHandlersSet[vector_var_indices[0]]);
+          *dof_handler_set[vector_var_indices[0]]);
         system_trans_vectors.prepare_for_serialization(solSet_transfer_vectors);
 
         triangulation.save("restart.mesh");
@@ -87,11 +87,11 @@ MatrixFreePDE<dim, degree>::save_checkpoint()
     else
       {
         parallel::distributed::SolutionTransfer<dim, vectorType> system_trans_scalars(
-          *dofHandlersSet[scalar_var_indices[0]]);
+          *dof_handler_set[scalar_var_indices[0]]);
         system_trans_scalars.prepare_for_serialization(solSet_transfer_scalars);
 
         parallel::distributed::SolutionTransfer<dim, vectorType> system_trans_vectors(
-          *dofHandlersSet[vector_var_indices[0]]);
+          *dof_handler_set[vector_var_indices[0]]);
         system_trans_vectors.prepare_for_serialization(solSet_transfer_vectors);
 
         triangulation.save("restart.mesh");
@@ -164,26 +164,26 @@ MatrixFreePDE<dim, degree>::load_checkpoint_fields()
     {
       if (userInputs.var_type[var] == SCALAR)
         {
-          solSet_transfer_scalars.push_back(solutionSet[var]);
+          solSet_transfer_scalars.push_back(solution_set[var]);
         }
       else
         {
-          solSet_transfer_vectors.push_back(solutionSet[var]);
+          solSet_transfer_vectors.push_back(solution_set[var]);
         }
     }
 
   // Finally, deserialize the fields to the solSet_transfer objects, which
-  // contain pointers to solutionSet
+  // contain pointers to solution_set
   if (scalar_var_indices.size() > 0)
     {
       parallel::distributed::SolutionTransfer<dim, vectorType> system_trans_scalars(
-        *dofHandlersSet[scalar_var_indices[0]]);
+        *dof_handler_set[scalar_var_indices[0]]);
       system_trans_scalars.deserialize(solSet_transfer_scalars);
     }
   if (vector_var_indices.size() > 0)
     {
       parallel::distributed::SolutionTransfer<dim, vectorType> system_trans_vectors(
-        *dofHandlersSet[vector_var_indices[0]]);
+        *dof_handler_set[vector_var_indices[0]]);
       system_trans_vectors.deserialize(solSet_transfer_vectors);
     }
 }

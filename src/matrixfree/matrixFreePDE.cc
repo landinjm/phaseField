@@ -24,10 +24,10 @@ MatrixFreePDE<dim, degree>::MatrixFreePDE(userInputParameters<dim> _userInputs)
   , AMR(_userInputs,
         triangulation,
         fields,
-        solutionSet,
-        soltransSet,
-        FESet,
-        dofHandlersSet_nonconst,
+        solution_set,
+        solution_transfer_set,
+        FE_set,
+        dof_handler_set_nonconst,
         constraintsDirichletSet,
         constraintsOtherSet)
 {}
@@ -49,21 +49,21 @@ MatrixFreePDE<dim, degree>::~MatrixFreePDE()
     {
       delete constraintsDirichletSet[iter];
     }
-  for (unsigned int iter = 0; iter < soltransSet.size(); iter++)
+  for (unsigned int iter = 0; iter < solution_transfer_set.size(); iter++)
     {
-      delete soltransSet[iter];
+      delete solution_transfer_set[iter];
     }
-  for (unsigned int iter = 0; iter < dofHandlersSet.size(); iter++)
+  for (unsigned int iter = 0; iter < dof_handler_set.size(); iter++)
     {
-      delete dofHandlersSet[iter];
+      delete dof_handler_set[iter];
     }
-  for (unsigned int iter = 0; iter < solutionSet.size(); iter++)
+  for (unsigned int iter = 0; iter < solution_set.size(); iter++)
     {
-      delete solutionSet[iter];
+      delete solution_set[iter];
     }
-  for (unsigned int iter = 0; iter < residualSet.size(); iter++)
+  for (unsigned int iter = 0; iter < residual_set.size(); iter++)
     {
-      delete residualSet[iter];
+      delete residual_set[iter];
     }
 }
 

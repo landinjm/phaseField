@@ -11,7 +11,7 @@ MatrixFreePDE<dim, degree>::reinit()
 
   // setup system
   pcout << "Reinitializing matrix free object\n";
-  totalDOFs = 0;
+  n_dofs = 0;
   for (const auto &field : fields)
     {
       currentFieldIndex = field.index;
@@ -19,14 +19,14 @@ MatrixFreePDE<dim, degree>::reinit()
       char buffer[100];
 
       // create FESystem
-      auto &fe = FESet.at(field.index);
+      auto &fe = FE_set.at(field.index);
 
       // distribute DOFs
       DoFHandler<dim> *dof_handler;
-      dof_handler = dofHandlersSet_nonconst.at(field.index);
+      dof_handler = dof_handler_set_nonconst.at(field.index);
 
       dof_handler->distribute_dofs(*fe);
-      totalDOFs += dof_handler->n_dofs();
+      n_dofs += dof_handler->n_dofs();
 
       // extract locally_relevant_dofs
       IndexSet *locally_relevant_dofs;
@@ -86,7 +86,7 @@ MatrixFreePDE<dim, degree>::reinit()
                constraintsDirichlet->n_constraints());
       pcout << buffer;
     }
-  pcout << "total DOF : " << totalDOFs << std::endl;
+  pcout << "total DOF : " << n_dofs << std::endl;
 
   // Setup the matrix free object
   typename MatrixFree<dim, double>::AdditionalData additional_data;
@@ -103,13 +103,13 @@ MatrixFreePDE<dim, degree>::reinit()
   QGaussLobatto<1> quadrature(degree + 1);
   matrixFreeObject.clear();
 #if (DEAL_II_VERSION_MAJOR == 9 && DEAL_II_VERSION_MINOR < 4)
-  matrixFreeObject.reinit(dofHandlersSet,
+  matrixFreeObject.reinit(dof_handler_set,
                           constraintsOtherSet,
                           quadrature,
                           additional_data);
 #else
   matrixFreeObject.reinit(MappingFE<dim, dim>(FE_Q<dim>(QGaussLobatto<1>(degree + 1))),
-                          dofHandlersSet,
+                          dof_handler_set,
                           constraintsOtherSet,
                           quadrature,
                           additional_data);
@@ -123,7 +123,7 @@ MatrixFreePDE<dim, degree>::reinit()
     {
       vectorType *U;
 
-      U = solutionSet.at(fieldIndex);
+      U = solution_set.at(fieldIndex);
 
       matrixFreeObject.initialize_dof_vector(*U, fieldIndex);
       *U = 0;
@@ -164,21 +164,22 @@ MatrixFreePDE<dim, degree>::reinit()
   for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++)
     {
       // interpolate and clear used solution transfer sets
-      soltransSet[fieldIndex]->interpolate(*solutionSet[fieldIndex]);
-      delete soltransSet[fieldIndex];
+      solution_transfer_set[fieldIndex]->interpolate(*solution_set[fieldIndex]);
+      delete solution_transfer_set[fieldIndex];
 
       // reset residual vector
-      vectorType *R = residualSet.at(fieldIndex);
+      vectorType *R = residual_set.at(fieldIndex);
       matrixFreeObject.initialize_dof_vector(*R, fieldIndex);
       *R = 0;
     }
 
   // Create new solution transfer sets
-  soltransSet.clear();
+  solution_transfer_set.clear();
   for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++)
     {
-      soltransSet.push_back(new parallel::distributed::SolutionTransfer<dim, vectorType>(
-        *dofHandlersSet_nonconst[fieldIndex]));
+      solution_transfer_set.push_back(
+        new parallel::distributed::SolutionTransfer<dim, vectorType>(
+          *dof_handler_set_nonconst[fieldIndex]));
     }
 
   // If remeshing at the zeroth time step, re-apply initial conditions so the
@@ -192,9 +193,9 @@ MatrixFreePDE<dim, degree>::reinit()
   // solution vectors
   for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++)
     {
-      constraintsDirichletSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
-      constraintsOtherSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
-      solutionSet[fieldIndex]->update_ghost_values();
+      constraintsDirichletSet[fieldIndex]->distribute(*solution_set[fieldIndex]);
+      constraintsOtherSet[fieldIndex]->distribute(*solution_set[fieldIndex]);
+      solution_set[fieldIndex]->update_ghost_values();
     }
 
   computing_timer.leave_subsection("matrixFreePDE: reinitialization");

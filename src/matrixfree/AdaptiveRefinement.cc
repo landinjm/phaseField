@@ -4,22 +4,23 @@ using namespace dealii;
 
 template <int dim, int degree>
 AdaptiveRefinement<dim, degree>::AdaptiveRefinement(
-  const userInputParameters<dim>                                          &_userInputs,
-  parallel::distributed::Triangulation<dim>                               &_triangulation,
-  std::vector<Field<dim>>                                                 &_fields,
-  std::vector<vectorType *>                                               &_solutionSet,
-  std::vector<parallel::distributed::SolutionTransfer<dim, vectorType> *> &_soltransSet,
-  std::vector<std::unique_ptr<FESystem<dim>>>                             &_FESet,
-  std::vector<DoFHandler<dim> *>                 &_dofHandlersSet_nonconst,
+  const userInputParameters<dim>            &_userInputs,
+  parallel::distributed::Triangulation<dim> &_triangulation,
+  std::vector<Field<dim>>                   &_fields,
+  std::vector<vectorType *>                 &_solution_set,
+  std::vector<parallel::distributed::SolutionTransfer<dim, vectorType> *>
+                                                 &_solution_transfer_set,
+  std::vector<std::unique_ptr<FESystem<dim>>>    &_FE_set,
+  std::vector<DoFHandler<dim> *>                 &_dof_handler_set_nonconst,
   std::vector<const AffineConstraints<double> *> &_constraintsDirichletSet,
   std::vector<const AffineConstraints<double> *> &_constraintsOtherSet)
   : userInputs(_userInputs)
   , triangulation(_triangulation)
   , fields(_fields)
-  , solutionSet(_solutionSet)
-  , soltransSet(_soltransSet)
-  , FESet(_FESet)
-  , dofHandlersSet_nonconst(_dofHandlersSet_nonconst)
+  , solution_set(_solution_set)
+  , solution_transfer_set(_solution_transfer_set)
+  , FE_set(_FE_set)
+  , dof_handler_set_nonconst(_dof_handler_set_nonconst)
   , constraintsDirichletSet(_constraintsDirichletSet)
   , constraintsOtherSet(_constraintsOtherSet)
 {}
@@ -33,9 +34,9 @@ AdaptiveRefinement<dim, degree>::do_adaptive_refinement(unsigned int currentIncr
     {
       for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++)
         {
-          constraintsDirichletSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
-          constraintsOtherSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
-          solutionSet[fieldIndex]->update_ghost_values();
+          constraintsDirichletSet[fieldIndex]->distribute(*solution_set[fieldIndex]);
+          constraintsOtherSet[fieldIndex]->distribute(*solution_set[fieldIndex]);
+          solution_set[fieldIndex]->update_ghost_values();
         }
     }
 
@@ -64,7 +65,7 @@ AdaptiveRefinement<dim, degree>::adaptive_refinement_criterion()
         }
     }
 
-  FEValues<dim> fe_values(*FESet[userInputs.refinement_criteria[0].variable_index],
+  FEValues<dim> fe_values(*FE_set[userInputs.refinement_criteria[0].variable_index],
                           quadrature,
                           update_flags);
 
@@ -76,7 +77,7 @@ AdaptiveRefinement<dim, degree>::adaptive_refinement_criterion()
     triangulation.begin_active();
 
   for (const auto &cell :
-       dofHandlersSet_nonconst[userInputs.refinement_criteria[0].variable_index]
+       dof_handler_set_nonconst[userInputs.refinement_criteria[0].variable_index]
          ->active_cell_iterators())
     {
       if (cell->is_locally_owned())
@@ -92,13 +93,14 @@ AdaptiveRefinement<dim, degree>::adaptive_refinement_criterion()
               // Get the values and/or gradients
               if (update_values & update_flags)
                 {
-                  fe_values.get_function_values(*solutionSet[criterion.variable_index],
+                  fe_values.get_function_values(*solution_set[criterion.variable_index],
                                                 values);
                 }
               if (update_gradients & update_flags)
                 {
-                  fe_values.get_function_gradients(*solutionSet[criterion.variable_index],
-                                                   gradients);
+                  fe_values.get_function_gradients(
+                    *solution_set[criterion.variable_index],
+                    gradients);
 
                   for (unsigned int q_point = 0; q_point < num_quad_points; ++q_point)
                     {
@@ -158,8 +160,8 @@ AdaptiveRefinement<dim, degree>::refine_grid()
   // Transfer solution
   for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++)
     {
-      soltransSet[fieldIndex]->prepare_for_coarsening_and_refinement(
-        *solutionSet[fieldIndex]);
+      solution_transfer_set[fieldIndex]->prepare_for_coarsening_and_refinement(
+        *solution_set[fieldIndex]);
     }
 
   // Execute refinement

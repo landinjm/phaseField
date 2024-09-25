@@ -23,7 +23,7 @@ public:
   {
     this->setRigidBodyModeConstraints(rigidBodyModeComponents,
                                       this->constraintsOtherSet_nonconst[0],
-                                      this->dofHandlersSet_nonconst[0]);
+                                      this->dof_handler_set_nonconst[0]);
 
     // Calculate the number of constraints that were set
     num_constraints = this->constraintsOtherSet_nonconst[0]->n_constraints();

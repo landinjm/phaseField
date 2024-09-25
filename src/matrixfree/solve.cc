@@ -36,9 +36,9 @@ MatrixFreePDE<dim, degree>::solve()
         {
           for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++)
             {
-              constraintsDirichletSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
-              constraintsOtherSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
-              solutionSet[fieldIndex]->update_ghost_values();
+              constraintsDirichletSet[fieldIndex]->distribute(*solution_set[fieldIndex]);
+              constraintsOtherSet[fieldIndex]->distribute(*solution_set[fieldIndex]);
+              solution_set[fieldIndex]->update_ghost_values();
             }
           outputResults();
           currentOutput++;
@@ -114,9 +114,9 @@ MatrixFreePDE<dim, degree>::solve()
               for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++)
                 {
                   constraintsDirichletSet[fieldIndex]->distribute(
-                    *solutionSet[fieldIndex]);
-                  constraintsOtherSet[fieldIndex]->distribute(*solutionSet[fieldIndex]);
-                  solutionSet[fieldIndex]->update_ghost_values();
+                    *solution_set[fieldIndex]);
+                  constraintsOtherSet[fieldIndex]->distribute(*solution_set[fieldIndex]);
+                  solution_set[fieldIndex]->update_ghost_values();
                 }
               outputResults();
               if (userInputs.print_timing_with_output &&

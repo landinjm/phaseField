@@ -31,10 +31,11 @@ public:
     const userInputParameters<dim>            &_userInputs,
     parallel::distributed::Triangulation<dim> &_triangulation,
     std::vector<Field<dim>>                   &_fields,
-    std::vector<vectorType *>                 &_solutionSet,
-    std::vector<parallel::distributed::SolutionTransfer<dim, vectorType> *> &_soltransSet,
-    std::vector<std::unique_ptr<FESystem<dim>>>                             &_FESet,
-    std::vector<DoFHandler<dim> *>                 &_dofHandlersSet_nonconst,
+    std::vector<vectorType *>                 &_solution_set,
+    std::vector<parallel::distributed::SolutionTransfer<dim, vectorType> *>
+                                                   &_solution_transfer_set,
+    std::vector<std::unique_ptr<FESystem<dim>>>    &_FE_set,
+    std::vector<DoFHandler<dim> *>                 &_dof_handler_set_nonconst,
     std::vector<const AffineConstraints<double> *> &_constraintsDirichletSet,
     std::vector<const AffineConstraints<double> *> &_constraintsOtherSet);
 
@@ -65,13 +66,14 @@ private:
 
   std::vector<Field<dim>> &fields;
 
-  std::vector<vectorType *> &solutionSet;
+  std::vector<vectorType *> &solution_set;
 
-  std::vector<parallel::distributed::SolutionTransfer<dim, vectorType> *> &soltransSet;
+  std::vector<parallel::distributed::SolutionTransfer<dim, vectorType> *>
+    &solution_transfer_set;
 
-  std::vector<std::unique_ptr<FESystem<dim>>> &FESet;
+  std::vector<std::unique_ptr<FESystem<dim>>> &FE_set;
 
-  std::vector<DoFHandler<dim> *> &dofHandlersSet_nonconst;
+  std::vector<DoFHandler<dim> *> &dof_handler_set_nonconst;
 
   std::vector<const AffineConstraints<double> *> &constraintsDirichletSet;
 

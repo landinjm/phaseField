@@ -14,8 +14,8 @@ MatrixFreePDE<dim, degree>::computeExplicitRHS()
   // call to integrate and assemble while clearing residual vecotrs
   matrixFreeObject.cell_loop(&MatrixFreePDE<dim, degree>::getExplicitRHS,
                              this,
-                             residualSet,
-                             solutionSet,
+                             residual_set,
+                             solution_set,
                              true);
 
   // end log
@@ -69,8 +69,8 @@ MatrixFreePDE<dim, degree>::computeNonexplicitRHS()
   // call to integrate and assemble while clearing residual vecotrs
   matrixFreeObject.cell_loop(&MatrixFreePDE<dim, degree>::getNonexplicitRHS,
                              this,
-                             residualSet,
-                             solutionSet,
+                             residual_set,
+                             solution_set,
                              true);
 
   // end log

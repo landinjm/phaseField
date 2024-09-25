@@ -26,9 +26,9 @@ MatrixFreePDE<dim, degree>::setNonlinearEqInitialGuess()
 
           for (const auto &it : *valuesDirichletSet[fieldIndex])
             {
-              if (residualSet[fieldIndex]->in_local_range(it.first))
+              if (residual_set[fieldIndex]->in_local_range(it.first))
                 {
-                  (*residualSet[fieldIndex])(it.first) = 0.0;
+                  (*residual_set[fieldIndex])(it.first) = 0.0;
                 }
             }
 
@@ -44,7 +44,7 @@ MatrixFreePDE<dim, degree>::setNonlinearEqInitialGuess()
             {
               tol_value =
                 userInputs.linear_solver_parameters.getToleranceValue(fieldIndex) *
-                residualSet[fieldIndex]->l2_norm();
+                residual_set[fieldIndex]->l2_norm();
             }
 
           SolverControl solver_control(
@@ -63,16 +63,16 @@ MatrixFreePDE<dim, degree>::setNonlinearEqInitialGuess()
                   dU_scalar = 0.0;
                   solver.solve(*this,
                                dU_scalar,
-                               *residualSet[fieldIndex],
-                               IdentityMatrix(solutionSet[fieldIndex]->size()));
+                               *residual_set[fieldIndex],
+                               IdentityMatrix(solution_set[fieldIndex]->size()));
                 }
               else
                 {
                   dU_vector = 0.0;
                   solver.solve(*this,
                                dU_vector,
-                               *residualSet[fieldIndex],
-                               IdentityMatrix(solutionSet[fieldIndex]->size()));
+                               *residual_set[fieldIndex],
+                               IdentityMatrix(solution_set[fieldIndex]->size()));
                 }
             }
           catch (...)
@@ -84,11 +84,11 @@ MatrixFreePDE<dim, degree>::setNonlinearEqInitialGuess()
 
           if (fields[fieldIndex].type == SCALAR)
             {
-              *solutionSet[fieldIndex] += dU_scalar;
+              *solution_set[fieldIndex] += dU_scalar;
             }
           else
             {
-              *solutionSet[fieldIndex] += dU_vector;
+              *solution_set[fieldIndex] += dU_vector;
             }
 
           if (currentIncrement % userInputs.skip_print_steps == 0)
@@ -108,11 +108,11 @@ MatrixFreePDE<dim, degree>::setNonlinearEqInitialGuess()
                        "residual:%12.6e, current residual:%12.6e, nsteps:%u, "
                        "tolerance criterion:%12.6e, solution: %12.6e, dU: %12.6e\n",
                        fields[fieldIndex].name.c_str(),
-                       residualSet[fieldIndex]->l2_norm(),
+                       residual_set[fieldIndex]->l2_norm(),
                        solver_control.last_value(),
                        solver_control.last_step(),
                        solver_control.tolerance(),
-                       solutionSet[fieldIndex]->l2_norm(),
+                       solution_set[fieldIndex]->l2_norm(),
                        dU_norm);
               pcout << buffer;
               pcout << std::endl;
@@ -138,8 +138,8 @@ MatrixFreePDE<dim, degree>::computeLaplaceRHS(unsigned int fieldIndex)
   // call to integrate and assemble while clearing residual vecotrs
   matrixFreeObject.cell_loop(&MatrixFreePDE<dim, degree>::getLaplaceRHS,
                              this,
-                             *residualSet[fieldIndex],
-                             *solutionSet[fieldIndex],
+                             *residual_set[fieldIndex],
+                             *solution_set[fieldIndex],
                              true);
 
   // end log

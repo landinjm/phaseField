@@ -43,12 +43,12 @@ MatrixFreePDE<dim, degree>::initForTests(std::vector<Field<dim>> fields)
       // create FESystem
       if (field.type == SCALAR)
         {
-          FESet.push_back(
+          FE_set.push_back(
             std::make_unique<FESystem<dim>>(FE_Q<dim>(QGaussLobatto<1>(degree + 1)), 1));
         }
       else if (field.type == VECTOR)
         {
-          FESet.push_back(
+          FE_set.push_back(
             std::make_unique<FESystem<dim>>(FE_Q<dim>(QGaussLobatto<1>(degree + 1)),
                                             dim));
         }
@@ -56,9 +56,9 @@ MatrixFreePDE<dim, degree>::initForTests(std::vector<Field<dim>> fields)
       // distribute DOFs
       DoFHandler<dim> *dof_handler;
       dof_handler = new DoFHandler<dim>(triangulation);
-      dofHandlersSet.push_back(dof_handler);
-      dofHandlersSet_nonconst.push_back(dof_handler);
-      dof_handler->distribute_dofs(*FESet.back());
+      dof_handler_set.push_back(dof_handler);
+      dof_handler_set_nonconst.push_back(dof_handler);
+      dof_handler->distribute_dofs(*FE_set.back());
 
       // extract locally_relevant_dofs
       IndexSet *locally_relevant_dofs;
@@ -89,13 +89,13 @@ MatrixFreePDE<dim, degree>::initForTests(std::vector<Field<dim>> fields)
   QGaussLobatto<1> quadrature(degree + 1);
   matrixFreeObject.clear();
 #if (DEAL_II_VERSION_MAJOR == 9 && DEAL_II_VERSION_MINOR < 4)
-  matrixFreeObject.reinit(dofHandlersSet,
+  matrixFreeObject.reinit(dof_handler_set,
                           constraintsOtherSet,
                           quadrature,
                           additional_data);
 #else
   matrixFreeObject.reinit(MappingFE<dim, dim>(FE_Q<dim>(QGaussLobatto<1>(degree + 1))),
-                          dofHandlersSet,
+                          dof_handler_set,
                           constraintsOtherSet,
                           quadrature,
                           additional_data);
@@ -106,8 +106,8 @@ MatrixFreePDE<dim, degree>::initForTests(std::vector<Field<dim>> fields)
       vectorType *U, *R;
       U = new vectorType;
       R = new vectorType;
-      solutionSet.push_back(U);
-      residualSet.push_back(R);
+      solution_set.push_back(U);
+      residual_set.push_back(R);
       matrixFreeObject.initialize_dof_vector(*R, 0);
       *R = 0;
       matrixFreeObject.initialize_dof_vector(*U, 0);

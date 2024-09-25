@@ -28,8 +28,8 @@ MatrixFreePDE<dim, degree>::outputResults()
       // add field to data_out
       std::vector<std::string> solutionNames(fields[fieldIndex].numComponents,
                                              fields[fieldIndex].name.c_str());
-      data_out.add_data_vector(*dofHandlersSet[fieldIndex],
-                               *solutionSet[fieldIndex],
+      data_out.add_data_vector(*dof_handler_set[fieldIndex],
+                               *solution_set[fieldIndex],
                                solutionNames,
                                dataType);
     }
@@ -133,7 +133,7 @@ MatrixFreePDE<dim, degree>::outputResults()
                 components,
                 userInputs.pp_var_name[fieldIndex].c_str());
               // add field to data_out
-              data_out.add_data_vector(*dofHandlersSet[0],
+              data_out.add_data_vector(*dof_handler_set[0],
                                        *postProcessedSet[fieldIndex],
                                        solutionNames,
                                        dataType);
@@ -148,7 +148,7 @@ MatrixFreePDE<dim, degree>::outputResults()
                 components,
                 userInputs.pp_var_name[fieldIndex].c_str());
               // add field to data_out
-              data_out.add_data_vector(*dofHandlersSet[0],
+              data_out.add_data_vector(*dof_handler_set[0],
                                        *postProcessedSet[fieldIndex],
                                        solutionNames,
                                        dataType);

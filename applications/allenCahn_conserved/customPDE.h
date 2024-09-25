@@ -113,8 +113,8 @@ customPDE<dim, degree>::solveIncrement(bool skip_time_dependent)
   char  buffer[200];
 
   // Calculating integral for mu (field 1)
-  this->computeIntegral(integrated_n, 0, this->solutionSet);
-  this->computeIntegral(integrated_mu, 1, this->solutionSet);
+  this->computeIntegral(integrated_n, 0, this->solution_set);
+  this->computeIntegral(integrated_mu, 1, this->solution_set);
 
   if (this->currentIncrement % userInputs.skip_print_steps == 0)
     {
@@ -145,7 +145,7 @@ customPDE<dim, degree>::solveIncrement(bool skip_time_dependent)
           // Print update to screen and confirm that solution isn't nan
           if (this->currentIncrement % userInputs.skip_print_steps == 0)
             {
-              double solution_L2_norm = this->solutionSet[fieldIndex]->l2_norm();
+              double solution_L2_norm = this->solution_set[fieldIndex]->l2_norm();
 
               snprintf(buffer,
                        sizeof(buffer),
@@ -153,7 +153,7 @@ customPDE<dim, degree>::solveIncrement(bool skip_time_dependent)
                        "%12.6e, current residual:%12.6e\n",
                        this->fields[fieldIndex].name.c_str(),
                        solution_L2_norm,
-                       this->residualSet[fieldIndex]->l2_norm());
+                       this->residual_set[fieldIndex]->l2_norm());
               this->pcout << buffer;
 
               if (!numbers::is_finite(solution_L2_norm))
@@ -182,7 +182,7 @@ customPDE<dim, degree>::solveIncrement(bool skip_time_dependent)
           nonlinear_it_converged = true; // Set to true here and will be set to false if
                                          // any variable isn't converged
 
-          // Update residualSet for the non-explicitly updated variables
+          // Update residual_set for the non-explicitly updated variables
           // compute_nonexplicit_RHS()
           // Ideally, I'd just do this for the non-explicit variables, but for
           // now I'll do all of them this is a little redundant, but hopefully
@@ -206,19 +206,19 @@ customPDE<dim, degree>::solveIncrement(bool skip_time_dependent)
                                "field '%2s' [nonlinear solve]: current "
                                "solution: %12.6e, current residual:%12.6e\n",
                                this->fields[fieldIndex].name.c_str(),
-                               this->solutionSet[fieldIndex]->l2_norm(),
-                               this->residualSet[fieldIndex]->l2_norm());
+                               this->solution_set[fieldIndex]->l2_norm(),
+                               this->residual_set[fieldIndex]->l2_norm());
                       this->pcout << buffer;
                     }
 
                   LinearAlgebra::distributed::Vector<double> solution_diff =
-                    *this->solutionSet[fieldIndex];
+                    *this->solution_set[fieldIndex];
 
                   // apply Dirichlet BC's
                   //  This clears the residual where we want to apply Dirichlet
                   //  BCs, otherwise the solver sees a positive residual
                   this->constraintsDirichletSet[fieldIndex]->set_zero(
-                    *this->residualSet[fieldIndex]);
+                    *this->residual_set[fieldIndex]);
 
                   // solver controls
                   double tol_value;
@@ -234,7 +234,7 @@ customPDE<dim, degree>::solveIncrement(bool skip_time_dependent)
                       tol_value =
                         MatrixFreePDE<dim, degree>::userInputs.linear_solver_parameters
                           .getToleranceValue(fieldIndex) *
-                        this->residualSet[fieldIndex]->l2_norm();
+                        this->residual_set[fieldIndex]->l2_norm();
                     }
 
                   SolverControl solver_control(
@@ -254,18 +254,18 @@ customPDE<dim, degree>::solveIncrement(bool skip_time_dependent)
                           this->dU_scalar = 0.0;
                           solver.solve(*this,
                                        this->dU_scalar,
-                                       *this->residualSet[fieldIndex],
+                                       *this->residual_set[fieldIndex],
                                        IdentityMatrix(
-                                         this->solutionSet[fieldIndex]->size()));
+                                         this->solution_set[fieldIndex]->size()));
                         }
                       else
                         {
                           this->dU_vector = 0.0;
                           solver.solve(*this,
                                        this->dU_vector,
-                                       *this->residualSet[fieldIndex],
+                                       *this->residual_set[fieldIndex],
                                        IdentityMatrix(
-                                         this->solutionSet[fieldIndex]->size()));
+                                         this->solution_set[fieldIndex]->size()));
                         }
                     }
                   catch (...)
@@ -286,8 +286,8 @@ customPDE<dim, degree>::solveIncrement(bool skip_time_dependent)
                             .nonlinear_solver_parameters.getBacktrackDampingFlag(
                               fieldIndex))
                         {
-                          vectorType solutionSet_old = *this->solutionSet[fieldIndex];
-                          double residual_old = this->residualSet[fieldIndex]->l2_norm();
+                          vectorType solution_set_old = *this->solution_set[fieldIndex];
+                          double residual_old = this->residual_set[fieldIndex]->l2_norm();
 
                           damping_coefficient            = 1.0;
                           bool damping_coefficient_found = false;
@@ -295,30 +295,28 @@ customPDE<dim, degree>::solveIncrement(bool skip_time_dependent)
                             {
                               if (this->fields[fieldIndex].type == SCALAR)
                                 {
-                                  this->solutionSet[fieldIndex]->sadd(1.0,
-                                                                      damping_coefficient,
-                                                                      this->dU_scalar);
+                                  this->solution_set[fieldIndex]
+                                    ->sadd(1.0, damping_coefficient, this->dU_scalar);
                                 }
                               else
                                 {
-                                  this->solutionSet[fieldIndex]->sadd(1.0,
-                                                                      damping_coefficient,
-                                                                      this->dU_vector);
+                                  this->solution_set[fieldIndex]
+                                    ->sadd(1.0, damping_coefficient, this->dU_vector);
                                 }
 
                               this->computeNonexplicitRHS();
 
                               for (const auto &it : *this->valuesDirichletSet[fieldIndex])
                                 {
-                                  if (this->residualSet[fieldIndex]->in_local_range(
+                                  if (this->residual_set[fieldIndex]->in_local_range(
                                         it.first))
                                     {
-                                      (*this->residualSet[fieldIndex])(it.first) = 0.0;
+                                      (*this->residual_set[fieldIndex])(it.first) = 0.0;
                                     }
                                 }
 
                               double residual_new =
-                                this->residualSet[fieldIndex]->l2_norm();
+                                this->residual_set[fieldIndex]->l2_norm();
 
                               if (this->currentIncrement % userInputs.skip_print_steps ==
                                   0)
@@ -348,8 +346,9 @@ customPDE<dim, degree>::solveIncrement(bool skip_time_dependent)
                                     MatrixFreePDE<dim, degree>::userInputs
                                       .nonlinear_solver_parameters
                                       .getBacktrackStepModifier(fieldIndex);
-                                  *this->solutionSet[fieldIndex] = solutionSet_old;
+                                  *this->solution_set[fieldIndex] = solution_set_old;
                                 }
+                              solution_set
                             }
                         }
                       else
@@ -361,15 +360,15 @@ customPDE<dim, degree>::solveIncrement(bool skip_time_dependent)
 
                           if (this->fields[fieldIndex].type == SCALAR)
                             {
-                              this->solutionSet[fieldIndex]->sadd(1.0,
-                                                                  damping_coefficient,
-                                                                  this->dU_scalar);
+                              this->solution_set[fieldIndex]->sadd(1.0,
+                                                                   damping_coefficient,
+                                                                   this->dU_scalar);
                             }
                           else
                             {
-                              this->solutionSet[fieldIndex]->sadd(1.0,
-                                                                  damping_coefficient,
-                                                                  this->dU_vector);
+                              this->solution_set[fieldIndex]->sadd(1.0,
+                                                                   damping_coefficient,
+                                                                   this->dU_vector);
                             }
                         }
 
@@ -391,11 +390,11 @@ customPDE<dim, degree>::solveIncrement(bool skip_time_dependent)
                                    "nsteps:%u, tolerance criterion:%12.6e, "
                                    "solution: %12.6e, dU: %12.6e\n",
                                    this->fields[fieldIndex].name.c_str(),
-                                   this->residualSet[fieldIndex]->l2_norm(),
+                                   this->residual_set[fieldIndex]->l2_norm(),
                                    solver_control.last_value(),
                                    solver_control.last_step(),
                                    solver_control.tolerance(),
-                                   this->solutionSet[fieldIndex]->l2_norm(),
+                                   this->solution_set[fieldIndex]->l2_norm(),
                                    dU_norm);
                           this->pcout << buffer;
                         }
@@ -447,11 +446,11 @@ customPDE<dim, degree>::solveIncrement(bool skip_time_dependent)
                         {
                           if (this->fields[fieldIndex].type == SCALAR)
                             {
-                              *this->solutionSet[fieldIndex] += this->dU_scalar;
+                              *this->solution_set[fieldIndex] += this->dU_scalar;
                             }
                           else
                             {
-                              *this->solutionSet[fieldIndex] += this->dU_vector;
+                              *this->solution_set[fieldIndex] += this->dU_vector;
                             }
 
                           if (this->currentIncrement % userInputs.skip_print_steps == 0)
@@ -472,11 +471,11 @@ customPDE<dim, degree>::solveIncrement(bool skip_time_dependent)
                                        "nsteps:%u, tolerance criterion:%12.6e, "
                                        "solution: %12.6e, dU: %12.6e\n",
                                        this->fields[fieldIndex].name.c_str(),
-                                       this->residualSet[fieldIndex]->l2_norm(),
+                                       this->residual_set[fieldIndex]->l2_norm(),
                                        solver_control.last_value(),
                                        solver_control.last_step(),
                                        solver_control.tolerance(),
-                                       this->solutionSet[fieldIndex]->l2_norm(),
+                                       this->solution_set[fieldIndex]->l2_norm(),
                                        dU_norm);
                               this->pcout << buffer;
                             }
@@ -493,11 +492,11 @@ customPDE<dim, degree>::solveIncrement(bool skip_time_dependent)
                         {
                           if (this->fields[fieldIndex].type == SCALAR)
                             {
-                              this->dU_scalar = *this->solutionSet[fieldIndex];
+                              this->dU_scalar = *this->solution_set[fieldIndex];
                             }
                           else
                             {
-                              this->dU_vector = *this->solutionSet[fieldIndex];
+                              this->dU_vector = *this->solution_set[fieldIndex];
                             }
                         }
 
@@ -514,8 +513,8 @@ customPDE<dim, degree>::solveIncrement(bool skip_time_dependent)
                                    "field '%2s' [auxiliary solve]: current solution: "
                                    "%12.6e, current residual:%12.6e\n",
                                    this->fields[fieldIndex].name.c_str(),
-                                   this->solutionSet[fieldIndex]->l2_norm(),
-                                   this->residualSet[fieldIndex]->l2_norm());
+                                   this->solution_set[fieldIndex]->l2_norm(),
+                                   this->residual_set[fieldIndex]->l2_norm());
                           this->pcout << buffer;
                         }
 
@@ -530,12 +529,12 @@ customPDE<dim, degree>::solveIncrement(bool skip_time_dependent)
 
                               if (this->fields[fieldIndex].type == SCALAR)
                                 {
-                                  this->dU_scalar -= *this->solutionSet[fieldIndex];
+                                  this->dU_scalar -= *this->solution_set[fieldIndex];
                                   diff = this->dU_scalar.l2_norm();
                                 }
                               else
                                 {
-                                  this->dU_vector -= *this->solutionSet[fieldIndex];
+                                  this->dU_vector -= *this->solution_set[fieldIndex];
                                   diff = this->dU_vector.l2_norm();
                                 }
                               if (this->currentIncrement % userInputs.skip_print_steps ==
@@ -569,7 +568,7 @@ customPDE<dim, degree>::solveIncrement(bool skip_time_dependent)
                 }
 
               // check if solution is nan
-              if (!numbers::is_finite(this->solutionSet[fieldIndex]->l2_norm()))
+              if (!numbers::is_finite(this->solution_set[fieldIndex]->l2_norm()))
                 {
                   snprintf(buffer,
                            sizeof(buffer),

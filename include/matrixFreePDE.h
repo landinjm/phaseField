@@ -145,7 +145,7 @@ public:
 protected:
   userInputParameters<dim> userInputs;
 
-  unsigned int totalDOFs;
+  unsigned int n_dofs;
 
   // Virtual methods to set the attributes of the primary field variables and
   // the postprocessing field variables virtual void setVariableAttriubutes() =
@@ -195,7 +195,7 @@ protected:
    *one primal field, the size of this vector is one,otherwise the size is the
    *number of primal fields in the problem.
    */
-  std::vector<std::unique_ptr<FESystem<dim>>> FESet;
+  std::vector<std::unique_ptr<FESystem<dim>>> FE_set;
   /*A vector of all the constraint sets in the problem. A constraint set is a
    *map which holds the mapping between the degrees of freedom and the
    *corresponding degree of freedom constraints. Currently the type of
@@ -207,7 +207,7 @@ protected:
   /*A vector of all the degree of freedom objects is the problem. A degree of
    *freedom object handles the serial/parallel distribution of the degrees of
    *freedom for all the primal fields in the problem.*/
-  std::vector<const DoFHandler<dim> *> dofHandlersSet;
+  std::vector<const DoFHandler<dim> *> dof_handler_set;
 
   /*A vector of the locally relevant degrees of freedom. Locally relevant degrees of
    *freedom in a parallel implementation is a collection of the degrees of freedom owned
@@ -220,18 +220,19 @@ protected:
   std::vector<AffineConstraints<double> *> constraintsDirichletSet_nonconst,
     constraintsOtherSet_nonconst;
   /*Copies of dofHandlerSet elements, but stored as non-const.*/
-  std::vector<DoFHandler<dim> *> dofHandlersSet_nonconst;
+  std::vector<DoFHandler<dim> *> dof_handler_set_nonconst;
   /*Copies of locally_relevant_dofsSet elements, but stored as non-const.*/
   std::vector<IndexSet *> locally_relevant_dofsSet_nonconst;
   /*Vector all the solution vectors in the problem. In a multi-field problem, each primal
    * field has a solution vector associated with it.*/
-  std::vector<vectorType *> solutionSet;
+  std::vector<vectorType *> solution_set;
   /*Vector all the residual (RHS) vectors in the problem. In a multi-field problem, each
    * primal field has a residual vector associated with it.*/
-  std::vector<vectorType *> residualSet;
+  std::vector<vectorType *> residual_set;
   /*Vector of parallel solution transfer objects. This is used only when adaptive meshing
    * is enabled.*/
-  std::vector<parallel::distributed::SolutionTransfer<dim, vectorType> *> soltransSet;
+  std::vector<parallel::distributed::SolutionTransfer<dim, vectorType> *>
+    solution_transfer_set;
 
   // matrix free objects
   /*Object of class MatrixFree<dim>. This is primarily responsible for all the
