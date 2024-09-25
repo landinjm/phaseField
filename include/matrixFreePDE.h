@@ -155,8 +155,10 @@ protected:
   // Elasticity matrix variables
   const static unsigned int CIJ_tensor_size = 2 * dim - 1 + dim / 3;
 
-  // Method to reinitialize the mesh, degrees of freedom, constraints and data
-  // structures when the mesh is adapted
+  /**
+   * Method to reinitialize the mesh, degrees of freedom, constraints and data structures
+   * when the mesh is adapted
+   */
   void
   reinit();
 
@@ -170,110 +172,156 @@ protected:
   std::vector<SimplifiedGrainRepresentation<dim>> simplified_grain_representations;
 
   /**
-   * Method to solve each time increment of a time-dependent problem. For
-   * time-independent problems this method is called only once. This method
-   * solves for all the fields in a staggered manner (one after another) and
-   * also invokes the corresponding solvers: Explicit solver for Parabolic
-   * problems, Implicit (matrix-free) solver for Elliptic problems.
+   * Method to solve each time increment of a time-dependent problem. For time-independent
+   * problems this method is called only once. This method solves for all the fields in a
+   * staggered manner (one after another) and also invokes the corresponding solvers:
+   * Explicit solver for Parabolic problems, Implicit (matrix-free) solver for Elliptic
+   * problems.
    */
   virtual void
   solveIncrement(bool skip_time_dependent);
-  /* Method to write solution fields to vtu and pvtu (parallel) files.
-   *
-   * This method can be enabled/disabled by setting the flag writeOutput to
-   * true/false. Also, the user can select how often the solution files are
-   * written by setting the flag skipOutputSteps in the parameters file.
+
+  /**
+   * Method to write solution fields to vtu and pvtu (parallel) files. This method can be
+   * enabled/disabled by setting the flag writeOutput to true/false. Also, the user can
+   * select how often the solution files are written by setting the flag skipOutputSteps
+   * in the parameters file.
    */
   void
   outputResults();
 
-  /*Parallel mesh object which holds information about the FE nodes, elements
-   * and parallel domain decomposition
+  /**
+   * Parallel mesh object which holds information about the FE nodes, elements and
+   * parallel domain decomposition
    */
   parallel::distributed::Triangulation<dim> triangulation;
-  /*A vector of finite element objects used in a model. For problems with only
-   *one primal field, the size of this vector is one,otherwise the size is the
-   *number of primal fields in the problem.
+
+  /**
+   * A vector of finite element objects used in a model. For problems with only one primal
+   * field, the size of this vector is one,otherwise the size is the number of primal
+   * fields in the problem.
    */
   std::vector<std::unique_ptr<FESystem<dim>>> FE_set;
-  /*A vector of all the constraint sets in the problem. A constraint set is a
-   *map which holds the mapping between the degrees of freedom and the
-   *corresponding degree of freedom constraints. Currently the type of
-   *constraints stored are either Dirichlet boundary conditions or hanging node
-   *constraints for adaptive meshes.
+
+  /**
+   * A vector of all the constraint sets in the problem. A constraint set is a map which
+   * holds the mapping between the degrees of freedom and the corresponding degree of
+   * freedom constraints. Currently the type of constraints stored are either Dirichlet
+   * boundary conditions or hanging node constraints for adaptive meshes.
    */
-  std::vector<const AffineConstraints<double> *> constraintsDirichletSet,
-    constraintsOtherSet;
-  /*A vector of all the degree of freedom objects is the problem. A degree of
-   *freedom object handles the serial/parallel distribution of the degrees of
-   *freedom for all the primal fields in the problem.*/
+  std::vector<const AffineConstraints<double> *> constraintsDirichletSet;
+  std::vector<const AffineConstraints<double> *> constraintsOtherSet;
+
+  /**
+   * A vector of all the degree of freedom objects is the problem. A degree of freedom
+   * object handles the serial/parallel distribution of the degrees of freedom for all the
+   * primal fields in the problem.
+   */
   std::vector<const DoFHandler<dim> *> dof_handler_set;
 
-  /*A vector of the locally relevant degrees of freedom. Locally relevant degrees of
-   *freedom in a parallel implementation is a collection of the degrees of freedom owned
-   *by the current processor and the surrounding ghost nodes which are required for the
-   *field computations in this processor.
+  /**
+   * A vector of the locally relevant degrees of freedom. Locally relevant degrees of
+   * freedom in a parallel implementation is a collection of the degrees of freedom owned
+   * by the current processor and the surrounding ghost nodes which are required for the
+   * field computations in this processor.
    */
   std::vector<const IndexSet *> locally_relevant_dofsSet;
-  /*Copies of constraintSet elements, but stored as non-const to enable application of
-   * constraints.*/
-  std::vector<AffineConstraints<double> *> constraintsDirichletSet_nonconst,
-    constraintsOtherSet_nonconst;
-  /*Copies of dofHandlerSet elements, but stored as non-const.*/
+
+  /**
+   * Copies of constraintSet elements, but stored as non-const to enable application of
+   * constraints.
+   */
+  std::vector<AffineConstraints<double> *> constraintsDirichletSet_nonconst;
+  std::vector<AffineConstraints<double> *> constraintsOtherSet_nonconst;
+
+  /**
+   * Copies of dofHandlerSet elements, but stored as non-const.
+   */
   std::vector<DoFHandler<dim> *> dof_handler_set_nonconst;
-  /*Copies of locally_relevant_dofsSet elements, but stored as non-const.*/
+
+  /**
+   * Copies of locally_relevant_dofsSet elements, but stored as non-const.
+   */
   std::vector<IndexSet *> locally_relevant_dofsSet_nonconst;
-  /*Vector all the solution vectors in the problem. In a multi-field problem, each primal
-   * field has a solution vector associated with it.*/
+
+  /**
+   * Vector all the solution vectors in the problem. In a multi-field problem, each primal
+   * field has a solution vector associated with it.*
+   */
   std::vector<vectorType *> solution_set;
-  /*Vector all the residual (RHS) vectors in the problem. In a multi-field problem, each
-   * primal field has a residual vector associated with it.*/
+
+  /**
+   * Vector all the residual (RHS) vectors in the problem. In a multi-field problem, each
+   * primal field has a residual vector associated with it.
+   */
   std::vector<vectorType *> residual_set;
-  /*Vector of parallel solution transfer objects. This is used only when adaptive meshing
-   * is enabled.*/
+
+  /**
+   * Vector of parallel solution transfer objects. This is used only when adaptive meshing
+   * is enabled.
+   */
   std::vector<parallel::distributed::SolutionTransfer<dim, vectorType> *>
     solution_transfer_set;
 
-  // matrix free objects
-  /*Object of class MatrixFree<dim>. This is primarily responsible for all the
-   *base matrix free functionality of this MatrixFreePDE<dim> class. Refer to
-   *deal.ii documentation of MatrixFree<dim> class for details.
+  /**
+   * Object of class MatrixFree<dim>. This is primarily responsible for all the base
+   * matrix free functionality of this MatrixFreePDE<dim> class. Refer to deal.ii
+   * documentation of MatrixFree<dim> class for details.
    */
   MatrixFree<dim, double> matrixFreeObject;
-  /*Vector to store the inverse of the mass matrix diagonal for scalar fields.
-   * Due to the choice of spectral elements with Guass-Lobatto quadrature, the
-   * mass matrix is diagonal.*/
-  vectorType invMscalar;
-  /*Vector to store the inverse of the mass matrix diagonal for vector fields.
-   * Due to the choice of spectral elements with Guass-Lobatto quadrature, the
-   * mass matrix is diagonal.*/
-  vectorType invMvector;
-  /*Vector to store the solution increment. This is a temporary vector used
-   * during implicit solves of the Elliptic fields.*/
-  vectorType dU_vector, dU_scalar;
 
-  // matrix free methods
-  /*Current field index*/
+  /**
+   * Vector to store the inverse of the mass matrix diagonal for scalar fields. Due to the
+   * choice of spectral elements with Guass-Lobatto quadrature, the mass matrix is
+   * diagonal.
+   */
+  vectorType invMscalar;
+
+  /**
+   * Vector to store the inverse of the mass matrix diagonal for vector fields. Due to the
+   * choice of spectral elements with Guass-Lobatto quadrature, the mass matrix is
+   * diagonal.
+   */
+  vectorType invMvector;
+
+  /**
+   * Vector to store the solution increment. This is a temporary vector used during
+   * implicit solves of the Elliptic fields.
+   */
+  vectorType dU_vector;
+  vectorType dU_scalar;
+
+  /**
+   * Current field index
+   */
   unsigned int currentFieldIndex;
-  /*Method to compute the inverse of the mass matrix*/
+
+  /**
+   * Method to compute the inverse of the mass matrix
+   */
   void
   computeInvM();
 
-  /*Method to compute an explicit timestep*/
+  /**
+   * Method to compute an explicit timestep
+   */
   void
   updateExplicitSolution(unsigned int fieldIndex);
 
-  /*Method to apply boundary conditions*/
+  /**
+   * Method to apply boundary conditions
+   */
   void
   applyBCs(unsigned int fieldIndex);
 
-  /*Method to compute the right hand side (RHS) residual vectors*/
+  /**
+   * Method to compute the right hand side (RHS) residual vectors
+   */
   void
   computeExplicitRHS();
   void
   computeNonexplicitRHS();
 
-  // virtual methods to be implemented in the derived class
   /*Method to calculate LHS(implicit solve)*/
   void
   getLHS(const MatrixFree<dim, double>               &data,
