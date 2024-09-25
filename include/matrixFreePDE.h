@@ -195,7 +195,7 @@ protected:
    *one primal field, the size of this vector is one,otherwise the size is the
    *number of primal fields in the problem.
    */
-  std::vector<FESystem<dim> *> FESet;
+  std::vector<std::unique_ptr<FESystem<dim>>> FESet;
   /*A vector of all the constraint sets in the problem. A constraint set is a
    *map which holds the mapping between the degrees of freedom and the
    *corresponding degree of freedom constraints. Currently the type of

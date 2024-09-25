@@ -9,7 +9,7 @@ AdaptiveRefinement<dim, degree>::AdaptiveRefinement(
   std::vector<Field<dim>>                                                 &_fields,
   std::vector<vectorType *>                                               &_solutionSet,
   std::vector<parallel::distributed::SolutionTransfer<dim, vectorType> *> &_soltransSet,
-  std::vector<FESystem<dim> *>                                            &_FESet,
+  std::vector<std::unique_ptr<FESystem<dim>>>                             &_FESet,
   std::vector<DoFHandler<dim> *>                 &_dofHandlersSet_nonconst,
   std::vector<const AffineConstraints<double> *> &_constraintsDirichletSet,
   std::vector<const AffineConstraints<double> *> &_constraintsOtherSet)

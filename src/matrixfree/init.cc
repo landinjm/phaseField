@@ -79,22 +79,21 @@ MatrixFreePDE<dim, degree>::init()
       pcout << buffer;
 
       // create FESystem
-      FESystem<dim> *fe;
+      Assert(field.type == SCALAR || field.type == VECTOR,
+             ExcMessage("PRISMS-PF Error: Unknown field type. The only allowed fields "
+                        "are scalar / vector."));
 
       if (field.type == SCALAR)
         {
-          fe = new FESystem<dim>(FE_Q<dim>(QGaussLobatto<1>(degree + 1)), 1);
+          FESet.push_back(
+            std::make_unique<FESystem<dim>>(FE_Q<dim>(QGaussLobatto<1>(degree + 1)), 1));
         }
       else if (field.type == VECTOR)
         {
-          fe = new FESystem<dim>(FE_Q<dim>(QGaussLobatto<1>(degree + 1)), dim);
+          FESet.push_back(
+            std::make_unique<FESystem<dim>>(FE_Q<dim>(QGaussLobatto<1>(degree + 1)),
+                                            dim));
         }
-      else
-        {
-          pcout << "\nmatrixFreePDE.h: unknown field type\n";
-          exit(-1);
-        }
-      FESet.push_back(fe);
 
       // distribute DOFs
       DoFHandler<dim> *dof_handler;
@@ -103,7 +102,7 @@ MatrixFreePDE<dim, degree>::init()
       dofHandlersSet.push_back(dof_handler);
       dofHandlersSet_nonconst.push_back(dof_handler);
 
-      dof_handler->distribute_dofs(*fe);
+      dof_handler->distribute_dofs(*FESet.back());
       totalDOFs += dof_handler->n_dofs();
 
       // Extract locally_relevant_dofs

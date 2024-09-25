@@ -39,7 +39,7 @@ MatrixFreePDE<dim, degree>::applyNeumannBCs()
           if (userInputs.BC_list[starting_BC_list_index].var_BC_type[direction] ==
               NEUMANN)
             {
-              FESystem<dim>         *fe = FESet[currentFieldIndex];
+              FESystem<dim>         *fe = FESet[currentFieldIndex].get();
               QGaussLobatto<dim - 1> face_quadrature_formula(degree + 1);
               FEFaceValues<dim>      fe_face_values(*fe,
                                                face_quadrature_formula,

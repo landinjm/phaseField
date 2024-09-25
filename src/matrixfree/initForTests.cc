@@ -41,23 +41,24 @@ MatrixFreePDE<dim, degree>::initForTests(std::vector<Field<dim>> fields)
   for (auto &field : fields)
     {
       // create FESystem
-      FESystem<dim> *fe;
       if (field.type == SCALAR)
         {
-          fe = new FESystem<dim>(FE_Q<dim>(QGaussLobatto<1>(degree + 1)), 1);
+          FESet.push_back(
+            std::make_unique<FESystem<dim>>(FE_Q<dim>(QGaussLobatto<1>(degree + 1)), 1));
         }
       else if (field.type == VECTOR)
         {
-          fe = new FESystem<dim>(FE_Q<dim>(QGaussLobatto<1>(degree + 1)), dim);
+          FESet.push_back(
+            std::make_unique<FESystem<dim>>(FE_Q<dim>(QGaussLobatto<1>(degree + 1)),
+                                            dim));
         }
-      FESet.push_back(fe);
 
       // distribute DOFs
       DoFHandler<dim> *dof_handler;
       dof_handler = new DoFHandler<dim>(triangulation);
       dofHandlersSet.push_back(dof_handler);
       dofHandlersSet_nonconst.push_back(dof_handler);
-      dof_handler->distribute_dofs(*fe);
+      dof_handler->distribute_dofs(*FESet.back());
 
       // extract locally_relevant_dofs
       IndexSet *locally_relevant_dofs;

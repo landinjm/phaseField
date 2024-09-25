@@ -19,8 +19,7 @@ MatrixFreePDE<dim, degree>::reinit()
       char buffer[100];
 
       // create FESystem
-      FESystem<dim> *fe;
-      fe = FESet.at(field.index);
+      auto &fe = FESet.at(field.index);
 
       // distribute DOFs
       DoFHandler<dim> *dof_handler;

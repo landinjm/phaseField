@@ -57,10 +57,6 @@ MatrixFreePDE<dim, degree>::~MatrixFreePDE()
     {
       delete dofHandlersSet[iter];
     }
-  for (unsigned int iter = 0; iter < FESet.size(); iter++)
-    {
-      delete FESet[iter];
-    }
   for (unsigned int iter = 0; iter < solutionSet.size(); iter++)
     {
       delete solutionSet[iter];
