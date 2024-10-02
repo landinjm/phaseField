@@ -1,7 +1,7 @@
 // methods to mark boundaries
 
-#include "../../include/initialConditions.h"
-#include "../../include/matrixFreePDE.h"
+#include "initialConditions.h"
+#include "matrixFreePDE.h"
 
 // methods to mark boundaries
 // methods to mark boundaries
@@ -32,4 +32,4 @@ MatrixFreePDE<dim, degree>::markBoundaries(
     }
 }
 
-#include "../../include/matrixFreePDE_template_instantiations.h"
+#include "matrixFreePDE_template_instantiations.h"

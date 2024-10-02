@@ -1,4 +1,4 @@
-#include "../../include/userInputParameters.h"
+#include "userInputParameters.h"
 
 template <int dim>
 std::vector<unsigned int>
@@ -64,4 +64,4 @@ userInputParameters<dim>::setTimeStepList(
 }
 
 // Template instantiations
-#include "../../include/userInputParameters_template_instantiations.h"
+#include "userInputParameters_template_instantiations.h"

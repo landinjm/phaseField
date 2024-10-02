@@ -1,12 +1,13 @@
 // Methods for the inputFileReader class
-#include "../../include/inputFileReader.h"
+#include "inputFileReader.h"
 
 #include <deal.II/base/mpi.h>
 #include <deal.II/base/utilities.h>
 
-#include "../../include/EquationDependencyParser.h"
-#include "../../include/RefinementCriterion.h"
-#include "../../include/sortIndexEntryPairList.h"
+#include "EquationDependencyParser.h"
+#include "RefinementCriterion.h"
+#include "sortIndexEntryPairList.h"
+
 #include <iostream>
 
 // Constructor

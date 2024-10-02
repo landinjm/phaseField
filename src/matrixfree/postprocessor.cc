@@ -1,5 +1,5 @@
-// #include "../../include/postprocessor.h"
-#include "../../include/matrixFreePDE.h"
+// #include "postprocessor.h"
+#include "matrixFreePDE.h"
 
 template <int dim, int degree>
 void
@@ -71,4 +71,4 @@ MatrixFreePDE<dim, degree>::getPostProcessedFields(
     }
 }
 
-#include "../../include/matrixFreePDE_template_instantiations.h"
+#include "matrixFreePDE_template_instantiations.h"

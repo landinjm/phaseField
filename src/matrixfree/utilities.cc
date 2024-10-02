@@ -1,6 +1,6 @@
 // utility functions for the MatrixFreePDE class
 
-#include "../../include/matrixFreePDE.h"
+#include "matrixFreePDE.h"
 
 // return index of given field name if exists, else throw error
 template <int dim, int degree>
@@ -16,4 +16,4 @@ MatrixFreePDE<dim, degree>::getFieldIndex(std::string _name)
   exit(-1);
 }
 
-#include "../../include/matrixFreePDE_template_instantiations.h"
+#include "matrixFreePDE_template_instantiations.h"

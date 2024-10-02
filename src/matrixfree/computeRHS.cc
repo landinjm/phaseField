@@ -1,7 +1,7 @@
 // computeRHS() method for MatrixFreePDE class
 
-#include "../../include/matrixFreePDE.h"
-#include "../../include/variableContainer.h"
+#include "matrixFreePDE.h"
+#include "variableContainer.h"
 
 // update RHS of each field
 template <int dim, int degree>
@@ -113,4 +113,4 @@ MatrixFreePDE<dim, degree>::getNonexplicitRHS(
     }
 }
 
-#include "../../include/matrixFreePDE_template_instantiations.h"
+#include "matrixFreePDE_template_instantiations.h"

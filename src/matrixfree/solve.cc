@@ -1,6 +1,6 @@
 // solve() method for MatrixFreePDE class
 
-#include "../../include/matrixFreePDE.h"
+#include "matrixFreePDE.h"
 
 // solve BVP
 template <int dim, int degree>
@@ -153,4 +153,4 @@ MatrixFreePDE<dim, degree>::solve()
   computing_timer.leave_subsection("matrixFreePDE: solve");
 }
 
-#include "../../include/matrixFreePDE_template_instantiations.h"
+#include "matrixFreePDE_template_instantiations.h"

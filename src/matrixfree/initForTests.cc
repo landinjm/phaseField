@@ -2,7 +2,7 @@
 
 #include <deal.II/grid/grid_generator.h>
 
-#include "../../include/matrixFreePDE.h"
+#include "matrixFreePDE.h"
 
 template <int dim, int degree>
 void
@@ -114,4 +114,4 @@ MatrixFreePDE<dim, degree>::initForTests(std::vector<Field<dim>> fields)
     }
 }
 
-#include "../../include/matrixFreePDE_template_instantiations.h"
+#include "matrixFreePDE_template_instantiations.h"

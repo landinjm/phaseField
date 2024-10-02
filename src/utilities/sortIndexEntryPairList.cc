@@ -1,4 +1,4 @@
-#include "../../include/sortIndexEntryPairList.h"
+#include "sortIndexEntryPairList.h"
 
 std::vector<bool>
 sortIndexEntryPairList(

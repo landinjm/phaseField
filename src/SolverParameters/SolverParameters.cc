@@ -1,4 +1,4 @@
-#include "../../include/SolverParameters.h"
+#include "SolverParameters.h"
 
 SolverToleranceType
 SolverParametersBase::getToleranceType(unsigned int index)

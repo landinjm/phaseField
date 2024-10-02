@@ -5,7 +5,7 @@
 
 #include <deal.II/base/exceptions.h>
 
-#include "../../include/userInputParameters.h"
+#include "userInputParameters.h"
 
 template <int dim>
 void
@@ -91,4 +91,4 @@ userInputParameters<dim>::load_BC_list(const std::vector<std::string> &list_of_B
     }
 }
 
-#include "../../include/userInputParameters_template_instantiations.h"
+#include "userInputParameters_template_instantiations.h"

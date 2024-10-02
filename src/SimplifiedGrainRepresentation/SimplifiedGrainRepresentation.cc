@@ -1,4 +1,4 @@
-#include "../../include/SimplifiedGrainRepresentation.h"
+#include "SimplifiedGrainRepresentation.h"
 
 // ============================================================================
 // Methods for SimplifiedGrainRepresentation

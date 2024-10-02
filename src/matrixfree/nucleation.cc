@@ -1,7 +1,8 @@
 // Methods in MatrixFreePDE to update the list of nuclei
-#include "../../include/matrixFreePDE.h"
-#include "../../include/parallelNucleationList.h"
-#include "../../include/varBCs.h"
+#include "matrixFreePDE.h"
+#include "parallelNucleationList.h"
+#include "varBCs.h"
+
 #include <ctime>
 #include <random>
 
@@ -568,4 +569,4 @@ MatrixFreePDE<dim, degree>::weightedDistanceFromNucleusCenter(
 }
 
 // Template instantiations
-#include "../../include/matrixFreePDE_template_instantiations.h"
+#include "matrixFreePDE_template_instantiations.h"

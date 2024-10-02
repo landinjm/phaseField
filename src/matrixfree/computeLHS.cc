@@ -1,6 +1,6 @@
 // vmult() and getLHS() method for MatrixFreePDE class
 
-#include "../../include/matrixFreePDE.h"
+#include "matrixFreePDE.h"
 
 // vmult operation for LHS
 template <int dim, int degree>
@@ -80,4 +80,4 @@ MatrixFreePDE<dim, degree>::getLHS(
     }
 }
 
-#include "../../include/matrixFreePDE_template_instantiations.h"
+#include "matrixFreePDE_template_instantiations.h"

@@ -1,7 +1,7 @@
-#include "../../include/FloodFiller.h"
-#include "../../include/OrderParameterRemapper.h"
-#include "../../include/SimplifiedGrainRepresentation.h"
-#include "../../include/matrixFreePDE.h"
+#include "FloodFiller.h"
+#include "OrderParameterRemapper.h"
+#include "SimplifiedGrainRepresentation.h"
+#include "matrixFreePDE.h"
 
 // vmult operation for LHS
 template <int dim, int degree>
@@ -112,4 +112,4 @@ MatrixFreePDE<dim, degree>::reassignGrains()
   computing_timer.leave_subsection("matrixFreePDE: reassignGrains");
 }
 
-#include "../../include/matrixFreePDE_template_instantiations.h"
+#include "matrixFreePDE_template_instantiations.h"

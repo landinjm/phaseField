@@ -2,8 +2,8 @@
 
 #include <deal.II/grid/grid_generator.h>
 
-#include "../../include/matrixFreePDE.h"
-#include "../../include/varBCs.h"
+#include "matrixFreePDE.h"
+#include "varBCs.h"
 
 // populate with fields and setup matrix free system
 template <int dim, int degree>
@@ -400,4 +400,4 @@ MatrixFreePDE<dim, degree>::makeTriangulation(
   markBoundaries(tria);
 }
 
-#include "../../include/matrixFreePDE_template_instantiations.h"
+#include "matrixFreePDE_template_instantiations.h"

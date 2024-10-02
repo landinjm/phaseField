@@ -2,7 +2,7 @@
 
 #include <deal.II/lac/solver_cg.h>
 
-#include "../../include/matrixFreePDE.h"
+#include "matrixFreePDE.h"
 
 // solve each time increment
 template <int dim, int degree>
@@ -546,4 +546,4 @@ MatrixFreePDE<dim, degree>::updateExplicitSolution(unsigned int fieldIndex)
     }
 }
 
-#include "../../include/matrixFreePDE_template_instantiations.h"
+#include "matrixFreePDE_template_instantiations.h"

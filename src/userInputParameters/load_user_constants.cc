@@ -1,7 +1,7 @@
 #include <deal.II/base/mpi.h>
 #include <deal.II/base/utilities.h>
 
-#include "../../include/userInputParameters.h"
+#include "userInputParameters.h"
 
 // ==========================================================================================
 // Method to extract the user-defined model constants
@@ -503,4 +503,4 @@ userInputParameters<dim>::getCIJMatrix(const elasticityModel       model,
 }
 
 // Template instantiations
-#include "../../include/userInputParameters_template_instantiations.h"
+#include "userInputParameters_template_instantiations.h"

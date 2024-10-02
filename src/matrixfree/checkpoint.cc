@@ -1,7 +1,7 @@
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
 
-#include "../../include/matrixFreePDE.h"
+#include "matrixFreePDE.h"
 
 #ifdef DEAL_II_WITH_ZLIB
 #  include <zlib.h>
@@ -255,4 +255,4 @@ MatrixFreePDE<dim, degree>::verify_checkpoint_file_exists(const std::string &fil
     }
 }
 
-#include "../../include/matrixFreePDE_template_instantiations.h"
+#include "matrixFreePDE_template_instantiations.h"

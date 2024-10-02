@@ -1,5 +1,5 @@
 
-#include "../../include/matrixFreePDE.h"
+#include "matrixFreePDE.h"
 
 template <int dim, int degree>
 void
@@ -45,4 +45,4 @@ MatrixFreePDE<dim, degree>::computeIntegral(double                   &integrated
   integratedField = value;
 }
 
-#include "../../include/matrixFreePDE_template_instantiations.h"
+#include "matrixFreePDE_template_instantiations.h"

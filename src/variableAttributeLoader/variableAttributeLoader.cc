@@ -1,6 +1,6 @@
-#include "../../include/variableAttributeLoader.h"
+#include "variableAttributeLoader.h"
 
-#include "../../include/sortIndexEntryPairList.h"
+#include "sortIndexEntryPairList.h"
 
 // Constructor
 variableAttributeLoader::variableAttributeLoader()

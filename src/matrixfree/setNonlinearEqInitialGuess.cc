@@ -2,7 +2,7 @@
 #include <deal.II/lac/solver_cg.h>
 #include <deal.II/matrix_free/evaluation_flags.h>
 
-#include "../../include/matrixFreePDE.h"
+#include "matrixFreePDE.h"
 
 // solve each time increment
 template <int dim, int degree>
@@ -200,4 +200,4 @@ MatrixFreePDE<dim, degree>::getLaplaceLHS(
     }
 }
 
-#include "../../include/matrixFreePDE_template_instantiations.h"
+#include "matrixFreePDE_template_instantiations.h"

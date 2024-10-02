@@ -1,4 +1,4 @@
-#include "../../include/FloodFiller.h"
+#include "FloodFiller.h"
 
 #include <numeric>
 

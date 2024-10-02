@@ -5,7 +5,7 @@
  *      Author: stephendewitt
  */
 
-#include "../../include/vectorBCFunction.h"
+#include "vectorBCFunction.h"
 
 #include <deal.II/base/function.h>
 #include <deal.II/lac/vector.h>

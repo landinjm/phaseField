@@ -1,7 +1,8 @@
 // computeInvM() method for MatrixFreePDE class
 #include <deal.II/matrix_free/evaluation_flags.h>
 
-#include "../../include/matrixFreePDE.h"
+#include "matrixFreePDE.h"
+
 #include <functional>
 #include <numeric>
 
@@ -170,4 +171,4 @@ MatrixFreePDE<dim, degree>::computeInvM()
         << parabolicVectorFieldIndex << ")\n";
 }
 
-#include "../../include/matrixFreePDE_template_instantiations.h"
+#include "matrixFreePDE_template_instantiations.h"

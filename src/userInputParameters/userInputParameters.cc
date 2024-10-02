@@ -1,5 +1,5 @@
 // Methods for the userInputParameters class
-#include "../../include/userInputParameters.h"
+#include "userInputParameters.h"
 
 #include <deal.II/base/mpi.h>
 #include <deal.II/base/utilities.h>
@@ -645,4 +645,4 @@ userInputParameters<dim>::userInputParameters(inputFileReader          &input_fi
 }
 
 // Template instantiations
-#include "../../include/userInputParameters_template_instantiations.h"
+#include "userInputParameters_template_instantiations.h"

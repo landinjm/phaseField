@@ -1,6 +1,6 @@
 // constructor and destructor for matrixFreePDE class
 
-#include "../../include/matrixFreePDE.h"
+#include "matrixFreePDE.h"
 
 // constructor
 template <int dim, int degree>
@@ -71,4 +71,4 @@ MatrixFreePDE<dim, degree>::~MatrixFreePDE()
     }
 }
 
-#include "../../include/matrixFreePDE_template_instantiations.h"
+#include "matrixFreePDE_template_instantiations.h"

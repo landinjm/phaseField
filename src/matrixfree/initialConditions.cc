@@ -1,10 +1,10 @@
 // methods to apply initial conditions
 
-#include "../../include/initialConditions.h"
+#include "initialConditions.h"
 
-#include "../../include/IntegrationTools/PField.hh"
-#include "../../include/OrderParameterRemapper.h"
-#include "../../include/matrixFreePDE.h"
+#include "IntegrationTools/PField.hh"
+#include "OrderParameterRemapper.h"
+#include "matrixFreePDE.h"
 
 template <int dim>
 class InitialConditionPField : public Function<dim>
@@ -439,4 +439,4 @@ MatrixFreePDE<dim, degree>::applyInitialConditions()
 //  }
 //};
 
-#include "../../include/matrixFreePDE_template_instantiations.h"
+#include "matrixFreePDE_template_instantiations.h"

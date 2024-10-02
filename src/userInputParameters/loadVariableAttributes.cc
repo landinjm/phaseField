@@ -1,5 +1,5 @@
-#include "../../include/EquationDependencyParser.h"
-#include "../../include/userInputParameters.h"
+#include "EquationDependencyParser.h"
+#include "userInputParameters.h"
 
 template <int dim>
 void
@@ -204,4 +204,4 @@ userInputParameters<dim>::loadVariableAttributes(
 }
 
 // Template instantiations
-#include "../../include/userInputParameters_template_instantiations.h"
+#include "userInputParameters_template_instantiations.h"

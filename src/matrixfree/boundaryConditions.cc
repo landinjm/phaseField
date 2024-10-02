@@ -1,9 +1,9 @@
 // methods to apply boundary conditons
 
-#include "../../include/matrixFreePDE.h"
-#include "../../include/nonUniformDirichletBC.h"
-#include "../../include/varBCs.h"
-#include "../../include/vectorBCFunction.h"
+#include "matrixFreePDE.h"
+#include "nonUniformDirichletBC.h"
+#include "varBCs.h"
+#include "vectorBCFunction.h"
 
 // =================================================================================
 // Methods to apply non-zero Neumann BCs
@@ -382,4 +382,4 @@ MatrixFreePDE<dim, degree>::setRigidBodyModeConstraints(
     }
 }
 
-#include "../../include/matrixFreePDE_template_instantiations.h"
+#include "matrixFreePDE_template_instantiations.h"

@@ -1,4 +1,4 @@
-#include "../../include/variableContainer.h"
+#include "variableContainer.h"
 
 template <int dim, int degree, typename T>
 variableContainer<dim, degree, T>::variableContainer(

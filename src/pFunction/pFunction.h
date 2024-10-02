@@ -9,7 +9,8 @@
 
 #include <deal.II/base/vectorization.h>
 
-#include "../../include/IntegrationTools/extern/PLibraryExtern.hh"
+#include "IntegrationTools/extern/PLibraryExtern.hh"
+
 #include <string>
 
 namespace PFunctions

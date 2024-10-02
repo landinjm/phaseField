@@ -1,9 +1,10 @@
-#include "../../include/parallelNucleationList.h"
+#include "parallelNucleationList.h"
 
 #include <deal.II/base/mpi.h>
 #include <deal.II/base/utilities.h>
 
-#include "../../include/nucleus.h"
+#include "nucleus.h"
+
 #include <iostream>
 
 // =================================================================================

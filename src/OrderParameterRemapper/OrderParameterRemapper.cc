@@ -1,4 +1,4 @@
-#include "../../include/OrderParameterRemapper.h"
+#include "OrderParameterRemapper.h"
 
 template <int dim>
 void

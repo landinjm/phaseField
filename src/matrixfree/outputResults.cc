@@ -2,7 +2,7 @@
 
 #include <deal.II/numerics/data_out.h>
 
-#include "../../include/matrixFreePDE.h"
+#include "matrixFreePDE.h"
 
 // output results
 template <int dim, int degree>
@@ -252,4 +252,4 @@ MatrixFreePDE<dim, degree>::outputResults()
   computing_timer.leave_subsection("matrixFreePDE: output");
 }
 
-#include "../../include/matrixFreePDE_template_instantiations.h"
+#include "matrixFreePDE_template_instantiations.h"

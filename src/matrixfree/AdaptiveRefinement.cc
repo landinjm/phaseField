@@ -1,4 +1,4 @@
-#include "../../include/AdaptiveRefinement.h"
+#include "AdaptiveRefinement.h"
 
 using namespace dealii;
 

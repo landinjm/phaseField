@@ -1,4 +1,4 @@
-#include "../../include/EquationDependencyParser.h"
+#include "EquationDependencyParser.h"
 
 #include <deal.II/base/exceptions.h>
 #include <deal.II/base/utilities.h>

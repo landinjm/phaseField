@@ -1,6 +1,6 @@
 // reinit() method for MatrixFreePDE class
 
-#include "../../include/matrixFreePDE.h"
+#include "matrixFreePDE.h"
 
 // populate with fields and setup matrix free system
 template <int dim, int degree>
@@ -201,4 +201,4 @@ MatrixFreePDE<dim, degree>::reinit()
   computing_timer.leave_subsection("matrixFreePDE: reinitialization");
 }
 
-#include "../../include/matrixFreePDE_template_instantiations.h"
+#include "matrixFreePDE_template_instantiations.h"
