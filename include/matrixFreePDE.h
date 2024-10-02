@@ -37,13 +37,12 @@
 // PRISMS headers
 #include "AdaptiveRefinement.h"
 #include "SimplifiedGrainRepresentation.h"
+#include "computeStress.h"
 #include "fields.h"
 #include "nucleus.h"
 #include "userInputParameters.h"
 #include "variableContainer.h"
 #include "variableValueContainer.h"
-
-#include "../src/models/mechanics/computeStress.h"
 
 using namespace dealii;
 
