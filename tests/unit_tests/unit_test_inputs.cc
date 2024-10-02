@@ -1,4 +1,4 @@
-#include "../../include/userInputParameters.h"
+#include "userInputParameters.h"
 
 template <int dim>
 void

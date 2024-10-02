@@ -6,7 +6,8 @@
 #ifndef pfunct_faV_HH
 #define pfunct_faV_HH
 
-#include "../../../include/IntegrationTools/PFunction.hh"
+#include "IntegrationTools/PFunction.hh"
+
 #include <cmath>
 #include <cstdlib>
 

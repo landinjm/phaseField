@@ -1,5 +1,5 @@
 // Unit tests for the class "nonlinearSolverParameters"
-#include "../../include/SolverParameters.h"
+#include "SolverParameters.h"
 
 template <int dim, typename T>
 bool

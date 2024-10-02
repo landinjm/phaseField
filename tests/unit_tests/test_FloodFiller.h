@@ -1,5 +1,5 @@
 // Unit tests for the class "FloodFiller"
-#include "../../include/FloodFiller.h"
+#include "FloodFiller.h"
 
 template <int dim>
 class InitialConditionFloodFill : public dealii::Function<dim>

@@ -3,14 +3,14 @@
 
 #include "boundaryConditions.cc"
 #include "initialConditions.cc"
+#include "initialConditions.h"
 #include "unitTest.h"
 #include "unit_test_inputs.cc"
+#include "userInputParameters.h"
+#include "userInputParameters/userInputParameters.cc"
+#include "utilities/vectorBCFunction.cc"
+#include "vectorBCFunction.h"
 
-#include "../../include/initialConditions.h"
-#include "../../include/userInputParameters.h"
-#include "../../include/vectorBCFunction.h"
-#include "../../src/userInputParameters/userInputParameters.cc"
-#include "../../src/utilities/vectorBCFunction.cc"
 #include <iostream>
 
 int

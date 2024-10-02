@@ -6,7 +6,8 @@
 #ifndef pfunct_McV_HH
 #define pfunct_McV_HH
 
-#include "../../../include/IntegrationTools/PFunction.hh"
+#include "IntegrationTools/PFunction.hh"
+
 #include <cmath>
 #include <cstdlib>
 

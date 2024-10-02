@@ -1,4 +1,4 @@
-#include "../../include/SimplifiedGrainRepresentation.h"
+#include "SimplifiedGrainRepresentation.h"
 
 template <int dim, typename T>
 bool
