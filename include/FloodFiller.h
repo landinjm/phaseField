@@ -120,8 +120,7 @@ public:
    * mesh/field and outputs a vector of GrainSet objects.
    */
   void
-  calcGrainSets(dealii::FESystem<dim>      &fe,
-                dealii::DoFHandler<dim>    &dof_handler,
+  calcGrainSets(dealii::DoFHandler<dim>    &dof_handler,
                 vectorType                 *solution_field,
                 double                      threshold_lower,
                 double                      threshold_upper,

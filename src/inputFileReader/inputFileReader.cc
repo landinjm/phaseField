@@ -137,8 +137,9 @@ inputFileReader::get_subsection_entry_list(const std::string &parameters_file_na
   input_file.open(parameters_file_name);
 
   std::string               line, entry;
-  bool                      in_subsection = false;
-  bool                      found_entry, desired_entry_found;
+  bool                      in_subsection       = false;
+  bool                      found_entry         = false;
+  bool                      desired_entry_found = false;
   unsigned int              subsection_index;
   std::vector<std::string>  entry_list;
   std::vector<unsigned int> index_list;

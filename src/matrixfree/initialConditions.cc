@@ -23,7 +23,8 @@ public:
   {}
 
   double
-  value(const Point<dim> &p, const unsigned int component = 0) const override
+  value(const Point<dim>                   &p,
+        [[maybe_unused]] const unsigned int component = 0) const override
   {
     double scalar_IC;
 
@@ -119,8 +120,7 @@ MatrixFreePDE<dim, degree>::applyInitialConditions()
 
           std::vector<GrainSet<dim>> grain_sets_single_id;
 
-          flood_filler.calcGrainSets(*FESet.at(scalar_field_index),
-                                     *dofHandlersSet_nonconst.at(scalar_field_index),
+          flood_filler.calcGrainSets(*dofHandlersSet_nonconst.at(scalar_field_index),
                                      &grain_index_field,
                                      (double) id - userInputs.order_parameter_threshold,
                                      (double) id + userInputs.order_parameter_threshold,
@@ -215,8 +215,7 @@ MatrixFreePDE<dim, degree>::applyInitialConditions()
         &grain_index_field,
         solutionSet,
         *dofHandlersSet_nonconst.at(scalar_field_index),
-        FESet.at(scalar_field_index)->dofs_per_cell,
-        userInputs.buffer_between_grains);
+        FESet.at(scalar_field_index)->dofs_per_cell);
 
       // Smooth the order parameters according to Fick's 2nd Law
       // In the time cycle below, we evolve the weak form of Eq.:

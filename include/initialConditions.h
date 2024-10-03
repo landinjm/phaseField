@@ -32,7 +32,8 @@ public:
 
   // IC for scalar values
   double
-  value(const dealii::Point<dim> &p, const unsigned int component = 0) const override
+  value(const dealii::Point<dim>           &p,
+        [[maybe_unused]] const unsigned int component = 0) const override
   {
     double                 scalar_IC = 0.0;
     dealii::Vector<double> vector_IC(dim);

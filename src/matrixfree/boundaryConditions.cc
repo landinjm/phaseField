@@ -340,9 +340,9 @@ MatrixFreePDE<dim, degree>::getComponentsWithRigidBodyModes(
 template <int dim, int degree>
 void
 MatrixFreePDE<dim, degree>::setRigidBodyModeConstraints(
-  const std::vector<int>    &rigidBodyModeComponents,
-  AffineConstraints<double> *constraints,
-  const DoFHandler<dim>     *dof_handler) const
+  const std::vector<int>                     &rigidBodyModeComponents,
+  [[maybe_unused]] AffineConstraints<double> *constraints,
+  const DoFHandler<dim>                      *dof_handler) const
 {
   if (rigidBodyModeComponents.size() > 0)
     {

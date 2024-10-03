@@ -129,12 +129,10 @@ unitTest<dim, T>::test_OrderParameterRemapper()
 
   FloodFiller<dim, degree>   test_object(fe, quadrature2);
   std::vector<GrainSet<dim>> grain_sets_0;
-  test_object
-    .calcGrainSets(fe, dof_handler, solution_field_0, 0.1, 1.1, 0, 0, grain_sets_0);
+  test_object.calcGrainSets(dof_handler, solution_field_0, 0.1, 1.1, 0, 0, grain_sets_0);
 
   std::vector<GrainSet<dim>> grain_sets_1;
-  test_object
-    .calcGrainSets(fe, dof_handler, solution_field_1, 0.1, 1.1, 0, 1, grain_sets_1);
+  test_object.calcGrainSets(dof_handler, solution_field_1, 0.1, 1.1, 0, 1, grain_sets_1);
 
   std::vector<GrainSet<dim>> grain_sets = grain_sets_0;
   grain_sets.insert(grain_sets.end(), grain_sets_1.begin(), grain_sets_1.end());
@@ -166,8 +164,7 @@ unitTest<dim, T>::test_OrderParameterRemapper()
   order_parameter_remapper.remap(simplified_grain_representations,
                                  solution_fields,
                                  dof_handler,
-                                 fe.dofs_per_cell,
-                                 0.001);
+                                 fe.dofs_per_cell);
 
   // ---------- Check the result -----------
   pass = true;

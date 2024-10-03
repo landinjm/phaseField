@@ -4,8 +4,7 @@
 
 template <int dim, int degree>
 void
-FloodFiller<dim, degree>::calcGrainSets(dealii::FESystem<dim>      &fe,
-                                        dealii::DoFHandler<dim>    &dof_handler,
+FloodFiller<dim, degree>::calcGrainSets(dealii::DoFHandler<dim>    &dof_handler,
                                         vectorType                 *solution_field,
                                         double                      threshold_lower,
                                         double                      threshold_upper,

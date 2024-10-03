@@ -12,7 +12,7 @@ namespace PRISMS
 {
   class Quad_f : public PSimpleBase<std::vector<PRISMS::Coordinate<2>>, double>
   {
-    double
+    [[nodiscard]] double
     eval(const std::vector<PRISMS::Coordinate<2>> &var) const override
     {
       // var[0]: coordinate to be evaluated
@@ -33,7 +33,7 @@ namespace PRISMS
       this->_name = "Quad_f";
     }
 
-    Quad_f *
+    [[nodiscard]] Quad_f *
     clone() const override
     {
       return new Quad_f(*this);
@@ -42,7 +42,7 @@ namespace PRISMS
 
   class Quad_grad_0 : public PSimpleBase<std::vector<PRISMS::Coordinate<2>>, double>
   {
-    double
+    [[nodiscard]] double
     eval(const std::vector<PRISMS::Coordinate<2>> &var) const override
     {
       return -var[3][0] * (1.0 - var[3][1] * (var[0][1] - var[1][1]) / var[2][1]) /
@@ -55,7 +55,7 @@ namespace PRISMS
       this->_name = "Quad_grad_0";
     }
 
-    Quad_grad_0 *
+    [[nodiscard]] Quad_grad_0 *
     clone() const override
     {
       return new Quad_grad_0(*this);
@@ -64,7 +64,7 @@ namespace PRISMS
 
   class Quad_grad_1 : public PSimpleBase<std::vector<PRISMS::Coordinate<2>>, double>
   {
-    double
+    [[nodiscard]] double
     eval(const std::vector<PRISMS::Coordinate<2>> &var) const override
     {
       return -var[3][1] * (1.0 - var[3][0] * (var[0][0] - var[1][0]) / var[2][0]) /
@@ -77,7 +77,7 @@ namespace PRISMS
       this->_name = "Quad_grad_1";
     }
 
-    Quad_grad_1 *
+    [[nodiscard]] Quad_grad_1 *
     clone() const override
     {
       return new Quad_grad_1(*this);
@@ -86,8 +86,8 @@ namespace PRISMS
 
   class Quad_hess_0_0 : public PSimpleBase<std::vector<PRISMS::Coordinate<2>>, double>
   {
-    double
-    eval(const std::vector<PRISMS::Coordinate<2>> &var) const override
+    [[nodiscard]] double
+    eval([[maybe_unused]] const std::vector<PRISMS::Coordinate<2>> &var) const override
     {
       return 0.0;
     }
@@ -98,7 +98,7 @@ namespace PRISMS
       this->_name = "Quad_hess_0_0";
     }
 
-    Quad_hess_0_0 *
+    [[nodiscard]] Quad_hess_0_0 *
     clone() const override
     {
       return new Quad_hess_0_0(*this);
@@ -107,7 +107,7 @@ namespace PRISMS
 
   class Quad_hess_0_1 : public PSimpleBase<std::vector<PRISMS::Coordinate<2>>, double>
   {
-    double
+    [[nodiscard]] double
     eval(const std::vector<PRISMS::Coordinate<2>> &var) const override
     {
       return var[3][0] * var[3][1] / var[2][0] / var[2][1];
@@ -119,7 +119,7 @@ namespace PRISMS
       this->_name = "Quad_hess_0_1";
     }
 
-    Quad_hess_0_1 *
+    [[nodiscard]] Quad_hess_0_1 *
     clone() const override
     {
       return new Quad_hess_0_1(*this);
@@ -128,7 +128,7 @@ namespace PRISMS
 
   class Quad_hess_1_0 : public PSimpleBase<std::vector<PRISMS::Coordinate<2>>, double>
   {
-    double
+    [[nodiscard]] double
     eval(const std::vector<PRISMS::Coordinate<2>> &var) const override
     {
       return var[3][0] * var[3][1] / var[2][0] / var[2][1];
@@ -140,7 +140,7 @@ namespace PRISMS
       this->_name = "Quad_hess_1_0";
     }
 
-    Quad_hess_1_0 *
+    [[nodiscard]] Quad_hess_1_0 *
     clone() const override
     {
       return new Quad_hess_1_0(*this);
@@ -149,8 +149,8 @@ namespace PRISMS
 
   class Quad_hess_1_1 : public PSimpleBase<std::vector<PRISMS::Coordinate<2>>, double>
   {
-    double
-    eval(const std::vector<PRISMS::Coordinate<2>> &var) const override
+    [[nodiscard]] double
+    eval([[maybe_unused]] const std::vector<PRISMS::Coordinate<2>> &var) const override
     {
       return 0.0;
     }
@@ -161,7 +161,7 @@ namespace PRISMS
       this->_name = "Quad_hess_1_1";
     }
 
-    Quad_hess_1_1 *
+    [[nodiscard]] Quad_hess_1_1 *
     clone() const override
     {
       return new Quad_hess_1_1(*this);
@@ -175,7 +175,7 @@ namespace PRISMS
     PSimpleBase<std::vector<PRISMS::Coordinate<2>>, double> ***_hess_val;
 
   public:
-    typedef PFuncBase<std::vector<PRISMS::Coordinate<2>>, double>::size_type size_type;
+    using size_type = PFuncBase<std::vector<PRISMS::Coordinate<2>>, double>::size_type;
 
     Quad()
       : PFuncBase<std::vector<PRISMS::Coordinate<2>>, double>()
@@ -206,29 +206,28 @@ namespace PRISMS
       delete[] _hess_val;
     }
 
-    Quad *
+    [[nodiscard]] Quad *
     clone() const override
     {
       return new Quad(*this);
     }
 
-    PSimpleFunction<std::vector<PRISMS::Coordinate<2>>, double>
+    [[nodiscard]] PSimpleFunction<std::vector<PRISMS::Coordinate<2>>, double>
     simplefunction() const override
     {
-      return PSimpleFunction<std::vector<PRISMS::Coordinate<2>>, double>(*_val);
+      return {*_val};
     }
 
-    PSimpleFunction<std::vector<PRISMS::Coordinate<2>>, double>
+    [[nodiscard]] PSimpleFunction<std::vector<PRISMS::Coordinate<2>>, double>
     grad_simplefunction(size_type di) const override
     {
-      return PSimpleFunction<std::vector<PRISMS::Coordinate<2>>, double>(*_grad_val[di]);
+      return {*_grad_val[di]};
     }
 
-    PSimpleFunction<std::vector<PRISMS::Coordinate<2>>, double>
+    [[nodiscard]] PSimpleFunction<std::vector<PRISMS::Coordinate<2>>, double>
     hess_simplefunction(size_type di, size_type dj) const override
     {
-      return PSimpleFunction<std::vector<PRISMS::Coordinate<2>>, double>(
-        *_hess_val[di][dj]);
+      return {*_hess_val[di][dj]};
     }
 
     double
@@ -279,13 +278,13 @@ namespace PRISMS
       return (*_val)();
     }
 
-    double
+    [[nodiscard]] double
     grad(size_type di) const override
     {
       return (*_grad_val[di])();
     }
 
-    double
+    [[nodiscard]] double
     hess(size_type di, size_type dj) const override
     {
       return (*_hess_val[di][dj])();
@@ -297,15 +296,15 @@ namespace PRISMS
     {
       this->_name = "Quad";
       this->_var_name.clear();
-      this->_var_name.push_back("r");
-      this->_var_name.push_back("n");
-      this->_var_name.push_back("h");
-      this->_var_name.push_back("s");
+      this->_var_name.emplace_back("r");
+      this->_var_name.emplace_back("n");
+      this->_var_name.emplace_back("h");
+      this->_var_name.emplace_back("s");
       this->_var_description.clear();
-      this->_var_description.push_back("Coordinate to be evaluated (Cartesian)");
-      this->_var_description.push_back("Coordinate of node");
-      this->_var_description.push_back("Coordinate containing element dimensions");
-      this->_var_description.push_back(
+      this->_var_description.emplace_back("Coordinate to be evaluated (Cartesian)");
+      this->_var_description.emplace_back("Coordinate of node");
+      this->_var_description.emplace_back("Coordinate containing element dimensions");
+      this->_var_description.emplace_back(
         "Coordinate containing +/- 1.0, depending on which corner of quad element");
 
       _val = new Quad_f();
@@ -336,7 +335,7 @@ namespace PRISMS
     std::vector<PRISMS::Coordinate<2>> _var;
 
   public:
-    typedef typename Interpolator<Coordinate, 2>::size_type size_type;
+    using size_type = typename Interpolator<Coordinate, 2>::size_type;
 
     // node_index: index of node in mesh
     // node_index: index of element in mesh
@@ -396,7 +395,7 @@ namespace PRISMS
         }
     }
 
-    PRISMS::Coordinate<2>
+    [[nodiscard]] PRISMS::Coordinate<2>
     min() const override
     {
       PRISMS::Coordinate<2> coord = _var[1];
@@ -409,7 +408,7 @@ namespace PRISMS
       return coord;
     }
 
-    PRISMS::Coordinate<2>
+    [[nodiscard]] PRISMS::Coordinate<2>
     max() const override
     {
       PRISMS::Coordinate<2> coord = _var[1];
