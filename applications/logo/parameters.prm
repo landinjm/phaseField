@@ -25,7 +25,7 @@ set Subdivisions Z = 3
 set Refine factor = 6
 
 # Set the polynomial degree of the element (allowed values: 1, 2, or 3)
-set Element degree = 2
+set Element degree = 3
 
 # =================================================================================
 # Set the adaptive mesh refinement parameters
@@ -61,7 +61,7 @@ set Time step = 0.001
 
 # The simulation ends when either the number of time steps is reached or the
 # simulation time is reached.
-set Simulation end time = 1000.0
+set Simulation end time = 100.0
 
 # =================================================================================
 # Set the boundary conditions
