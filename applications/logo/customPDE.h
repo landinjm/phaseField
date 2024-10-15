@@ -107,14 +107,16 @@ customPDE<dim, degree>::makeTriangulation(
 
   // Create spherical manifold
   const Point<dim> mesh_center;
-  const double     core_radius  = userInputs.domain_size[0] / 5.0;
-  const double     inner_radius = userInputs.domain_size[0] / 3.0;
+  const double     core_radius  = userInputs.domain_size[0] / 3.0;
+  const double     inner_radius = userInputs.domain_size[0] / 2.0;
   for (const auto &cell : tria.active_cell_iterators())
     {
       if (mesh_center.distance(cell->center()) < 1e-5)
         {
           for (const auto v : cell->vertex_indices())
-            cell->vertex(v) *= core_radius / mesh_center.distance(cell->vertex(v));
+            {
+              cell->vertex(v) *= core_radius / mesh_center.distance(cell->vertex(v));
+            }
         }
     }
 
@@ -141,11 +143,13 @@ customPDE<dim, degree>::makeTriangulation(
     {
       bool is_in_inner_circle = false;
       for (const auto v : cell->vertex_indices())
-        if (mesh_center.distance(cell->vertex(v)) < inner_radius)
-          {
-            is_in_inner_circle = true;
-            break;
-          }
+        {
+          if (mesh_center.distance(cell->vertex(v)) < inner_radius)
+            {
+              is_in_inner_circle = true;
+              break;
+            }
+        }
       if (is_in_inner_circle == false)
         {
           cell->set_all_manifold_ids(0);
