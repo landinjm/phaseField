@@ -22,7 +22,9 @@ variableAttributeLoader::loadVariableAttributes()
   set_variable_equation_type(0, IMPLICIT_TIME_DEPENDENT);
 
   set_dependencies_value_term_RHS(0, "n, old(n), grad(n)");
+  set_dependencies_gradient_term_RHS(0, "n, old(n), grad(n)");
   set_dependencies_value_term_LHS(0, "change(n), grad(change(n))");
+  set_dependencies_gradient_term_LHS(0, "change(n), grad(change(n))");
 }
 
 // =============================================================================================
@@ -81,11 +83,19 @@ customPDE<dim, degree>::nonExplicitEquationRHS(
   // Norm of the local velocity
   scalarvalueType u_l2norm = 1.0e-12 + vel.norm_square();
 
+  // Stabilization parameter
+  scalarvalueType h = std::sqrt(element_volume) * constV(std::sqrt(4.0 / M_PI) / degree);
+  scalarvalueType stabilization_parameter =
+    constV(1.0) / std::sqrt(constV(dealii::Utilities::fixed_power<2>(sdt)) +
+                            constV(4.0) * u_l2norm / h / h);
+
   // Submission terms
   scalarvalueType residual = (n_old - n - constV(userInputs.dtValue) * vel * nx);
   scalarvalueType eq_n     = residual;
+  scalargradType  eqx_n    = residual * stabilization_parameter * vel;
 
   variable_list.set_scalar_value_term_RHS(0, eq_n);
+  variable_list.set_scalar_gradient_term_RHS(0, eqx_n);
 }
 
 // =============================================================================================
@@ -124,9 +134,17 @@ customPDE<dim, degree>::equationLHS(
   // Norm of the local velocity
   scalarvalueType u_l2norm = 1.0e-12 + vel.norm_square();
 
+  // Stabilization parameter
+  scalarvalueType h = std::sqrt(element_volume) * constV(std::sqrt(4.0 / M_PI) / degree);
+  scalarvalueType stabilization_parameter =
+    constV(1.0) / std::sqrt(constV(dealii::Utilities::fixed_power<2>(sdt)) +
+                            constV(4.0) * u_l2norm / h / h);
+
   // Submission terms
   scalarvalueType residual = (change_n + constV(userInputs.dtValue) * vel * change_nx);
   scalarvalueType eq_n     = residual;
+  scalargradType  eqx_n    = residual * stabilization_parameter * vel;
 
-  variable_list.set_scalar_value_term_LHS(0, eq_n);
+  variable_list.set_scalar_value_term_RHS(0, eq_n);
+  variable_list.set_scalar_gradient_term_RHS(0, eqx_n);
 }

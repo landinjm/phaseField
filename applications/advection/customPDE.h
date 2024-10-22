@@ -90,5 +90,8 @@ private:
   dealii::Tensor<1, dim> velocity =
     userInputs.get_model_constant_rank_1_tensor("velocity");
 
+  // 1/dt
+  double sdt = 1.0 / userInputs.dtValue;
+
   // ================================================================
 };

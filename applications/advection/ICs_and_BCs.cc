@@ -18,7 +18,7 @@ customPDE<dim, degree>::setInitialCondition([[maybe_unused]] const Point<dim>  &
   // according to its variable index
 
   // Sphere level-set
-  double             radius = 15.0;
+  double             radius = 10.0;
   dealii::Point<dim> center(20.0, 20.0);
 
   dealii::Functions::SignedDistance::Sphere<dim> sphere(center, radius);
