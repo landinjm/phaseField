@@ -115,6 +115,35 @@ variableContainer<dim, degree, T>::variableContainer(
     }
 }
 
+template <int dim, int degree, typename T>
+variableContainer<dim, degree, T>::variableContainer(
+  const dealii::MatrixFree<dim, double> &data,
+  const std::vector<variable_info>      &_varInfoList)
+  : varInfoList(_varInfoList)
+  , num_var(varInfoList.size())
+{
+  for (unsigned int i = 0; i < num_var; i++)
+    {
+      const auto &var_info = varInfoList[i];
+
+      if (var_info.var_needed)
+        {
+          const unsigned int var_index = var_info.global_var_index;
+
+          if (var_info.is_scalar)
+            {
+              scalar_vars_map.emplace(var_index,
+                                      std::make_unique<scalar_FEEval>(data, i));
+            }
+          else
+            {
+              vector_vars_map.emplace(var_index,
+                                      std::make_unique<vector_FEEval>(data, i));
+            }
+        }
+    }
+}
+
 // Variant of the constructor where it reads from a fixed index of "data", used
 // for post-processing
 template <int dim, int degree, typename T>
@@ -270,33 +299,33 @@ variableContainer<dim, degree, T>::reinit_and_eval_change_in_solution(
 template <int dim, int degree, typename T>
 void
 variableContainer<dim, degree, T>::reinit_and_eval_old_solution(
-  const std::vector<vectorType *> &src,
-  unsigned int                     cell)
+  const boost::unordered_map<unsigned int, std::unique_ptr<vectorType>> &src,
+  unsigned int                                                           cell)
 {
   for (unsigned int i = 0; i < num_var; i++)
     {
-      const auto &var_old_info = varOldInfoList[i];
+      const auto &var_info = varOldInfoList[i];
 
-      if (!var_old_info.var_needed)
+      if (!var_info.var_needed)
         {
           continue;
         }
 
-      const unsigned int var_index = var_old_info.global_var_index;
+      const unsigned int var_index = var_info.global_var_index;
 
-      if (var_old_info.is_scalar)
+      if (var_info.is_scalar)
         {
           auto *scalar_FEEval_ptr = scalar_old_vars_map[var_index].get();
           scalar_FEEval_ptr->reinit(cell);
-          scalar_FEEval_ptr->read_dof_values(*src[i]);
-          scalar_FEEval_ptr->evaluate(var_old_info.evaluation_flags);
+          scalar_FEEval_ptr->read_dof_values(*src.at(i));
+          scalar_FEEval_ptr->evaluate(var_info.evaluation_flags);
         }
       else
         {
           auto *vector_FEEval_ptr = vector_old_vars_map[var_index].get();
           vector_FEEval_ptr->reinit(cell);
-          vector_FEEval_ptr->read_dof_values(*src[i]);
-          vector_FEEval_ptr->evaluate(var_old_info.evaluation_flags);
+          vector_FEEval_ptr->read_dof_values(*src.at(i));
+          vector_FEEval_ptr->evaluate(var_info.evaluation_flags);
         }
     }
 }

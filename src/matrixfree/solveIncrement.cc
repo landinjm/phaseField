@@ -14,9 +14,6 @@ MatrixFreePDE<dim, degree>::solveIncrement(bool skip_time_dependent)
   Timer time;
   char  buffer[200];
 
-  // Copy solution vectors
-  copy_solution_vectors(solutionSet, solutionSet_previous);
-
   // Get the RHS of the explicit equations
   if (hasExplicitEquation && !skip_time_dependent)
     {
@@ -207,6 +204,9 @@ MatrixFreePDE<dim, degree>::solveIncrement(bool skip_time_dependent)
           nonlinear_it_index++;
         }
     }
+
+  // Copy solution vectors
+  copy_solution_vectors(solutionSet, solutionSet_previous);
 
   if (currentIncrement % userInputs.skip_print_steps == 0)
     {
@@ -565,12 +565,7 @@ MatrixFreePDE<dim, degree>::copy_solution_vectors(
         }
 
       // Copy the solution vector.
-      for (unsigned int dof = 0; dof < solutionSet[fieldIndex]->locally_owned_size();
-           ++dof)
-        {
-          solutionSet_previous[fieldIndex]->local_element(dof) =
-            solutionSet[fieldIndex]->local_element(dof);
-        }
+      *solutionSet_previous[fieldIndex] = *solutionSet[fieldIndex];
     }
 }
 

@@ -61,7 +61,7 @@ MatrixFreePDE<dim, degree>::getLHS(
     data,
     userInputs.varInfoListLHS,
     userInputs.varChangeInfoListLHS,
-    userInputs.varInfoList_old_LHS);
+    userInputs.varInfoList_nonexplicit_old_LHS);
 
   // loop over cells
   for (unsigned int cell = cell_range.first; cell < cell_range.second; ++cell)
@@ -69,7 +69,11 @@ MatrixFreePDE<dim, degree>::getLHS(
       // Initialize, read DOFs, and set evaulation flags for each variable
       variable_list.reinit_and_eval(solutionSet, cell);
       variable_list.reinit_and_eval_change_in_solution(src, cell, currentFieldIndex);
-      variable_list.reinit_and_eval_old_solution(solutionSet, cell);
+
+      if (userInputs.varInfoListNonexplicitRHS[currentFieldIndex].is_implicit)
+        {
+          variable_list.reinit_and_eval_old_solution(solutionSet_previous, cell);
+        }
 
       unsigned int num_q_points = variable_list.get_num_q_points();
 

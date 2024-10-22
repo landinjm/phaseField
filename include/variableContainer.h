@@ -33,11 +33,17 @@ public:
                     const std::vector<variable_info>      &_varOldInfoList);
 
   /**
-   * \brief Standard constructor for explicit & nonexplicit RHS
+   * \brief Standard constructor for nonexplicit RHS
    */
   variableContainer(const dealii::MatrixFree<dim, double> &data,
                     const std::vector<variable_info>      &_varInfoList,
                     const std::vector<variable_info>      &_varOldInfoList);
+
+  /**
+   * \brief Standard constructor for explicit RHS
+   */
+  variableContainer(const dealii::MatrixFree<dim, double> &data,
+                    const std::vector<variable_info>      &_varInfoList);
 
   /**
    * \brief Nonstandard constructor for postprocessing when only one index of "data"
@@ -299,7 +305,9 @@ public:
    * \param cell The cell where this is done.
    */
   void
-  reinit_and_eval_old_solution(const std::vector<vectorType *> &src, unsigned int cell);
+  reinit_and_eval_old_solution(
+    const boost::unordered_map<unsigned int, std::unique_ptr<vectorType>> &src,
+    unsigned int                                                           cell);
 
   /**
    * Initialize the FEEvaluation object for each variable for post-processing since

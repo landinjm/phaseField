@@ -1,5 +1,8 @@
 // solve() method for MatrixFreePDE class
 
+#include <deal.II/numerics/vector_tools_interpolate.h>
+
+#include "../../include/initialConditions.h"
 #include "../../include/matrixFreePDE.h"
 
 // solve BVP
@@ -10,6 +13,34 @@ MatrixFreePDE<dim, degree>::solve()
   // log time
   computing_timer.enter_subsection("matrixFreePDE: solve");
   pcout << "\nsolving...\n\n";
+
+  // Copy initial condition for old solutions
+  for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++)
+    {
+      // Skip the copy if not tracking prior solutions for the variable index.
+      if (solutionSet_previous.find(fieldIndex) == solutionSet_previous.end())
+        {
+          continue;
+        }
+
+      // Interpolate initial condition
+      if (userInputs.var_type[fieldIndex] == SCALAR)
+        {
+          VectorTools::interpolate(*dofHandlersSet[fieldIndex],
+                                   InitialCondition<dim, degree>(fieldIndex,
+                                                                 userInputs,
+                                                                 this),
+                                   *solutionSet_previous[fieldIndex]);
+        }
+      else if (userInputs.var_type[fieldIndex] == VECTOR)
+        {
+          VectorTools::interpolate(*dofHandlersSet[fieldIndex],
+                                   InitialConditionVector<dim, degree>(fieldIndex,
+                                                                       userInputs,
+                                                                       this),
+                                   *solutionSet_previous[fieldIndex]);
+        }
+    }
 
   // time dependent BVP
   if (isTimeDependentBVP)

@@ -32,15 +32,13 @@ MatrixFreePDE<dim, degree>::getExplicitRHS(
 {
   variableContainer<dim, degree, dealii::VectorizedArray<double>> variable_list(
     data,
-    userInputs.varInfoListExplicitRHS,
-    userInputs.varInfoList_old_RHS);
+    userInputs.varInfoListExplicitRHS);
 
   // loop over cells
   for (unsigned int cell = cell_range.first; cell < cell_range.second; ++cell)
     {
       // Initialize, read DOFs, and set evaulation flags for each variable
       variable_list.reinit_and_eval(src, cell);
-      variable_list.reinit_and_eval_old_solution(src, cell);
 
       unsigned int num_q_points = variable_list.get_num_q_points();
 
@@ -92,14 +90,18 @@ MatrixFreePDE<dim, degree>::getNonexplicitRHS(
   variableContainer<dim, degree, dealii::VectorizedArray<double>> variable_list(
     data,
     userInputs.varInfoListNonexplicitRHS,
-    userInputs.varInfoList_old_RHS);
+    userInputs.varInfoList_nonexplicit_old_RHS);
 
   // loop over cells
   for (unsigned int cell = cell_range.first; cell < cell_range.second; ++cell)
     {
       // Initialize, read DOFs, and set evaulation flags for each variable
       variable_list.reinit_and_eval(src, cell);
-      variable_list.reinit_and_eval_old_solution(src, cell);
+
+      if (userInputs.varInfoListNonexplicitRHS[currentFieldIndex].is_implicit)
+        {
+          variable_list.reinit_and_eval_old_solution(solutionSet_previous, cell);
+        }
 
       unsigned int num_q_points = variable_list.get_num_q_points();
 

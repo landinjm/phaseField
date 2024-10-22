@@ -88,12 +88,12 @@ customPDE<dim, degree>::nonExplicitEquationRHS(
   scalarvalueType stabilization_parameter =
     constV(1.0) / std::sqrt(constV(dealii::Utilities::fixed_power<2>(sdt)) +
                             constV(4.0) * u_l2norm / h / h);
-
+  stabilization_parameter = constV(0.0);
   // Submission terms
   scalarvalueType residual = (n_old - n - constV(userInputs.dtValue) * vel * nx);
   scalarvalueType eq_n     = residual;
   scalargradType  eqx_n    = residual * stabilization_parameter * vel;
-
+  eq_n                     = n_old - n + constV(0.1);
   variable_list.set_scalar_value_term_RHS(0, eq_n);
   variable_list.set_scalar_gradient_term_RHS(0, eqx_n);
 }
@@ -139,12 +139,12 @@ customPDE<dim, degree>::equationLHS(
   scalarvalueType stabilization_parameter =
     constV(1.0) / std::sqrt(constV(dealii::Utilities::fixed_power<2>(sdt)) +
                             constV(4.0) * u_l2norm / h / h);
-
+  stabilization_parameter = constV(0.0);
   // Submission terms
   scalarvalueType residual = (change_n + constV(userInputs.dtValue) * vel * change_nx);
   scalarvalueType eq_n     = residual;
   scalargradType  eqx_n    = residual * stabilization_parameter * vel;
-
+  eq_n                     = change_n;
   variable_list.set_scalar_value_term_RHS(0, eq_n);
   variable_list.set_scalar_gradient_term_RHS(0, eqx_n);
 }

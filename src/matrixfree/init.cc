@@ -271,7 +271,7 @@ MatrixFreePDE<dim, degree>::init()
 
       // If the equation type is implicit initialize a solution vector for the previous
       // timestep. In the future, we should support arbitrary saving of old timesteps.
-      if (fields[fieldIndex].pdetype == TIME_INDEPENDENT)
+      if (fields[fieldIndex].pdetype == IMPLICIT_TIME_DEPENDENT)
         {
           std::unique_ptr<vectorType> U_previous = std::make_unique<vectorType>();
           solutionSet_previous.emplace(fieldIndex, std::move(U_previous));

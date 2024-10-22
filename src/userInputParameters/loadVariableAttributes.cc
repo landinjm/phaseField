@@ -110,7 +110,7 @@ userInputParameters<dim>::loadVariableAttributes(
           num_var_old_RHS++;
         }
     }
-  varInfoList_old_RHS.reserve(num_var_old_RHS);
+  varInfoList_nonexplicit_old_RHS.reserve(num_var_old_RHS);
   for (unsigned int i = 0; i < number_of_variables; i++)
     {
       variable_info varInfo;
@@ -127,7 +127,7 @@ userInputParameters<dim>::loadVariableAttributes(
 
       varInfo.is_scalar = var_type[i] == SCALAR;
 
-      varInfoList_old_RHS.push_back(varInfo);
+      varInfoList_nonexplicit_old_RHS.push_back(varInfo);
     }
 
   // Load variable information for calculating the LHS for nonexplicit equations
@@ -194,7 +194,7 @@ userInputParameters<dim>::loadVariableAttributes(
           num_var_old_LHS++;
         }
     }
-  varInfoList_old_LHS.reserve(num_var_old_LHS);
+  varInfoList_nonexplicit_old_LHS.reserve(num_var_old_LHS);
   for (unsigned int i = 0; i < number_of_variables; i++)
     {
       variable_info varInfo;
@@ -211,7 +211,7 @@ userInputParameters<dim>::loadVariableAttributes(
 
       varInfo.is_scalar = var_type[i] == SCALAR;
 
-      varInfoList_old_LHS.push_back(varInfo);
+      varInfoList_nonexplicit_old_LHS.push_back(varInfo);
     }
 
   // Load variable information for postprocessing

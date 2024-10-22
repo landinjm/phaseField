@@ -129,7 +129,7 @@ MatrixFreePDE<dim, degree>::reinit()
 
       // If the equation type is implicit reinitialize a solution vector for the previous
       // timestep. In the future, we should support arbitrary saving of old timesteps.
-      if (fields[fieldIndex].pdetype == TIME_INDEPENDENT)
+      if (fields[fieldIndex].pdetype == IMPLICIT_TIME_DEPENDENT)
         {
           matrixFreeObject.initialize_dof_vector(*solutionSet_previous[fieldIndex],
                                                  fieldIndex);
