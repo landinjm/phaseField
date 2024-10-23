@@ -254,6 +254,10 @@ variableContainer<dim, degree, T>::reinit_and_eval(const std::vector<vectorType 
 
       if (var_info.is_scalar)
         {
+          Assert(scalar_vars_map.find(var_index) != scalar_vars_map.end(),
+                 dealii::ExcMessage(
+                   "PRISMS-PF Error: Invalid index for accessing scalar_vars_map."));
+
           auto *scalar_FEEval_ptr = scalar_vars_map[var_index].get();
           scalar_FEEval_ptr->reinit(cell);
           scalar_FEEval_ptr->read_dof_values(*src[i]);
@@ -261,6 +265,10 @@ variableContainer<dim, degree, T>::reinit_and_eval(const std::vector<vectorType 
         }
       else
         {
+          Assert(vector_vars_map.find(var_index) != vector_vars_map.end(),
+                 dealii::ExcMessage(
+                   "PRISMS-PF Error: Invalid index for accessing vector_vars_map."));
+
           auto *vector_FEEval_ptr = vector_vars_map[var_index].get();
           vector_FEEval_ptr->reinit(cell);
           vector_FEEval_ptr->read_dof_values(*src[i]);
@@ -282,6 +290,12 @@ variableContainer<dim, degree, T>::reinit_and_eval_change_in_solution(
 {
   if (varChangeInfoList[var_being_solved].is_scalar)
     {
+      Assert(
+        scalar_change_in_vars_map.find(var_being_solved) !=
+          scalar_change_in_vars_map.end(),
+        dealii::ExcMessage(
+          "PRISMS-PF Error: Invalid index for accessing scalar_change_in_vars_map."));
+
       auto *scalar_FEEval_ptr = scalar_change_in_vars_map[var_being_solved].get();
       scalar_FEEval_ptr->reinit(cell);
       scalar_FEEval_ptr->read_dof_values(src);
@@ -289,6 +303,12 @@ variableContainer<dim, degree, T>::reinit_and_eval_change_in_solution(
     }
   else
     {
+      Assert(
+        vector_change_in_vars_map.find(var_being_solved) !=
+          vector_change_in_vars_map.end(),
+        dealii::ExcMessage(
+          "PRISMS-PF Error: Invalid index for accessing vector_change_in_vars_map."));
+
       auto *vector_FEEval_ptr = vector_change_in_vars_map[var_being_solved].get();
       vector_FEEval_ptr->reinit(cell);
       vector_FEEval_ptr->read_dof_values(src);
@@ -316,6 +336,10 @@ variableContainer<dim, degree, T>::reinit_and_eval_old_solution(
 
       if (field_info.is_scalar)
         {
+          Assert(scalar_old_vars_map.find(field_index) != scalar_old_vars_map.end(),
+                 dealii::ExcMessage(
+                   "PRISMS-PF Error: Invalid index for accessing scalar_old_vars_map."));
+
           auto *scalar_FEEval_ptr = scalar_old_vars_map[field_index].get();
           scalar_FEEval_ptr->reinit(cell);
           scalar_FEEval_ptr->read_dof_values(*old_solution_field);
@@ -323,6 +347,10 @@ variableContainer<dim, degree, T>::reinit_and_eval_old_solution(
         }
       else
         {
+          Assert(vector_old_vars_map.find(field_index) != vector_old_vars_map.end(),
+                 dealii::ExcMessage(
+                   "PRISMS-PF Error: Invalid index for accessing vector_old_vars_map."));
+
           auto *vector_FEEval_ptr = vector_old_vars_map[field_index].get();
           vector_FEEval_ptr->reinit(cell);
           vector_FEEval_ptr->read_dof_values(*old_solution_field);
@@ -348,10 +376,18 @@ variableContainer<dim, degree, T>::reinit(unsigned int cell)
 
       if (var_info.is_scalar)
         {
+          Assert(scalar_vars_map.find(var_index) != scalar_vars_map.end(),
+                 dealii::ExcMessage(
+                   "PRISMS-PF Error: Invalid index for accessing scalar_vars_map."));
+
           scalar_vars_map[var_index]->reinit(cell);
         }
       else
         {
+          Assert(vector_vars_map.find(var_index) != vector_vars_map.end(),
+                 dealii::ExcMessage(
+                   "PRISMS-PF Error: Invalid index for accessing vector_vars_map."));
+
           vector_vars_map[var_index]->reinit(cell);
         }
     }
@@ -375,12 +411,20 @@ variableContainer<dim, degree, T>::integrate_and_distribute(
 
       if (var_info.is_scalar)
         {
+          Assert(scalar_vars_map.find(var_index) != scalar_vars_map.end(),
+                 dealii::ExcMessage(
+                   "PRISMS-PF Error: Invalid index for accessing scalar_vars_map."));
+
           auto *scalar_FEEval_ptr = scalar_vars_map[var_index].get();
           scalar_FEEval_ptr->integrate(var_info.residual_flags);
           scalar_FEEval_ptr->distribute_local_to_global(*dst[i]);
         }
       else
         {
+          Assert(vector_vars_map.find(var_index) != vector_vars_map.end(),
+                 dealii::ExcMessage(
+                   "PRISMS-PF Error: Invalid index for accessing vector_vars_map."));
+
           auto *vector_FEEval_ptr = vector_vars_map[var_index].get();
           vector_FEEval_ptr->integrate(var_info.residual_flags);
           vector_FEEval_ptr->distribute_local_to_global(*dst[i]);
@@ -397,12 +441,24 @@ variableContainer<dim, degree, T>::integrate_and_distribute_change_in_solution_L
   // integrate
   if (varChangeInfoList[var_being_solved].is_scalar)
     {
+      Assert(
+        scalar_change_in_vars_map.find(var_being_solved) !=
+          scalar_change_in_vars_map.end(),
+        dealii::ExcMessage(
+          "PRISMS-PF Error: Invalid index for accessing scalar_change_in_vars_map."));
+
       auto *scalar_FEEval_ptr = scalar_change_in_vars_map[var_being_solved].get();
       scalar_FEEval_ptr->integrate(varChangeInfoList[var_being_solved].residual_flags);
       scalar_FEEval_ptr->distribute_local_to_global(dst);
     }
   else
     {
+      Assert(
+        vector_change_in_vars_map.find(var_being_solved) !=
+          vector_change_in_vars_map.end(),
+        dealii::ExcMessage(
+          "PRISMS-PF Error: Invalid index for accessing vector_change_in_vars_map."));
+
       auto *vector_FEEval_ptr = vector_change_in_vars_map[var_being_solved].get();
       vector_FEEval_ptr->integrate(varChangeInfoList[var_being_solved].residual_flags);
       vector_FEEval_ptr->distribute_local_to_global(dst);
