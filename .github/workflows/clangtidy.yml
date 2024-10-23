@@ -48,12 +48,6 @@ jobs:
             chmod +x llvm.sh
             ./llvm.sh 16
 
-        - name: Set up clang-tidy-16 and clang-16
-          run: |
-            update-alternatives --install /usr/bin/clang clang /usr/lib/llvm-16/bin/clang 100
-            update-alternatives --install /usr/bin/clang++ clang++ /usr/lib/llvm-16/bin/clang++ 100
-            update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/lib/llvm-16/bin/clang-tidy 100
-
         - name: Run clang-tidy
           run: |
             ./utilities/clang_tidy.sh .
