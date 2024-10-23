@@ -50,7 +50,7 @@ jobs:
 
         - name: Set up path for llvm-16.0.0
           run: |
-            "/usr/lib/llvm-16/bin" >> $GITHUB_PATH
+            echo "/usr/lib/llvm-16/bin" >> "$GITHUB_PATH"
             echo "Current PATH: $PATH"
             /usr/lib/llvm-16/bin/clang --version
             /usr/lib/llvm-16/bin/clang++ --version
