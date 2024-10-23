@@ -33,7 +33,7 @@ jobs:
           with:
             fetch-depth: 30
 
-        - name: Cache llvm-16.0.0 installation
+        - name: Cache llvm-16 installation
           uses: actions/cache@v3
           with:
             path: /usr/lib/llvm-16
@@ -41,21 +41,16 @@ jobs:
             restore-keys: |
               ${{ runner.os }}-llvm
 
-        - name: Install llvm-16.0.0
+        - name: Install llvm-16
           if: steps.cache.outputs.cache-hit != 'true'
           run: |
             wget https://apt.llvm.org/llvm.sh
             chmod +x llvm.sh
             ./llvm.sh 16
 
-        - name: Set up path for llvm-16.0.0
+        - name: Set up path for llvm-16
           run: |
             echo "/usr/lib/llvm-16/bin" >> "$GITHUB_PATH"
-            echo "Current PATH: $PATH"
-            which clang
-            which clang++
-            which clang-tidy
-
 
         - name: Run clang-tidy
           run: |
