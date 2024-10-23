@@ -33,12 +33,26 @@ jobs:
           with:
             fetch-depth: 30
 
-        - name: Download dependencies
+        - name: Cache llvm-16.0.0 installation
+          uses: actions/cache@v3
+          with:
+            path: /usr/lib/llvm-16
+            key: ${{ runner.os }}-llvm-16
+            restore-keys: |
+              ${{ runner.os }}-llvm
+
+        - name: Install llvm-16.0.0
+          if: steps.cache.outputs.cache-hit != 'true'
           run: |
-            apt-get update
-            apt-get install -y \
-                clang-tidy-16  \
-                clang-16
+            wget https://apt.llvm.org/llvm.sh
+            chmod +x llvm.sh
+            ./llvm.sh 16
+
+        - name: Set up clang-tidy-16 and clang-16
+          run: |
+            update-alternatives --install /usr/bin/clang clang /usr/lib/llvm-16/bin/clang 100
+            update-alternatives --install /usr/bin/clang++ clang++ /usr/lib/llvm-16/bin/clang++ 100
+            update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/lib/llvm-16/bin/clang-tidy 100
 
         - name: Run clang-tidy
           run: |
