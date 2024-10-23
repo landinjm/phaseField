@@ -52,9 +52,9 @@ jobs:
           run: |
             echo "/usr/lib/llvm-16/bin" >> "$GITHUB_PATH"
             echo "Current PATH: $PATH"
-            /usr/lib/llvm-16/bin/clang --version
-            /usr/lib/llvm-16/bin/clang++ --version
-            /usr/lib/llvm-16/bin/clang-tidy --version
+            which clang
+            which clang++
+            which clang-tidy
 
 
         - name: Run clang-tidy
