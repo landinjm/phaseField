@@ -49,7 +49,13 @@ jobs:
             ./llvm.sh 16
 
         - name: Set up path for llvm-16.0.0
-          run: echo "/usr/lib/llvm-16/bin" >> $GITHUB_PATH
+          run: |
+            echo "/usr/lib/llvm-16/bin" >> $GITHUB_PATH
+            echo "Current PATH: $PATH"
+            /usr/lib/llvm-16/bin/clang --version
+            /usr/lib/llvm-16/bin/clang++ --version
+            /usr/lib/llvm-16/bin/clang-tidy --version
+
 
         - name: Run clang-tidy
           run: |
