@@ -96,12 +96,8 @@ MatrixFreePDE<dim, degree>::getNonexplicitRHS(
   for (unsigned int cell = cell_range.first; cell < cell_range.second; ++cell)
     {
       // Initialize, read DOFs, and set evaulation flags for each variable
+      variable_list.reinit_and_eval_old_solution(solutionSet_previous, cell);
       variable_list.reinit_and_eval(src, cell);
-
-      if (userInputs.varInfoListNonexplicitRHS[currentFieldIndex].is_implicit)
-        {
-          variable_list.reinit_and_eval_old_solution(solutionSet_previous, cell);
-        }
 
       unsigned int num_q_points = variable_list.get_num_q_points();
 

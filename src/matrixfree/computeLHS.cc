@@ -68,12 +68,8 @@ MatrixFreePDE<dim, degree>::getLHS(
     {
       // Initialize, read DOFs, and set evaulation flags for each variable
       variable_list.reinit_and_eval(solutionSet, cell);
+      variable_list.reinit_and_eval_old_solution(solutionSet_previous, cell);
       variable_list.reinit_and_eval_change_in_solution(src, cell, currentFieldIndex);
-
-      if (userInputs.varInfoListNonexplicitRHS[currentFieldIndex].is_implicit)
-        {
-          variable_list.reinit_and_eval_old_solution(solutionSet_previous, cell);
-        }
 
       unsigned int num_q_points = variable_list.get_num_q_points();
 
