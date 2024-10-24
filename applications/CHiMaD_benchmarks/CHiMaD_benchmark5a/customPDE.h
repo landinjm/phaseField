@@ -96,6 +96,10 @@ private:
   scalarvalueType g_x = constV(0.0);
   scalarvalueType g_y = constV(-0.001);
 
+  scalarvalueType dt = constV(userInputs.dtValue);
+  // 1/dt
+  double sdt = 1.0 / userInputs.dtValue;
+
   // ================================================================
 };
 

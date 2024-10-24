@@ -30,9 +30,17 @@ variableAttributeLoader::loadVariableAttributes()
   set_variable_equation_type(1, TIME_INDEPENDENT);
 
   set_dependencies_value_term_RHS(1, "grad(u)");
-  set_dependencies_gradient_term_RHS(1, "grad(p)");
+  set_dependencies_gradient_term_RHS(1, "grad(p), u, u_old, hess(u)");
   set_dependencies_value_term_LHS(1, "");
   set_dependencies_gradient_term_LHS(1, "grad(change(p))");
+
+  // Variable 2
+  set_variable_name(2, "u_old");
+  set_variable_type(2, VECTOR);
+  set_variable_equation_type(2, EXPLICIT_TIME_DEPENDENT);
+
+  set_dependencies_value_term_RHS(2, "u_old, u");
+  set_dependencies_gradient_term_RHS(2, "");
 }
 
 // =============================================================================================
@@ -73,19 +81,20 @@ customPDE<dim, degree>::explicitEquationRHS(
       gravity[0] = g_x;
       gravity[1] = g_y;
 
-      eq_u  = u + constV(userInputs.dtValue) * gravity;
-      eqx_u = constV(-userInputs.dtValue) * ux * mu / rho;
+      eq_u  = u + dt * gravity;
+      eqx_u = -dt * ux * mu / rho;
     }
 
   // Step three of the Chorin projection
   else
     {
-      eq_u = u - constV(userInputs.dtValue) * px;
+      eq_u = u - dt * px;
     }
 
   // Submitting the terms for the governing equations
   variable_list.set_vector_value_term_RHS(0, eq_u);
   variable_list.set_vector_gradient_term_RHS(0, eqx_u);
+  variable_list.set_vector_value_term_RHS(2, u);
 }
 
 // =============================================================================================
@@ -109,20 +118,45 @@ customPDE<dim, degree>::nonExplicitEquationRHS(
   [[maybe_unused]] const VectorizedArray<double> element_volume) const
 {
   // Grab model variables
-  vectorgradType ux = variable_list.get_vector_gradient(0);
-  scalargradType px = variable_list.get_scalar_gradient(1);
+  vectorvalueType u     = variable_list.get_vector_value(0);
+  vectorgradType  ux    = variable_list.get_vector_gradient(0);
+  vectorhessType  uxx   = variable_list.get_vector_hessian(0);
+  scalargradType  px    = variable_list.get_scalar_gradient(1);
+  vectorvalueType u_old = variable_list.get_vector_value(2);
 
   // Initialize submission terms
   scalarvalueType eq_p = constV(0.0);
   scalargradType  eqx_p;
   eqx_p = eqx_p * constV(0.0);
 
+  // Norm of the local velocity
+  scalarvalueType u_l2norm = 1.0e-12 + u.norm_square();
+
+  // Stabilization parameter
+  scalarvalueType h = std::sqrt(element_volume) * constV(std::sqrt(4.0 / M_PI) / degree);
+  scalarvalueType stabilization_parameter =
+    constV(1.0) / std::sqrt(constV(dealii::Utilities::fixed_power<2>(sdt)) +
+                            constV(4.0) * u_l2norm / h / h);
+
   // Continuity equation
   for (unsigned int i = 0; i < dim; i++)
     {
-      eq_p += -constV(1.0 / userInputs.dtValue) * ux[i][i];
+      eq_p -= ux[i][i] / (dt + stabilization_parameter);
     }
   eqx_p = -px;
+
+  // Reconstruct gravity vector
+  vectorvalueType gravity;
+  gravity[0] = g_x;
+  gravity[1] = g_y;
+
+  // Residual
+  scalargradType residual = (u - u_old) / dt - gravity;
+  for (unsigned int i = 0; i < dim; i++)
+    {
+      residual -= mu / rho * uxx[i][i];
+    }
+  eqx_p -= residual * stabilization_parameter / (dt + stabilization_parameter);
 
   // Submitting the terms for the governing equations
   variable_list.set_scalar_value_term_RHS(1, eq_p);
