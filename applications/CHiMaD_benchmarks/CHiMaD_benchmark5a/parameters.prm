@@ -20,7 +20,7 @@ set Subdivisions X = 5
 set Subdivisions Y = 1
 set Subdivisions Z = 1
 
-set Refine factor = 3
+set Refine factor = 4
 
 set Element degree = 2
 
@@ -28,9 +28,9 @@ set Element degree = 2
 # Set the time step parameters
 # =================================================================================
 
-set Time step = 1.0e-2
+set Time step = 1.0e-1
 
-set Simulation end time = 10
+set Simulation end time = 100
 
 # =================================================================================
 # Set the boundary conditions
