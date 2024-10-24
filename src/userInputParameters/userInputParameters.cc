@@ -630,10 +630,13 @@ userInputParameters<dim>::userInputParameters(inputFileReader          &input_fi
           bc_text.append(", y component");
           list_of_BCs.push_back(parameter_handler.get(bc_text));
 
-          bc_text = "Boundary condition for variable ";
-          bc_text.append(var_name.at(i));
-          bc_text.append(", z component");
-          list_of_BCs.push_back(parameter_handler.get(bc_text));
+          if (dim > 2)
+            {
+              bc_text = "Boundary condition for variable ";
+              bc_text.append(var_name.at(i));
+              bc_text.append(", z component");
+              list_of_BCs.push_back(parameter_handler.get(bc_text));
+            }
         }
     }
 
