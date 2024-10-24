@@ -20,9 +20,9 @@ set Subdivisions X = 5
 set Subdivisions Y = 1
 set Subdivisions Z = 1
 
-set Refine factor = 1
+set Refine factor = 3
 
-set Element degree = 1
+set Element degree = 2
 
 # =================================================================================
 # Set the time step parameters
@@ -30,7 +30,7 @@ set Element degree = 1
 
 set Time step = 1.0e-2
 
-set Simulation end time = 1
+set Simulation end time = 10
 
 # =================================================================================
 # Set the boundary conditions
@@ -39,6 +39,22 @@ set Simulation end time = 1
 set Boundary condition for variable u, x component = NON_UNIFORM_DIRICHLET, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0
 set Boundary condition for variable u, y component = DIRICHLET: 0.0, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0
 set Boundary condition for variable p = NATURAL
+
+# =================================================================================
+# Set the linear solver parameters
+# =================================================================================
+
+subsection Linear solver parameters: p
+    # Whether the tolerance value is compared to the residual (ABSOLUTE_RESIDUAL)
+    # or the change in the residual (RELATIVE_RESIDUAL_CHANGE)
+    set Tolerance type = ABSOLUTE_RESIDUAL
+
+    # The tolerance for convergence (L2 norm)
+    set Tolerance value =1.0e-5
+
+    # The maximum number of linear solver iterations per solve
+    set Maximum linear solver iterations = 1000
+end
 
 # =================================================================================
 # Set the output parameters
