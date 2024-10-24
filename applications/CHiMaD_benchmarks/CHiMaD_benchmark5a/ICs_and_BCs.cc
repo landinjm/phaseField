@@ -37,4 +37,9 @@ customPDE<dim, degree>::setNonUniformDirichletBCs(
   [[maybe_unused]] const double       time,
   [[maybe_unused]] double            &scalar_BC,
   [[maybe_unused]] Vector<double>    &vector_BC)
-{}
+{
+  if (index == 0 && direction == 0)
+    {
+      vector_BC[0] = -0.001 * (p[1] - 3) * (p[1] - 3) + 0.009;
+    }
+}
