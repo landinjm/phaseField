@@ -640,6 +640,37 @@ userInputParameters<dim>::userInputParameters(inputFileReader          &input_fi
         }
     }
 
+  /*----------------------
+  |  Pinning point
+  -----------------------*/
+  for (unsigned int i = 0; i < number_of_variables; i++)
+    {
+      std::string pinning_text = "Pinning point: ";
+      pinning_text.append(input_file_reader.var_names.at(i));
+      parameter_handler.enter_subsection(pinning_text);
+
+      // Skip if the default
+      if (parameter_handler.get_double("x") == -1.0)
+        {
+          parameter_handler.leave_subsection();
+          continue;
+        }
+
+      // Otherwise, fill out point
+      if (dim == 2)
+        {
+          pinned_point[i] = dealii::Point<dim>(parameter_handler.get_double("x"),
+                                               parameter_handler.get_double("y"));
+        }
+      else
+        {
+          pinned_point[i] = dealii::Point<dim>(parameter_handler.get_double("x"),
+                                               parameter_handler.get_double("y"),
+                                               parameter_handler.get_double("z"));
+        }
+      parameter_handler.leave_subsection();
+    }
+
   // Load the BC information from the strings into a varBCs object
   load_BC_list(list_of_BCs);
 
