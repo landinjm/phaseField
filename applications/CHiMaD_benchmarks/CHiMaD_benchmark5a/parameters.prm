@@ -42,6 +42,11 @@ set Boundary condition for variable p = NATURAL
 set Boundary condition for variable u_old, x component = NON_UNIFORM_DIRICHLET, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0
 set Boundary condition for variable u_old, y component = DIRICHLET: 0.0, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0
 
+subsection Pinning point: p
+    set x = 30.0
+    set y = 6.0
+end
+
 # =================================================================================
 # Set the linear solver parameters
 # =================================================================================
