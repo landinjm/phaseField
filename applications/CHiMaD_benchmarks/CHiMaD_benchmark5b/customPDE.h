@@ -83,6 +83,9 @@ private:
   // ================================================================
 
   void
+  makeTriangulation(parallel::distributed::Triangulation<dim> &) const override;
+
+  void
   solveIncrement(bool skip_time_dependent) override;
 
   // ================================================================
@@ -102,6 +105,110 @@ private:
 
   // ================================================================
 };
+
+#include <deal.II/grid/grid_generator.h>
+
+template <int dim, int degree>
+void
+customPDE<dim, degree>::makeTriangulation(
+  parallel::distributed::Triangulation<dim> &tria) const
+{
+  // Check that dimensions match the benchmark
+  AssertThrow(dim == 2, ExcMessage("CHiMaD Benchmark 5b should only be run in 2D."));
+  AssertThrow(userInputs.domain_size[0] == 30.0,
+              ExcMessage("CHiMaD Benchmark 5b should have dimensions 30 by 6."));
+  AssertThrow(userInputs.domain_size[1] == 6.0,
+              ExcMessage("CHiMaD Benchmark 5b should have dimensions 30 by 6."));
+
+  // Create points of interest for triangulation
+  Point<dim> origin;
+  Point<dim> corner;
+  Point<dim> hole;
+
+  if (dim == 2)
+    {
+      origin = Point<dim>(0.0, 0.0);
+      corner = Point<dim>(userInputs.domain_size[0], userInputs.domain_size[1]);
+      hole   = Point<dim>(7.0, 3.0);
+    }
+
+  // Create rectangular triangulation
+  parallel::distributed::Triangulation<dim> tria_rectangle(MPI_COMM_WORLD);
+  GridGenerator::subdivided_hyper_rectangle(tria_rectangle,
+                                            userInputs.subdivisions,
+                                            origin,
+                                            corner);
+
+  // Create a list of cells that we are going to remove (deal.II step-27)
+  std::set<typename Triangulation<dim>::active_cell_iterator> cells_to_remove;
+  for (const auto &cell : tria_rectangle.active_cell_iterators())
+    {
+      if (hole.distance(cell->center()) < 0.1)
+        {
+          cells_to_remove.insert(cell);
+        }
+    }
+
+  // Subtract cells from triangulation
+  GridGenerator::create_triangulation_with_removed_cells(tria_rectangle,
+                                                         cells_to_remove,
+                                                         tria);
+
+  // Attach flat manifold to the entire domain
+  tria.reset_all_manifolds();
+  tria.set_manifold(0, FlatManifold<dim>());
+  tria.set_all_manifold_ids(0);
+
+  // Attach spherical manifold
+  tria.set_manifold(1, SphericalManifold<dim>(hole));
+
+  // Set spherical manifold cells
+  for (const auto &cell : tria.active_cell_iterators())
+    {
+      for (unsigned int face = 0; face < GeometryInfo<dim>::faces_per_cell; ++face)
+        {
+          const auto face_center_distance = hole.distance(cell->face(face)->center());
+
+          if (cell->face(face)->at_boundary() && face_center_distance < 1.1)
+            {
+              cell->face(face)->set_manifold_id(1);
+            }
+        }
+    }
+
+  // Mark the boundaries
+  for (const auto &cell : tria.active_cell_iterators())
+    {
+      // Mark the left face with boundary id 0 (inflow), the right with boundary id 1
+      // (outflow), and everything else with boundary id 2 (wall). This ensures that the
+      // right boundary conditions are used for the benchmark. This reduces the complexity
+      // of the code at the cost of flexibility in boundary conditions. For the benchmark
+      // case, we don't care about flexibility. If you plan to use this code to create
+      // your own triangulation, modify this section accordingly.
+      for (unsigned int face_number = 0; face_number < GeometryInfo<dim>::faces_per_cell;
+           ++face_number)
+        {
+          const auto &face = cell->face(face_number);
+
+          if (face->at_boundary())
+            {
+              if (std::fabs(cell->face(face_number)->center()(0) - 0) < 1e-12)
+                {
+                  face->set_boundary_id(0);
+                }
+              else if (std::fabs(cell->face(face_number)->center()(0) -
+                                 userInputs.domain_size[0]) < 1e-12)
+                {
+                  face->set_boundary_id(1);
+                }
+              else
+                {
+                  face->set_boundary_id(2);
+                }
+            }
+        }
+    }
+}
 
 // =================================================================================
 // Function overriding solveIncrement
