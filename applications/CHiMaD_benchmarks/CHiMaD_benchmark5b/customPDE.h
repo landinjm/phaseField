@@ -107,6 +107,7 @@ private:
 };
 
 #include <deal.II/grid/grid_generator.h>
+#include <deal.II/grid/grid_out.h>
 
 template <int dim, int degree>
 void
@@ -154,6 +155,22 @@ customPDE<dim, degree>::makeTriangulation(
             }
         }
     }
+
+  // Attach elliptical manifold
+  Tensor<1, dim> major_axis_direction;
+  major_axis_direction[0] = 0.0;
+  major_axis_direction[1] = 1.0;
+
+  const double eccentricity = std::sqrt(1.0 - (1.0 / 1.5) * (1.0 / 1.5));
+
+  tria.set_manifold(0,
+                    EllipticalManifold<dim, dim>(center,
+                                                 major_axis_direction,
+                                                 eccentricity));
+
+  std::ofstream output("triangulation.vtk");
+  GridOut       grid_out;
+  grid_out.write_vtk(tria, output);
 
   // Mark the boundaries
   for (const auto &cell : tria.active_cell_iterators())

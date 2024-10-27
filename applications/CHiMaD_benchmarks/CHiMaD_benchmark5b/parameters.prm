@@ -20,9 +20,9 @@ set Subdivisions X = 15
 set Subdivisions Y = 3
 set Subdivisions Z = 1
 
-set Refine factor = 2
+set Refine factor = 3
 
-set Element degree = 2
+set Element degree = 1
 
 # =================================================================================
 # Set the time step parameters
