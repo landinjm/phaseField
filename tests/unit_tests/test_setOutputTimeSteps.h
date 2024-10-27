@@ -24,11 +24,7 @@ unitTest<dim, T>::test_setOutputTimeSteps()
                                        var_eq_types,
                                        0,
                                        var_nucleates);
-#if (DEAL_II_VERSION_MAJOR < 9 && DEAL_II_VERSION_MINOR < 5)
-  parameter_handler.read_input("parameters_test.prm");
-#else
   parameter_handler.parse_input("parameters_test.prm");
-#endif
 
   // userInputParameters<dim> userInputs;
 

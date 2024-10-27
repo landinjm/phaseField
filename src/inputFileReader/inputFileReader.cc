@@ -44,11 +44,7 @@ inputFileReader::inputFileReader(const std::string       &input_file_name,
                      var_eq_types,
                      num_constants,
                      var_nucleates);
-#if (DEAL_II_VERSION_MAJOR < 9 && DEAL_II_VERSION_MINOR < 5)
-  parameter_handler.read_input(input_file_name);
-#else
   parameter_handler.parse_input(input_file_name);
-#endif
   number_of_dimensions = parameter_handler.get_integer("Number of dimensions");
 }
 

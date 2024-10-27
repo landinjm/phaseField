@@ -71,9 +71,6 @@ unitTest<dim, T>::test_OrderParameterRemapper()
   DoFTools::extract_locally_relevant_dofs(dof_handler, locally_relevant_dofs);
 
   typename MatrixFree<dim, double>::AdditionalData additional_data;
-#if (DEAL_II_VERSION_MAJOR < 9 && DEAL_II_VERSION_MINOR < 5)
-  additional_data.mpi_communicator = MPI_COMM_WORLD;
-#endif
   additional_data.tasks_parallel_scheme =
     MatrixFree<dim, double>::AdditionalData::partition_partition;
   additional_data.mapping_update_flags =
