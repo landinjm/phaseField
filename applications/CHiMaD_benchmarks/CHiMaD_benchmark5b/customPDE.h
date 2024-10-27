@@ -120,58 +120,37 @@ customPDE<dim, degree>::makeTriangulation(
   AssertThrow(userInputs.domain_size[1] == 6.0,
               ExcMessage("CHiMaD Benchmark 5b should have dimensions 30 by 6."));
 
-  // Create points of interest for triangulation
-  Point<dim> origin;
-  Point<dim> corner;
-  Point<dim> hole;
+  // Mesh parameters
+  const double     inner_radius = 1.0;
+  const double     outer_radius = 2.0;
+  const Point<dim> center(7.0, 2.5);
 
-  if (dim == 2)
+  const double pad_bottom = 2.5 - outer_radius;
+  const double pad_top    = 6.0 - 2.5 - outer_radius;
+  const double pad_left   = 7.0 - outer_radius;
+  const double pad_right  = 30.0 - 7.0 - outer_radius;
+
+  // Generate the initial mesh with a circular hole
+  GridGenerator::plate_with_a_hole(tria,
+                                   inner_radius,
+                                   outer_radius,
+                                   pad_bottom,
+                                   pad_top,
+                                   pad_left,
+                                   pad_right,
+                                   center);
+
+  // Adjust the vertices to create an ellipse
+  const double y_scale = 1.5;
+  for (auto &cell : tria.active_cell_iterators())
     {
-      origin = Point<dim>(0.0, 0.0);
-      corner = Point<dim>(userInputs.domain_size[0], userInputs.domain_size[1]);
-      hole   = Point<dim>(7.0, 3.0);
-    }
-
-  // Create rectangular triangulation
-  parallel::distributed::Triangulation<dim> tria_rectangle(MPI_COMM_WORLD);
-  GridGenerator::subdivided_hyper_rectangle(tria_rectangle,
-                                            userInputs.subdivisions,
-                                            origin,
-                                            corner);
-
-  // Create a list of cells that we are going to remove (deal.II step-27)
-  std::set<typename Triangulation<dim>::active_cell_iterator> cells_to_remove;
-  for (const auto &cell : tria_rectangle.active_cell_iterators())
-    {
-      if (hole.distance(cell->center()) < 0.1)
+      for (unsigned int v = 0; v < GeometryInfo<dim>::vertices_per_cell; ++v)
         {
-          cells_to_remove.insert(cell);
-        }
-    }
+          Point<dim> &vertex = cell->vertex(v);
 
-  // Subtract cells from triangulation
-  GridGenerator::create_triangulation_with_removed_cells(tria_rectangle,
-                                                         cells_to_remove,
-                                                         tria);
-
-  // Attach flat manifold to the entire domain
-  tria.reset_all_manifolds();
-  tria.set_manifold(0, FlatManifold<dim>());
-  tria.set_all_manifold_ids(0);
-
-  // Attach spherical manifold
-  tria.set_manifold(1, SphericalManifold<dim>(hole));
-
-  // Set spherical manifold cells
-  for (const auto &cell : tria.active_cell_iterators())
-    {
-      for (unsigned int face = 0; face < GeometryInfo<dim>::faces_per_cell; ++face)
-        {
-          const auto face_center_distance = hole.distance(cell->face(face)->center());
-
-          if (cell->face(face)->at_boundary() && face_center_distance < 1.1)
+          if ((vertex - center).norm() <= inner_radius * 1.1)
             {
-              cell->face(face)->set_manifold_id(1);
+              vertex[1] = center[1] + y_scale * (vertex[1] - center[1]);
             }
         }
     }
