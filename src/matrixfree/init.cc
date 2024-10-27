@@ -230,10 +230,9 @@ MatrixFreePDE<dim, degree>::init()
   typename MatrixFree<dim, double>::AdditionalData additional_data;
   additional_data.tasks_parallel_scheme =
     MatrixFree<dim, double>::AdditionalData::partition_partition;
-  // additional_data.tasks_parallel_scheme =
-  // MatrixFree<dim,double>::AdditionalData::none;
   additional_data.mapping_update_flags =
-    (update_values | update_gradients | update_JxW_values | update_quadrature_points);
+    (update_values | update_gradients | update_hessians | update_JxW_values |
+     update_quadrature_points);
   QGaussLobatto<1> quadrature(degree + 1);
   matrixFreeObject.clear();
 #if (DEAL_II_VERSION_MAJOR == 9 && DEAL_II_VERSION_MINOR < 4)
