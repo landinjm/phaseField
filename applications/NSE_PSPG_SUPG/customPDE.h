@@ -271,17 +271,19 @@ customPDE<dim, degree>::solveIncrement(bool skip_time_dependent)
           nonlinear_it_converged = true; // Set to true here and will be set to false if
                                          // any variable isn't converged
 
-          // Update residualSet for the non-explicitly updated variables
-          // compute_nonexplicit_RHS()
-          // Ideally, I'd just do this for the non-explicit variables, but for
-          // now I'll do all of them this is a little redundant, but hopefully
-          // not too terrible
-          this->computeNonexplicitRHS();
-
           for (unsigned int fieldIndex = 0; fieldIndex < this->fields.size();
                fieldIndex++)
             {
               this->currentFieldIndex = fieldIndex; // Used in computeLHS()
+
+              // Compute RHS if we have a nonexplicit field
+              if ((this->fields[fieldIndex].pdetype == IMPLICIT_TIME_DEPENDENT &&
+                   !skip_time_dependent) ||
+                  this->fields[fieldIndex].pdetype == TIME_INDEPENDENT ||
+                  this->fields[fieldIndex].pdetype == AUXILIARY)
+                {
+                  this->computeNonexplicitRHS();
+                }
 
               if ((this->fields[fieldIndex].pdetype == IMPLICIT_TIME_DEPENDENT &&
                    !skip_time_dependent) ||
