@@ -102,15 +102,12 @@ customPDE<dim, degree>::nonExplicitEquationRHS(
   [[maybe_unused]] const Point<dim, VectorizedArray<double>>                q_point_loc,
   [[maybe_unused]] const VectorizedArray<double> element_volume) const
 {
-  vectorvalueType u_star  = variable_list.get_vector_value(0);
-  vectorgradType  ux_star = variable_list.get_vector_gradient(0);
-  vectorvalueType u_old   = variable_list.get_vector_value(1);
-  vectorgradType  ux_old  = variable_list.get_vector_gradient(1);
-  scalargradType  px      = variable_list.get_scalar_gradient(2);
-  vectorvalueType u       = variable_list.get_vector_value(3);
-
   if (this->currentFieldIndex == 0)
     {
+      vectorvalueType u_star = variable_list.get_vector_value(0);
+      vectorvalueType u_old  = variable_list.get_vector_value(1);
+      vectorgradType  ux_old = variable_list.get_vector_gradient(1);
+
       vectorvalueType advection_term;
       advection_term = constV(0.0) * advection_term;
       for (unsigned int i = 0; i < dim; i++)
@@ -129,6 +126,9 @@ customPDE<dim, degree>::nonExplicitEquationRHS(
     }
   else if (this->currentFieldIndex == 2)
     {
+      vectorgradType ux_star = variable_list.get_vector_gradient(0);
+      scalargradType px      = variable_list.get_scalar_gradient(2);
+
       scalarvalueType eq_p = constV(0.0);
       for (unsigned int i = 0; i < dim; i++)
         {
@@ -141,6 +141,10 @@ customPDE<dim, degree>::nonExplicitEquationRHS(
     }
   else if (this->currentFieldIndex == 3)
     {
+      vectorvalueType u_star = variable_list.get_vector_value(0);
+      scalargradType  px     = variable_list.get_scalar_gradient(2);
+      vectorvalueType u      = variable_list.get_vector_value(3);
+
       vectorvalueType eq_u = u_star - u - dt * px;
 
       variable_list.set_vector_value_term_RHS(3, eq_u);
