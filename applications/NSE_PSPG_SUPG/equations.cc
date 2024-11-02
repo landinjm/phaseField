@@ -31,7 +31,7 @@ variableAttributeLoader::loadVariableAttributes()
   set_variable_type(1, VECTOR);
   set_variable_equation_type(1, EXPLICIT_TIME_DEPENDENT);
 
-  set_dependencies_value_term_RHS(1, "u_old, u_star");
+  set_dependencies_value_term_RHS(1, "u_old, u");
   set_dependencies_gradient_term_RHS(1, "");
 
   // Variable 2
@@ -76,7 +76,7 @@ customPDE<dim, degree>::explicitEquationRHS(
   [[maybe_unused]] const VectorizedArray<double> element_volume) const
 {
   // Grab model variables
-  vectorvalueType u = variable_list.get_vector_value(0);
+  vectorvalueType u = variable_list.get_vector_value(3);
 
   // Submitting the terms for the governing equations
   variable_list.set_vector_value_term_RHS(1, u);
@@ -109,33 +109,42 @@ customPDE<dim, degree>::nonExplicitEquationRHS(
   scalargradType  px      = variable_list.get_scalar_gradient(2);
   vectorvalueType u       = variable_list.get_vector_value(3);
 
-  vectorvalueType advection_term;
-  advection_term = constV(0.0) * advection_term;
-  for (unsigned int i = 0; i < dim; i++)
+  if (this->currentFieldIndex == 0)
     {
-      for (unsigned int j = 0; j < dim; j++)
+      vectorvalueType advection_term;
+      advection_term = constV(0.0) * advection_term;
+      for (unsigned int i = 0; i < dim; i++)
         {
-          advection_term[i] += u_old[j] * ux_old[i][j];
+          for (unsigned int j = 0; j < dim; j++)
+            {
+              advection_term[i] += u_old[j] * ux_old[i][j];
+            }
         }
+
+      vectorvalueType eq_u_star  = u_old - u_star - dt * advection_term;
+      vectorgradType  eqx_u_star = -dt * ux_old * nu;
+
+      variable_list.set_vector_value_term_RHS(0, eq_u_star);
+      variable_list.set_vector_gradient_term_RHS(0, eqx_u_star);
     }
-
-  vectorvalueType eq_u_star  = u_old - u_star - dt * advection_term;
-  vectorgradType  eqx_u_star = -dt * ux_old * nu;
-
-  scalarvalueType eq_p = constV(0.0);
-  for (unsigned int i = 0; i < dim; i++)
+  else if (this->currentFieldIndex == 2)
     {
-      eq_p -= ux_star[i][i] / dt;
+      scalarvalueType eq_p = constV(0.0);
+      for (unsigned int i = 0; i < dim; i++)
+        {
+          eq_p -= ux_star[i][i] / dt;
+        }
+      scalargradType eqx_p = -px;
+
+      variable_list.set_scalar_value_term_RHS(2, eq_p);
+      variable_list.set_scalar_gradient_term_RHS(2, eqx_p);
     }
-  scalargradType eqx_p = -px;
+  else if (this->currentFieldIndex == 3)
+    {
+      vectorvalueType eq_u = u_star - u - dt * px;
 
-  vectorvalueType eq_u = u_star - u - dt * px;
-
-  variable_list.set_vector_value_term_RHS(0, eq_u_star);
-  variable_list.set_vector_gradient_term_RHS(0, eqx_u_star);
-  variable_list.set_scalar_value_term_RHS(2, eq_p);
-  variable_list.set_scalar_gradient_term_RHS(2, eqx_p);
-  variable_list.set_vector_value_term_RHS(3, eq_u);
+      variable_list.set_vector_value_term_RHS(3, eq_u);
+    }
 }
 
 // =============================================================================================
