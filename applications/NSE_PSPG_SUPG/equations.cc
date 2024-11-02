@@ -43,6 +43,16 @@ variableAttributeLoader::loadVariableAttributes()
   set_dependencies_gradient_term_RHS(2, "grad(p)");
   set_dependencies_value_term_LHS(2, "");
   set_dependencies_gradient_term_LHS(2, "grad(change(p))");
+
+  // Variable 3
+  set_variable_name(3, "u");
+  set_variable_type(3, VECTOR);
+  set_variable_equation_type(3, TIME_INDEPENDENT);
+
+  set_dependencies_value_term_RHS(3, "u, u_star grad(p)");
+  set_dependencies_gradient_term_RHS(3, "");
+  set_dependencies_value_term_LHS(3, "change(u)");
+  set_dependencies_gradient_term_LHS(3, "");
 }
 
 // =============================================================================================
@@ -97,6 +107,7 @@ customPDE<dim, degree>::nonExplicitEquationRHS(
   vectorvalueType u_old   = variable_list.get_vector_value(1);
   vectorgradType  ux_old  = variable_list.get_vector_gradient(1);
   scalargradType  px      = variable_list.get_scalar_gradient(2);
+  vectorvalueType u       = variable_list.get_vector_value(3);
 
   vectorvalueType advection_term;
   advection_term = constV(0.0) * advection_term;
@@ -118,10 +129,13 @@ customPDE<dim, degree>::nonExplicitEquationRHS(
     }
   scalargradType eqx_p = -px;
 
+  vectorvalueType eq_u = u_star - u - dt * px;
+
   variable_list.set_vector_value_term_RHS(0, eq_u_star);
   variable_list.set_vector_gradient_term_RHS(0, eqx_u_star);
   variable_list.set_scalar_value_term_RHS(2, eq_p);
   variable_list.set_scalar_gradient_term_RHS(2, eqx_p);
+  variable_list.set_vector_value_term_RHS(3, eq_u);
 }
 
 // =============================================================================================
@@ -157,5 +171,11 @@ customPDE<dim, degree>::equationLHS(
       scalargradType D_px = variable_list.get_change_in_scalar_gradient(2);
 
       variable_list.set_scalar_gradient_term_LHS(2, D_px);
+    }
+  else if (this->currentFieldIndex == 3)
+    {
+      vectorvalueType D_u = variable_list.get_change_in_vector_value(3);
+
+      variable_list.set_vector_value_term_LHS(3, D_u);
     }
 }

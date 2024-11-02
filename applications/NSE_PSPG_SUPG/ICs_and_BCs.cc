@@ -11,7 +11,7 @@ customPDE<dim, degree>::setInitialCondition([[maybe_unused]] const Point<dim>  &
                                             [[maybe_unused]] double            &scalar_IC,
                                             [[maybe_unused]] Vector<double>    &vector_IC)
 {
-  if (index == 0)
+  if (index == 0 || index == 1 || index == 3)
     {
       for (unsigned int dimension = 0; dimension < dim; dimension++)
         {
@@ -38,7 +38,7 @@ customPDE<dim, degree>::setNonUniformDirichletBCs(
   [[maybe_unused]] double            &scalar_BC,
   [[maybe_unused]] Vector<double>    &vector_BC)
 {
-  if ((index == 0 || index == 1) && direction == 0)
+  if ((index == 0 || index == 1 || index == 3) && direction == 0)
     {
       vector_BC[0] = -0.001 * (p[1] - 3) * (p[1] - 3) + 0.009;
     }

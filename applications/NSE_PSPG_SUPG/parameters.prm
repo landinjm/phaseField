@@ -30,7 +30,7 @@ set Element degree = 2
 
 set Time step = 5.0e-1
 
-set Number of time steps = 1
+set Number of time steps = 2
 
 # =================================================================================
 # Set the boundary conditions
@@ -41,6 +41,8 @@ set Boundary condition for variable u_star, y component = DIRICHLET: 0.0, NATURA
 set Boundary condition for variable u_old, x component = NON_UNIFORM_DIRICHLET, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0
 set Boundary condition for variable u_old, y component = DIRICHLET: 0.0, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0
 set Boundary condition for variable p = NATURAL, DIRICHLET: 0.0, NATURAL, NATURAL
+set Boundary condition for variable u, x component = NON_UNIFORM_DIRICHLET, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0
+set Boundary condition for variable u, y component = DIRICHLET: 0.0, NATURAL, DIRICHLET: 0.0, DIRICHLET: 0.0
 
 # =================================================================================
 # Set the linear solver parameters
@@ -62,12 +64,20 @@ subsection Linear solver parameters: p
     set Maximum linear solver iterations = 1000
 end
 
+subsection Linear solver parameters: u
+    set Tolerance type = ABSOLUTE_RESIDUAL
+
+    set Tolerance value = 1.0e-6
+
+    set Maximum linear solver iterations = 1000
+end
+
 # =================================================================================
 # Set the output parameters
 # =================================================================================
 
 set Output condition = EQUAL_SPACING
 
-set Number of outputs = 1
+set Number of outputs = 2
 
 set Skip print steps = 1
