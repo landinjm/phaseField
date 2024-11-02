@@ -22,9 +22,9 @@ variableAttributeLoader::loadVariableAttributes()
   set_variable_equation_type(0, TIME_INDEPENDENT);
 
   set_dependencies_value_term_RHS(0, "u_star, u_old, grad(u_old)");
-  set_dependencies_gradient_term_RHS(0, "grad(u_old)");
+  set_dependencies_gradient_term_RHS(0, "u_star, u_old, grad(u_old), hess(u_old)");
   set_dependencies_value_term_LHS(0, "change(u_star)");
-  set_dependencies_gradient_term_LHS(0, "");
+  set_dependencies_gradient_term_LHS(0, "u_old, change(u_star)");
 
   // Variable 1
   set_variable_name(1, "u_old");
@@ -51,9 +51,9 @@ variableAttributeLoader::loadVariableAttributes()
   set_variable_equation_type(3, TIME_INDEPENDENT);
 
   set_dependencies_value_term_RHS(3, "u, u_star grad(p)");
-  set_dependencies_gradient_term_RHS(3, "");
+  set_dependencies_gradient_term_RHS(3, "u_star, u_old, grad(p)");
   set_dependencies_value_term_LHS(3, "change(u)");
-  set_dependencies_gradient_term_LHS(3, "");
+  set_dependencies_gradient_term_LHS(3, "u_old, change(u)");
 }
 
 // =============================================================================================
@@ -105,9 +105,13 @@ customPDE<dim, degree>::nonExplicitEquationRHS(
 {
   if (this->currentFieldIndex == 0)
     {
-      vectorvalueType u_star = variable_list.get_vector_value(0);
-      vectorvalueType u_old  = variable_list.get_vector_value(1);
-      vectorgradType  ux_old = variable_list.get_vector_gradient(1);
+      vectorvalueType u_star  = variable_list.get_vector_value(0);
+      vectorvalueType u_old   = variable_list.get_vector_value(1);
+      vectorgradType  ux_old  = variable_list.get_vector_gradient(1);
+      vectorhessType  uxx_old = variable_list.get_vector_hessian(1);
+
+      scalarvalueType stabilization_parameter =
+        compute_stabilization_parameter(u_old, element_volume);
 
       vectorvalueType advection_term;
       advection_term = constV(0.0) * advection_term;
@@ -119,8 +123,24 @@ customPDE<dim, degree>::nonExplicitEquationRHS(
             }
         }
 
+      vectorvalueType residual = u_old - u_star - dt * advection_term;
+      for (unsigned int i = 0; i < dim; i++)
+        {
+          residual += dt * nu * uxx_old[i][i];
+        }
+
+      vectorgradType SUPG_term;
+      for (unsigned int i = 0; i < dim; i++)
+        {
+          for (unsigned int j = 0; j < dim; j++)
+            {
+              SUPG_term[i][j] = residual[i] * u_old[j];
+            }
+        }
+      SUPG_term *= stabilization_parameter;
+
       vectorvalueType eq_u_star  = u_old - u_star - dt * advection_term;
-      vectorgradType  eqx_u_star = -dt * ux_old * nu;
+      vectorgradType  eqx_u_star = -dt * ux_old * nu + SUPG_term;
 
       variable_list.set_vector_value_term_RHS(0, eq_u_star);
       variable_list.set_vector_gradient_term_RHS(0, eqx_u_star);
@@ -167,12 +187,29 @@ customPDE<dim, degree>::nonExplicitEquationRHS(
   else if (this->currentFieldIndex == 3)
     {
       vectorvalueType u_star = variable_list.get_vector_value(0);
+      vectorvalueType u_old  = variable_list.get_vector_value(1);
       scalargradType  px     = variable_list.get_scalar_gradient(2);
       vectorvalueType u      = variable_list.get_vector_value(3);
+
+      scalarvalueType stabilization_parameter =
+        compute_stabilization_parameter(u_old, element_volume);
+
+      vectorvalueType residual = u_star - u - dt * px;
+
+      vectorgradType eq_ux;
+      for (unsigned int i = 0; i < dim; i++)
+        {
+          for (unsigned int j = 0; j < dim; j++)
+            {
+              eq_ux[i][j] = residual[i] * u_old[j];
+            }
+        }
+      eq_ux *= stabilization_parameter;
 
       vectorvalueType eq_u = u_star - u - dt * px;
 
       variable_list.set_vector_value_term_RHS(3, eq_u);
+      variable_list.set_vector_gradient_term_RHS(3, eq_ux);
     }
 }
 
@@ -201,8 +238,23 @@ customPDE<dim, degree>::equationLHS(
   if (this->currentFieldIndex == 0)
     {
       vectorvalueType D_u_star = variable_list.get_change_in_vector_value(0);
+      vectorvalueType u_old    = variable_list.get_vector_value(1);
+
+      scalarvalueType stabilization_parameter =
+        compute_stabilization_parameter(u_old, element_volume);
+
+      vectorgradType eq_Dx_u_star;
+      for (unsigned int i = 0; i < dim; i++)
+        {
+          for (unsigned int j = 0; j < dim; j++)
+            {
+              eq_Dx_u_star[i][j] = D_u_star[i] * u_old[j];
+            }
+        }
+      eq_Dx_u_star *= stabilization_parameter;
 
       variable_list.set_vector_value_term_LHS(0, D_u_star);
+      variable_list.set_vector_gradient_term_LHS(0, eq_Dx_u_star);
     }
   else if (this->currentFieldIndex == 2)
     {
@@ -212,8 +264,23 @@ customPDE<dim, degree>::equationLHS(
     }
   else if (this->currentFieldIndex == 3)
     {
-      vectorvalueType D_u = variable_list.get_change_in_vector_value(3);
+      vectorvalueType u_old = variable_list.get_vector_value(1);
+      vectorvalueType D_u   = variable_list.get_change_in_vector_value(3);
+
+      scalarvalueType stabilization_parameter =
+        compute_stabilization_parameter(u_old, element_volume);
+
+      vectorgradType eq_Dx_u;
+      for (unsigned int i = 0; i < dim; i++)
+        {
+          for (unsigned int j = 0; j < dim; j++)
+            {
+              eq_Dx_u[i][j] = D_u[i] * u_old[j];
+            }
+        }
+      eq_Dx_u *= stabilization_parameter;
 
       variable_list.set_vector_value_term_LHS(3, D_u);
+      variable_list.set_vector_gradient_term_LHS(3, eq_Dx_u);
     }
 }
