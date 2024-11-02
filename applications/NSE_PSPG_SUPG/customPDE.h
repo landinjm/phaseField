@@ -82,8 +82,8 @@ private:
   // Methods specific to this subclass
   // ================================================================
 
-  /*void
-  makeTriangulation(parallel::distributed::Triangulation<dim> &) const override;*/
+  void
+  makeTriangulation(parallel::distributed::Triangulation<dim> &) const override;
 
   void
   solveIncrement(bool skip_time_dependent) override;
@@ -129,7 +129,6 @@ customPDE<dim, degree>::compute_stabilization_parameter(
   return stabilization_parameter;
 }
 
-/*
 #include <deal.II/grid/grid_generator.h>
 #include <deal.II/grid/grid_out.h>
 
@@ -190,7 +189,7 @@ customPDE<dim, degree>::makeTriangulation(
             }
         }
     }
-}*/
+}
 
 // =================================================================================
 // Function overriding solveIncrement
