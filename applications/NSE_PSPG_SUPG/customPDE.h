@@ -97,8 +97,6 @@ private:
   // Model constants specific to this subclass
   // ================================================================
 
-  bool fractional_pressure_update_step = false;
-
   scalarvalueType rho = constV(100.0);
   scalarvalueType mu  = constV(0.01);
 
@@ -207,9 +205,6 @@ customPDE<dim, degree>::solveIncrement(bool skip_time_dependent)
   this->computing_timer.enter_subsection("matrixFreePDE: solveIncrements");
   Timer time;
   char  buffer[200];
-
-  // Set fractional_pressure_update_step to false so steps 1 and 2 may occur
-  fractional_pressure_update_step = false;
 
   // Get the RHS of the explicit equations
   if (this->hasExplicitEquation && !skip_time_dependent)
@@ -406,60 +401,6 @@ customPDE<dim, degree>::solveIncrement(bool skip_time_dependent)
             }
 
           nonlinear_it_index++;
-        }
-    }
-
-  // Set fractional_pressure_update_step to true so steps 3 may occur
-  fractional_pressure_update_step = true;
-
-  // Get the RHS of the explicit equations
-  if (this->hasExplicitEquation && !skip_time_dependent)
-    {
-      this->computeExplicitRHS();
-    }
-
-  // solve for the projected velocity field
-  for (unsigned int fieldIndex = 0; fieldIndex < this->fields.size(); fieldIndex++)
-    {
-      // Here are the allowed fields that we recalulate
-      if (userInputs.var_name[fieldIndex] != "u")
-        {
-          continue;
-        }
-
-      // Parabolic (first order derivatives in time) fields
-      if (this->fields[fieldIndex].pdetype == EXPLICIT_TIME_DEPENDENT &&
-          !skip_time_dependent)
-        {
-          this->updateExplicitSolution(fieldIndex);
-
-          // Apply Boundary conditions
-          this->applyBCs(fieldIndex);
-
-          // Print update to screen and confirm that solution isn't nan
-          if (this->currentIncrement % userInputs.skip_print_steps == 0)
-            {
-              double solution_L2_norm = this->solutionSet[fieldIndex]->l2_norm();
-
-              snprintf(buffer,
-                       sizeof(buffer),
-                       "field '%2s' [explicit solve]: current solution: "
-                       "%12.6e, current residual:%12.6e\n",
-                       this->fields[fieldIndex].name.c_str(),
-                       solution_L2_norm,
-                       this->residualSet[fieldIndex]->l2_norm());
-              this->pcout << buffer;
-
-              if (!numbers::is_finite(solution_L2_norm))
-                {
-                  snprintf(buffer,
-                           sizeof(buffer),
-                           "ERROR: field '%s' solution is NAN. exiting.\n\n",
-                           this->fields[fieldIndex].name.c_str());
-                  this->pcout << buffer;
-                  exit(-1);
-                }
-            }
         }
     }
 
