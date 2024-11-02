@@ -199,8 +199,7 @@ EquationDependencyParser::parseDependencyListRHS(
             }
 
           // Check for nonlinearity
-          is_nonlinear =
-            !variable_is_explicit && !same_variable && !dependency_variable_is_explicit;
+          is_nonlinear = false;
 
           // Increment counter
           ++dependency_variable_index;
