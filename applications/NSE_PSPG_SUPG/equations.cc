@@ -40,7 +40,8 @@ variableAttributeLoader::loadVariableAttributes()
   set_variable_equation_type(2, TIME_INDEPENDENT);
 
   set_dependencies_value_term_RHS(2, "grad(u_star)");
-  set_dependencies_gradient_term_RHS(2, "grad(p)");
+  set_dependencies_gradient_term_RHS(2,
+                                     "grad(p), u_star, u_old, grad(u_old), hess(u_old)");
   set_dependencies_value_term_LHS(2, "");
   set_dependencies_gradient_term_LHS(2, "grad(change(p))");
 
@@ -126,15 +127,39 @@ customPDE<dim, degree>::nonExplicitEquationRHS(
     }
   else if (this->currentFieldIndex == 2)
     {
-      vectorgradType ux_star = variable_list.get_vector_gradient(0);
-      scalargradType px      = variable_list.get_scalar_gradient(2);
+      vectorvalueType u_star  = variable_list.get_vector_value(0);
+      vectorgradType  ux_star = variable_list.get_vector_gradient(0);
+      vectorvalueType u_old   = variable_list.get_vector_value(1);
+      vectorgradType  ux_old  = variable_list.get_vector_gradient(1);
+      vectorhessType  uxx_old = variable_list.get_vector_hessian(1);
+      scalargradType  px      = variable_list.get_scalar_gradient(2);
+
+      scalarvalueType stabilization_parameter =
+        compute_stabilization_parameter(u_star, element_volume);
 
       scalarvalueType eq_p = constV(0.0);
       for (unsigned int i = 0; i < dim; i++)
         {
-          eq_p -= ux_star[i][i] / dt;
+          eq_p -= ux_star[i][i] / (dt + stabilization_parameter);
         }
       scalargradType eqx_p = -px;
+
+      vectorvalueType advection_term;
+      advection_term = constV(0.0) * advection_term;
+      for (unsigned int i = 0; i < dim; i++)
+        {
+          for (unsigned int j = 0; j < dim; j++)
+            {
+              advection_term[i] += u_old[j] * ux_old[i][j];
+            }
+        }
+
+      scalargradType residual = (u_star - u_old) / dt;
+      for (unsigned int i = 0; i < dim; i++)
+        {
+          residual -= nu * uxx_old[i][i] + advection_term;
+        }
+      eqx_p -= residual * stabilization_parameter / (dt + stabilization_parameter);
 
       variable_list.set_scalar_value_term_RHS(2, eq_p);
       variable_list.set_scalar_gradient_term_RHS(2, eqx_p);
