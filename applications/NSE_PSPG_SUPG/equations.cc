@@ -154,10 +154,10 @@ customPDE<dim, degree>::nonExplicitEquationRHS(
             }
         }
 
-      scalargradType residual = (u_star - u_old) / dt;
+      scalargradType residual = (u_star - u_old) / dt + advection_term;
       for (unsigned int i = 0; i < dim; i++)
         {
-          residual -= nu * uxx_old[i][i] + advection_term;
+          residual -= nu * uxx_old[i][i];
         }
       eqx_p -= residual * stabilization_parameter / (dt + stabilization_parameter);
 
