@@ -47,14 +47,10 @@ set Boundary condition for variable u_old, y component = DIRICHLET: 0.0, NATURAL
 # =================================================================================
 
 subsection Linear solver parameters: p
-    # Whether the tolerance value is compared to the residual (ABSOLUTE_RESIDUAL)
-    # or the change in the residual (RELATIVE_RESIDUAL_CHANGE)
     set Tolerance type = ABSOLUTE_RESIDUAL
 
-    # The tolerance for convergence (L2 norm)
-    set Tolerance value = 1.0e-5
+    set Tolerance value = 1.0e-8
 
-    # The maximum number of linear solver iterations per solve
     set Maximum linear solver iterations = 1000
 end
 
