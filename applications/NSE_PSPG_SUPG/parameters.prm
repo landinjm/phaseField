@@ -30,7 +30,7 @@ set Element degree = 2
 
 set Time step = 5.0e-1
 
-set Number of time steps = 1000
+set Number of time steps = 10000
 
 # =================================================================================
 # Set the boundary conditions
@@ -78,6 +78,6 @@ end
 
 set Output condition = EQUAL_SPACING
 
-set Number of outputs = 2
+set Number of outputs = 100
 
 set Skip print steps = 100
