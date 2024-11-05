@@ -20,7 +20,7 @@ set Subdivisions X = 1
 set Subdivisions Y = 1
 set Subdivisions Z = 1
 
-set Refine factor = 5
+set Refine factor = 6
 
 set Element degree = 2
 
@@ -28,9 +28,9 @@ set Element degree = 2
 # Set the time step parameters
 # =================================================================================
 
-set Time step = 1.0e-2
+set Time step = 1.0e-3
 
-set Number of time steps = 1000
+set Number of time steps = 10000
 
 # =================================================================================
 # Set the boundary conditions
@@ -40,7 +40,7 @@ set Boundary condition for variable u_star, x component = PERIODIC
 set Boundary condition for variable u_star, y component = PERIODIC
 set Boundary condition for variable u_old, x component = PERIODIC
 set Boundary condition for variable u_old, y component = PERIODIC
-set Boundary condition for variable p = NATURAL
+set Boundary condition for variable p = PERIODIC
 set Boundary condition for variable u, x component = PERIODIC
 set Boundary condition for variable u, y component = PERIODIC
 
