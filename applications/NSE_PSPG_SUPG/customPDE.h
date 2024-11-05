@@ -90,8 +90,8 @@ private:
 
   VectorizedArray<double>
   compute_stabilization_parameter(
-    const dealii::Tensor<1, dim, dealii::VectorizedArray<double>> &local_velocity,
-    const VectorizedArray<double>                                 &element_volume) const;
+    const Tensor<1, dim, VectorizedArray<double>> &local_velocity,
+    const VectorizedArray<double>                 &element_volume) const;
 
   // ================================================================
   // Model constants specific to this subclass
@@ -106,7 +106,7 @@ private:
   // Values for stabilization term
   scalarvalueType size_modifier = constV(std::sqrt(4.0 / M_PI) / degree);
   scalarvalueType time_contribution =
-    constV(dealii::Utilities::fixed_power<2>(1.0 / userInputs.dtValue));
+    constV(Utilities::fixed_power<2>(1.0 / userInputs.dtValue));
 
   // ================================================================
 };
@@ -114,8 +114,8 @@ private:
 template <int dim, int degree>
 VectorizedArray<double>
 customPDE<dim, degree>::compute_stabilization_parameter(
-  const dealii::Tensor<1, dim, dealii::VectorizedArray<double>> &local_velocity,
-  const VectorizedArray<double>                                 &element_volume) const
+  const Tensor<1, dim, VectorizedArray<double>> &local_velocity,
+  const VectorizedArray<double>                 &element_volume) const
 {
   // Norm of the local velocity
   VectorizedArray<double> u_l2norm = 1.0e-12 + local_velocity.norm_square();
@@ -124,7 +124,9 @@ customPDE<dim, degree>::compute_stabilization_parameter(
   VectorizedArray<double> h = std::sqrt(element_volume) * size_modifier;
 
   VectorizedArray<double> stabilization_parameter =
-    constV(1.0) / std::sqrt(time_contribution + constV(4.0) * u_l2norm / h / h);
+    constV(1.0) /
+    std::sqrt(time_contribution + constV(4.0) * u_l2norm / h / h +
+              constV(9.0) * Utilities::fixed_power<2>(constV(4.0) * nu / h / h));
 
   return stabilization_parameter;
 }
