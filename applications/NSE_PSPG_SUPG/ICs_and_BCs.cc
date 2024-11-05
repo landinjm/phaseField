@@ -40,6 +40,7 @@ customPDE<dim, degree>::setNonUniformDirichletBCs(
 {
   if ((index == 0 || index == 1 || index == 3) && direction == 0)
     {
-      vector_BC[0] = -0.001 * (p[1] - 3) * (p[1] - 3) + 0.009;
+      double u_max = 0.1;
+      vector_BC[0] = u_max * (-(p[1] - 3) * (p[1] - 3) + 9.0);
     }
 }

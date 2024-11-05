@@ -97,7 +97,7 @@ private:
   // Model constants specific to this subclass
   // ================================================================
 
-  scalarvalueType rho = constV(100.0);
+  scalarvalueType rho = constV(1.0);
   scalarvalueType mu  = constV(0.01);
 
   scalarvalueType nu = mu / rho;
