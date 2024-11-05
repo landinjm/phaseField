@@ -95,7 +95,7 @@ private:
   // ================================================================
 
   scalarvalueType rho = constV(1.0);
-  scalarvalueType mu  = constV(0.1);
+  scalarvalueType mu  = constV(0.01);
 
   scalarvalueType nu = mu / rho;
   scalarvalueType dt = constV(userInputs.dtValue);

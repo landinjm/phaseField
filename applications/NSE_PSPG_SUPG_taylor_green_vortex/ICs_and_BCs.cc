@@ -13,8 +13,9 @@ customPDE<dim, degree>::setInitialCondition([[maybe_unused]] const Point<dim>  &
 {
   if (index == 0 || index == 1 || index == 3)
     {
-      vector_IC[0] = std::sin(p[0]) * std::cos(p[1]);
-      vector_IC[1] = -std::cos(p[0]) * std::sin(p[1]);
+      vector_IC[0] = std::sin(p[0]) * std::cos(p[1]) * std::cos(p[2]);
+      vector_IC[1] = -std::cos(p[0]) * std::sin(p[1]) * std::cos(p[2]);
+      vector_IC[2] = 0.0;
     }
   else
     {
