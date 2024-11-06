@@ -6,14 +6,45 @@ void
 MatrixFreePDE<dim, degree>::computePostProcessedFields(
   std::vector<vectorType *> &postProcessedSet)
 {
+  // find indices of first occuring scalar & vector field
+  unsigned int scalarField = 0;
+  bool         foundScalar = false;
+  unsigned int vectorField = 0;
+  bool         foundVector = false;
+  for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++)
+    {
+      if (fields[fieldIndex].type == SCALAR && !foundScalar)
+        {
+          scalarField = fieldIndex;
+          foundScalar = true;
+        }
+      else if (fields[fieldIndex].type == VECTOR && !foundVector)
+        {
+          vectorField = fieldIndex;
+          foundVector = true;
+        }
+    }
+
   // Initialize the postProcessedSet
+  pcout << "initializing parallel::distributed postprocessed vectors\n";
   for (unsigned int fieldIndex = 0; fieldIndex < userInputs.pp_number_of_variables;
        fieldIndex++)
     {
       vectorType *U;
       U = new vectorType;
       postProcessedSet.push_back(U);
-      matrixFreeObject.initialize_dof_vector(*U, 0);
+
+      if (userInputs.pp_varInfoList[fieldIndex].is_scalar)
+        {
+          matrixFreeObject.initialize_dof_vector(*U, scalarField);
+          *U = 0;
+        }
+      else
+        {
+          pcout << "Vector postprocess variables are currently not supported"
+                << std::endl;
+          exit(-1);
+        }
     }
 
   integrated_postprocessed_fields.clear();
@@ -38,12 +69,31 @@ MatrixFreePDE<dim, degree>::getPostProcessedFields(
   const std::vector<vectorType *>             &src,
   const std::pair<unsigned int, unsigned int> &cell_range)
 {
+  // find indices of first occuring scalar & vector field
+  unsigned int scalarField = 0;
+  bool         foundScalar = false;
+  unsigned int vectorField = 0;
+  bool         foundVector = false;
+  for (unsigned int fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++)
+    {
+      if (fields[fieldIndex].type == SCALAR && !foundScalar)
+        {
+          scalarField = fieldIndex;
+          foundScalar = true;
+        }
+      else if (fields[fieldIndex].type == VECTOR && !foundVector)
+        {
+          vectorField = fieldIndex;
+          foundVector = true;
+        }
+    }
+
   // initialize FEEvaulation objects
   variableContainer<dim, degree, dealii::VectorizedArray<double>> variable_list(
     data,
     userInputs.pp_baseVarInfoList);
   variableContainer<dim, degree, dealii::VectorizedArray<double>>
-    pp_variable_list(data, userInputs.pp_varInfoList, 0);
+    pp_variable_list(data, userInputs.pp_varInfoList, scalarField);
 
   // loop over cells
   for (unsigned int cell = cell_range.first; cell < cell_range.second; ++cell)
