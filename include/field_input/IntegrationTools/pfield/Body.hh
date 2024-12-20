@@ -33,8 +33,6 @@ namespace PRISMS
     void
     read_vtk(const std::string &vtkfile)
     {
-      std::cout << "Begin reading unstructured vtk file\n";
-
       // Read vtk file
       std::ifstream infile(vtkfile.c_str());
       if (!infile.is_open())
@@ -97,11 +95,9 @@ namespace PRISMS
                 }
 
               // Construct field
-              std::cout << "\tConstructing PField '" << name << "'\n";
               scalar_field.emplace_back(name, mesh, gid, 0.0);
             }
         }
-      std::cout << "Finished reading VTK file." << std::endl;
     }
 
     void

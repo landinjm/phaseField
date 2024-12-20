@@ -160,8 +160,6 @@ namespace PRISMS
     void
     read_vtk(std::ifstream &infile)
     {
-      std::cout << "\tReading unstructured mesh\n";
-
       std::istringstream ss;
       std::string        line;
       std::string        str;
@@ -195,7 +193,6 @@ namespace PRISMS
               std::vector<std::vector<double>> value(dim);
               std::vector<std::vector<int>>    hist(dim);
 
-              std::cout << "\tReading POINTS: " << Npoints << std::endl;
               _node.reserve(Npoints);
               for (unsigned int i = 0; i < Npoints; i++)
                 {
@@ -231,16 +228,6 @@ namespace PRISMS
                   min[j] -= incr[j];
                   N[j] += 2;
                 }
-              std::cout << "\tMin Coordinate: ";
-              for (int j = 0; j < dim; j++)
-                {
-                  std::cout << _min[j] << " ";
-                }
-              std::cout << "\n\tMax Coordinate: ";
-              for (int j = 0; j < dim; j++)
-                {
-                  std::cout << _max[j] << " ";
-                }
 
               _bin = Bin<Interpolator<Coordinate, dim> *, Coordinate>(min, incr, N);
             }
@@ -270,7 +257,6 @@ namespace PRISMS
                 }
               bfunc_ptr = _bfunc.back();
 
-              std::cout << "\n\tReading CELLS: " << Ncells << std::endl;
               for (unsigned int i = 0; i < Ncells; i++)
                 {
                   infile >> uli_dummy;
