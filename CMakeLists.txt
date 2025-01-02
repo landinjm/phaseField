@@ -5,7 +5,7 @@
 
 cmake_minimum_required(VERSION 3.3.0)
 
-project(prisms_pf)
+project(prisms_pf CXX)
 
 file(STRINGS "${CMAKE_SOURCE_DIR}/VERSION" PRISMS_PF_VERSION LIMIT_COUNT 1)
 
@@ -26,6 +26,11 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/CMakeCache.txt)
   "in your source directory, which may be leftover from prior builds. " 
   "Please delete the file before running cmake again.")
 endif()
+
+# Set C++17 standard
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Setup the build type (debug, release, debugrelease)
 if("${CMAKE_BUILD_TYPE}" STREQUAL "")
@@ -93,6 +98,13 @@ if(NOT DEAL_II_WITH_P4EST)
     set(DEALII_INSTALL_VALID OFF)
 endif()
 
+if(NOT DEAL_II_WITH_MPI)
+    message(SEND_ERROR
+      "\n**deal.II was built without support for MPI!\n"
+      )
+    set(DEALII_INSTALL_VALID OFF)
+endif()
+
 if(NOT DEALII_INSTALL_VALID)
   message(FATAL_ERROR
     "\nPRISMS-PF requires a deal.II installation with certain features enabled!\n"
@@ -138,7 +150,7 @@ configure_file(
 
 # Collect source files
 file(GLOB_RECURSE PRISMS_PF_SOURCE_FILES "src/*.cc" "include/*.h")
-file(GLOB_RECURSE PRISMS_PF_UNIT_TEST_FILES "unit_tests/*.cc" "contrib/catch/catch.hpp")
+file(GLOB_RECURSE PRISMS_PF_UNIT_TEST_FILES "tests/*.cc" "contrib/catch/catch.hpp")
 
 # Setup include directories
 include_directories(BEFORE ${CMAKE_BINARY_DIR}/include include)
@@ -195,7 +207,6 @@ add_custom_target(distclean
     build.ninja rules.ninja .ninja_deps .ninja_log
   COMMENT "distclean invoked"
   )
-
 
 file(WRITE ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/print_usage.cmake
 "message(
