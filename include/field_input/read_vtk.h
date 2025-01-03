@@ -9,19 +9,29 @@
 
 #include <array>
 #include <fstream>
+#include <functional>
 #include <sstream>
 #include <string>
 #include <utility>
 
-/**
- * \brief Mesh type for vtk read-in.
- */
-enum mesh_type
+// Defining a custom hash function
+namespace std
 {
-  STRUCTURED,
-  UNSTRUCTURED,
-  RECTILINEAR
-};
+  template <int dim>
+  struct hash<dealii::Point<dim, double>>
+  {
+    std::size_t
+    operator()(const dealii::Point<dim, double> &point) const
+    {
+      std::size_t seed = 0;
+      for (unsigned int i = 0; i < dim; ++i)
+        {
+          seed ^= std::hash<double>()(point[i]) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+        }
+      return seed;
+    }
+  };
+} // namespace std
 
 /**
  * \brief A class that reads an unstructured vtk file and creates mappings between the
@@ -37,8 +47,16 @@ enum mesh_type
  */
 template <int dim, typename datatype>
 class ReadVTK
-
 {
+  using scalar_list = std::vector<datatype>;
+  using vector_list = std::vector<dealii::Vector<datatype>>;
+  using scalar_map  = boost::unordered_map<dealii::Point<dim, datatype>,
+                                          datatype,
+                                          std::hash<dealii::Point<dim, datatype>>>;
+  using vector_map  = boost::unordered_map<dealii::Point<dim, datatype>,
+                                          dealii::Vector<datatype>,
+                                          std::hash<dealii::Point<dim, datatype>>>;
+
 public:
   /**
    * \brief Class constructor.
@@ -52,10 +70,22 @@ public:
    */
   ~ReadVTK();
 
+  /**
+   * \brief Get the unique mappings between points and their scalar values.
+   */
+  boost::unordered_map<std::string, scalar_map>
+  get_scalar_mappings();
+
+  /**
+   * \brief Get the unique mappings between points and their vector values.
+   */
+  boost::unordered_map<std::string, vector_map>
+  get_vector_mappings();
+
 private:
   /**
-   * \brief Check for any errors in reading the line or if we are at the end of file. Note
-   * that this function will only check the lines in debug mode.
+   * \brief Check for any errors in reading the line or if we are at the end of file.
+   * Note that this function will only check the lines in debug mode.
    */
   void
   check_line_errors(const std::string &context);
@@ -76,7 +106,7 @@ private:
    * \brief Find the mesh type and assign the correct enum.
    */
   void
-  find_mesh_type();
+  check_mesh_type();
 
   /**
    * \brief Read the points from the file.
@@ -91,26 +121,15 @@ private:
   read_fields();
 
   /**
-   * \brief Read a scalar field from the file.
+   * \brief Compute the mappings between values and points
    */
   void
-  read_scalar_field();
-
-  /**
-   * \brief Read a vector field from the file.
-   */
-  void
-  read_vector_field();
+  compute_mappings();
 
   /**
    * \brief Filename.
    */
   std::string file;
-
-  /**
-   * \brief Mesh type.
-   */
-  mesh_type mesh;
 
   /**
    * \brief Input stream.
@@ -127,9 +146,6 @@ private:
    */
   std::vector<dealii::Point<dim, datatype>> point_list;
 
-  using scalar_list = std::vector<datatype>;
-  using vector_list = std::vector<dealii::Vector<datatype>>;
-
   /**
    * \brief List of scalar values
    */
@@ -139,6 +155,16 @@ private:
    * \brief List of vector values
    */
   boost::unordered_map<std::string, vector_list> vector_value_list_map;
+
+  /**
+   * \brief List of scalar values to point mappings
+   */
+  boost::unordered_map<std::string, scalar_map> scalar_value_mappings;
+
+  /**
+   * \brief List of vector values to point mappings
+   */
+  boost::unordered_map<std::string, vector_map> vector_value_mappings;
 };
 
 template <int dim, typename datatype>
@@ -151,8 +177,8 @@ ReadVTK<dim, datatype>::ReadVTK(std::string filename)
   // Check that the provided file matches support verions
   check_vtk_version();
 
-  // Find mesh type
-  find_mesh_type();
+  // Check mesh type
+  check_mesh_type();
 
   // Read points
   read_points();
@@ -162,6 +188,9 @@ ReadVTK<dim, datatype>::ReadVTK(std::string filename)
 
   // Read fields
   read_fields();
+
+  // Compute mappings
+  compute_mappings();
 }
 
 template <int dim, typename datatype>
@@ -172,24 +201,38 @@ ReadVTK<dim, datatype>::~ReadVTK()
 }
 
 template <int dim, typename datatype>
+boost::unordered_map<std::string,
+                     boost::unordered_map<dealii::Point<dim, datatype>,
+                                          datatype,
+                                          std::hash<dealii::Point<dim, datatype>>>>
+ReadVTK<dim, datatype>::get_scalar_mappings()
+{
+  return scalar_value_mappings;
+}
+
+template <int dim, typename datatype>
+boost::unordered_map<std::string,
+                     boost::unordered_map<dealii::Point<dim, datatype>,
+                                          dealii::Vector<datatype>,
+                                          std::hash<dealii::Point<dim, datatype>>>>
+ReadVTK<dim, datatype>::get_vector_mappings()
+{
+  return vector_value_mappings;
+}
+
+template <int dim, typename datatype>
 void
 ReadVTK<dim, datatype>::check_line_errors(const std::string &context)
 {
   // Throw an error if we reach the end of file
-  if (vtk_file.eof())
-    {
-      Assert(false,
-             dealii::ExcMessage("Error in reading vtk file. Reached end-of-file "
-                                "without finding " +
-                                context + " section."));
-    }
+  Assert(!vtk_file.eof(),
+         dealii::ExcMessage("Error in reading vtk file. Reached end-of-file "
+                            "without finding " +
+                            context + " section."));
 
   // Throw an error if we fail to read a line
-  if (vtk_file.fail())
-    {
-      Assert(false,
-             dealii::ExcMessage("Error in reading vtk file. Unable to read line."));
-    }
+  Assert(!vtk_file.fail(),
+         dealii::ExcMessage("Error in reading vtk file. Unable to read line."));
 }
 
 template <int dim, typename datatype>
@@ -212,60 +255,36 @@ template <int dim, typename datatype>
 void
 ReadVTK<dim, datatype>::check_dim()
 {
-  switch (mesh)
+  // Loop through lines until we find CELL_TYPES.
+  std::string line;
+  while (std::getline(vtk_file, line))
     {
-      case STRUCTURED:
+      check_line_errors("'CELL_TYPES'");
+
+      if (line.find("CELL_TYPES") == 0)
         {
-          AssertThrow(false, dealii::ExcMessage("This hasn't been implemented."));
+          std::getline(vtk_file, line);
+
+          // Create string stream for line
+          std::istringstream string_stream(line);
+
+          // Find the cell type with string stream
+          unsigned int cell_type = 0;
+          string_stream >> cell_type;
+
+          // Check that we have quad elements for 2D problems and hex elements for
+          // 3D problems.
+          AssertThrow(3 * dim + 3 == cell_type,
+                      dealii::ExcMessage("The provided vtk's dimensions does match "
+                                         "the one in parameters.prm."));
           break;
         }
-
-      case UNSTRUCTURED:
-        {
-          // Loop through lines until we find CELL_TYPES.
-          std::string line;
-          while (std::getline(vtk_file, line))
-            {
-              check_line_errors("'CELL_TYPES'");
-
-              if (line.find("CELL_TYPES") == 0)
-                {
-                  std::getline(vtk_file, line);
-
-                  // Create string stream for line
-                  std::istringstream string_stream(line);
-
-                  // Find the cell type with string stream
-                  unsigned int cell_type = 0;
-                  string_stream >> cell_type;
-
-                  // Check that we have quad elements for 2D problems and hex elements for
-                  // 3D problems.
-                  AssertThrow(3 * dim + 3 == cell_type,
-                              dealii::ExcMessage(
-                                "The provided vtk's dimensions does match "
-                                "the one in parameters.prm."));
-                  break;
-                }
-            }
-          break;
-        }
-
-      case RECTILINEAR:
-        {
-          AssertThrow(false, dealii::ExcMessage("This hasn't been implemented."));
-          break;
-        }
-
-      default:
-        AssertThrow(false, dealii::ExcMessage("Unknown mesh type."));
-        break;
     }
 }
 
 template <int dim, typename datatype>
 void
-ReadVTK<dim, datatype>::find_mesh_type()
+ReadVTK<dim, datatype>::check_mesh_type()
 {
   // Loop until we find DATASET
   std::string line;
@@ -284,21 +303,9 @@ ReadVTK<dim, datatype>::find_mesh_type()
           std::string mesh_str;
           string_stream >> dataset_str >> mesh_str;
 
-          // Assign enum
-          if (mesh_str == "UNSTRUCTURED_GRID")
-            {
-              mesh = mesh_type::UNSTRUCTURED;
-            }
-          else if (mesh_str == "RECTILINEAR_GRID")
-            {
-              mesh = mesh_type::RECTILINEAR;
-            }
-          else
-            {
-              AssertThrow(false,
-                          dealii::ExcMessage("Error in reading vtk file. " + mesh_str +
-                                             " is currently not supported."));
-            }
+          AssertThrow(mesh_str == "UNSTRUCTURED_GRID",
+                      dealii::ExcMessage("Error in reading unstructured grid vtk file. " +
+                                         mesh_str + " is currently not supported."));
 
           break;
         }
@@ -443,10 +450,36 @@ ReadVTK<dim, datatype>::read_fields()
 
               // Get the values
               std::istringstream stream(line);
-              datatype           vector_value;
-              while (stream >> vector_value) // Extract each number
+              datatype           x;
+              datatype           y;
+              datatype           z;
+              string_stream >> x >> y >> z;
+
+              dealii::Vector<datatype> vector_value;
+
+              switch (dim)
                 {
-                  scalar_value_list_map[var_name].emplace_back(vector_value);
+                  case 1:
+                    vector_value.reinit(1);
+                    vector_value[0] = x;
+                    vector_value_list_map[var_name].emplace_back(vector_value);
+                    break;
+                  case 2:
+                    vector_value.reinit(2);
+                    vector_value[0] = x;
+                    vector_value[1] = y;
+                    vector_value_list_map[var_name].emplace_back(vector_value);
+                    break;
+                  case 3:
+                    vector_value.reinit(3);
+                    vector_value[0] = x;
+                    vector_value[1] = y;
+                    vector_value[2] = z;
+                    vector_value_list_map[var_name].emplace_back(vector_value);
+                    break;
+                  default:
+                    AssertThrow(false, dealii::ExcMessage("Invalid dimension."));
+                    break;
                 }
 
               if (line.find("SCALARS") == 0 || line.find("VECTORS") == 0)
@@ -457,6 +490,45 @@ ReadVTK<dim, datatype>::read_fields()
               previous_position = vtk_file.tellg();
             }
         }
+    }
+}
+
+template <int dim, typename datatype>
+void
+ReadVTK<dim, datatype>::compute_mappings()
+{
+  // Create scalar value mappings by looping through each known variable
+  for (const auto &entry : scalar_value_list_map)
+    {
+      const std::string           &var_name   = entry.first;
+      const std::vector<datatype> &value_list = entry.second;
+
+      AssertDimension(point_list.size(), value_list.size());
+
+      scalar_map mappings;
+      for (std::size_t i = 0; i < n_points; ++i)
+        {
+          mappings[point_list[i]] = value_list[i];
+        }
+
+      scalar_value_mappings[var_name] = std::move(mappings);
+    }
+
+  // Create vector value mappings by looping through each known variable
+  for (const auto &entry : vector_value_list_map)
+    {
+      const std::string                           &var_name   = entry.first;
+      const std::vector<dealii::Vector<datatype>> &value_list = entry.second;
+
+      AssertDimension(point_list.size(), value_list.size());
+
+      vector_map mappings;
+      for (std::size_t i = 0; i < n_points; ++i)
+        {
+          mappings[point_list[i]] = value_list[i];
+        }
+
+      vector_value_mappings[var_name] = std::move(mappings);
     }
 }
 

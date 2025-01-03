@@ -1,46 +1,9 @@
-// methods to apply initial conditions
-
 #include <cmath>
 #include <core/initial_conditions/initialConditions.h>
 #include <core/matrixFreePDE.h>
-#include <field_input/IntegrationTools/PField.hh>
+#include <field_input/read_vtk.h>
 #include <grains/OrderParameterRemapper.h>
 
-template <int dim>
-class InitialConditionPField : public Function<dim>
-{
-public:
-  unsigned int   index;
-  Vector<double> values;
-
-  using ScalarField = PRISMS::PField<double *, double, dim>;
-  ScalarField &inputField;
-
-  InitialConditionPField(const unsigned int _index, ScalarField &_inputField)
-    : Function<dim>(1)
-    , index(_index)
-    , inputField(_inputField)
-  {}
-
-  [[nodiscard]] double
-  value(const Point<dim>                   &p,
-        [[maybe_unused]] const unsigned int component = 0) const override
-  {
-    double scalar_IC = NAN;
-
-    double coord[dim];
-    for (unsigned int i = 0; i < dim; i++)
-      {
-        coord[i] = p(i);
-      }
-
-    scalar_IC = inputField(coord);
-
-    return scalar_IC;
-  }
-};
-
-// methods to apply initial conditions
 template <int dim, int degree>
 void
 MatrixFreePDE<dim, degree>::applyInitialConditions()
@@ -79,40 +42,40 @@ MatrixFreePDE<dim, degree>::applyInitialConditions()
 
       matrixFreeObject.initialize_dof_vector(grain_index_field, scalar_field_index);
 
-      // Declare the PField types and containers
-      typedef PRISMS::PField<double *, double, dim> ScalarField;
-      typedef PRISMS::Body<double *, dim>           Body;
-      Body                                          body;
+      // // Declare the PField types and containers
+      // typedef PRISMS::PField<double *, double, dim> ScalarField;
+      // typedef PRISMS::Body<double *, dim>           Body;
+      // Body                                          body;
 
-      // Create the filename of the the file to be loaded
+      // // Create the filename of the the file to be loaded
 
-      // Load the data from the file using a PField
-      std::string filename = userInputs.grain_structure_filename;
-      filename += ".vtk";
+      // // Load the data from the file using a PField
+      // std::string filename = userInputs.grain_structure_filename;
+      // filename += ".vtk";
 
-      // new section added for the choice of unstructured mesh and rectilinear mesh
-      if (userInputs.load_vtk_file_type == "UNSTRUCTURED")
-        {
-          body.read_vtk(filename);
-        }
-      else if (userInputs.load_vtk_file_type == "RECTILINEAR")
-        {
-          body.read_RL_vtk(filename);
-        }
-      else
-        {
-          pcout << "Error in vtk file type: Use either UNSTRUCTURED OR RECTILINEAR\n";
-          abort();
-        } // new section ends
+      // // new section added for the choice of unstructured mesh and rectilinear mesh
+      // if (userInputs.load_vtk_file_type == "UNSTRUCTURED")
+      //   {
+      //     body.read_vtk(filename);
+      //   }
+      // else if (userInputs.load_vtk_file_type == "RECTILINEAR")
+      //   {
+      //     body.read_RL_vtk(filename);
+      //   }
+      // else
+      //   {
+      //     pcout << "Error in vtk file type: Use either UNSTRUCTURED OR RECTILINEAR\n";
+      //     abort();
+      //   } // new section ends
 
-      ScalarField &id_field =
-        body.find_scalar_field(userInputs.grain_structure_variable_name);
+      // ScalarField &id_field =
+      //   body.find_scalar_field(userInputs.grain_structure_variable_name);
 
-      pcout << "Applying PField initial condition...\n";
+      // pcout << "Applying PField initial condition...\n";
 
-      VectorTools::interpolate(*dofHandlersSet[scalar_field_index],
-                               InitialConditionPField<dim>(0, id_field),
-                               grain_index_field);
+      // VectorTools::interpolate(*dofHandlersSet[scalar_field_index],
+      //                          InitialConditionPField<dim>(id_field),
+      //                          grain_index_field);
 
       grain_index_field.update_ghost_values();
 
@@ -306,19 +269,15 @@ MatrixFreePDE<dim, degree>::applyInitialConditions()
         }
     }
   // Read out unique filenames
-  if (Utilities::MPI::this_mpi_process(MPI_COMM_WORLD) == 0 && !file_field_map.empty())
+  if (!file_field_map.empty())
     {
-      std::cout << "Unique VTK input files: " << std::endl;
+      pcout << "Unique VTK input files: " << std::endl;
       for (const auto &pair : file_field_map)
         {
-          std::cout << pair.first << ", ";
+          pcout << pair.first << ", ";
         }
     }
   // Read in each vtk once and apply initial conditions
-  using ScalarField = PRISMS::PField<double *, double, dim>;
-  using Body        = PRISMS::Body<double *, dim>;
-  Body body;
-
   for (const auto &pair : file_field_map)
     {
       bool                using_parallel_files = false;
@@ -342,43 +301,33 @@ MatrixFreePDE<dim, degree>::applyInitialConditions()
         }
 
       std::cout << "Reading " << filename << "\n";
-      // Load the data from the file using a PField
-      // new section added for the choice of unstructured mesh and rectilinear mesh
+      // Load the data from the file
       if (userInputs.load_vtk_file_type == "UNSTRUCTURED")
         {
-          body.read_vtk(filename);
-        }
-      else if (userInputs.load_vtk_file_type == "RECTILINEAR")
-        {
-          body.read_RL_vtk(filename);
+          ReadVTK<dim, double> vtk(filename);
+          auto                 scalar_mappings = vtk.get_scalar_mappings();
+          auto                 vector_mappings = vtk.get_vector_mappings();
+
+          for (const auto &index : index_list)
+            {
+              std::string var_name = userInputs.load_field_name[index];
+
+              if (var_attributes.at(index).var_type == SCALAR)
+                {
+                  pcout << "Applying initial condition for "
+                        << userInputs.load_field_name[index] << "...\n";
+
+                  VectorTools::interpolate(*dofHandlersSet[index],
+                                           ScalarInitialConditionVTK<dim, double>(
+                                             scalar_mappings[var_name]),
+                                           *solutionSet[index]);
+                }
+            }
         }
       else
         {
-          pcout << "Error in vtk file type: Use either UNSTRUCTURED OR RECTILINEAR\n";
+          pcout << "Error in vtk file type: Only UNSTRUCTURED allowed\n";
           abort();
-        } // new section ends
-
-      for (const auto &index : index_list)
-        {
-          std::string var_name = userInputs.load_field_name[index];
-
-          // Find the scalar field in the file
-          ScalarField &field = body.find_scalar_field(var_name);
-
-          if (var_attributes.at(index).var_type == SCALAR)
-            {
-              pcout << "Applying PField initial condition for "
-                    << userInputs.load_field_name[index] << "...\n";
-              VectorTools::interpolate(*dofHandlersSet[index],
-                                       InitialConditionPField<dim>(index, field),
-                                       *solutionSet[index]);
-            }
-          else
-            {
-              AssertThrow(false,
-                          ExcMessage("PRISMS-PF Error: We do not support the loading of "
-                                     "vector fields from vtks at this moment."));
-            }
         }
     }
 
@@ -423,29 +372,3 @@ MatrixFreePDE<dim, degree>::applyInitialConditions()
         }
     }
 }
-
-// =================================================================================
-
-// I don't think vector fields are implemented in PFields yet
-// template <int dim>
-// class InitialConditionPFieldVec : public Function<dim>
-//{
-// public:
-//  unsigned int index;
-//  Vector<double> values;
-//  typedef PRISMS::PField<double*, double, 2> ScalarField2D;
-//  ScalarField2D &inputField;
-//
-//  InitialConditionPFieldVec (const unsigned int _index, ScalarField2D
-//  &_inputField) : Function<dim>(1), index(_index), inputField(_inputField) {}
-//
-//  void vector_value (const Point<dim> &p,Vector<double> &vector_IC) const
-//  {
-//	  double coord[dim];
-//	  for (unsigned int i = 0; i < dim; i++){
-//		  coord[i] = p(i);
-//	  }
-//
-//	  vector_IC = inputField(coord);
-//  }
-//};
