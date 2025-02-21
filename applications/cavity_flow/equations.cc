@@ -21,7 +21,7 @@ customAttributeLoader::loadVariableAttributes()
   set_variable_name(1, "p");
   set_variable_type(1, SCALAR);
   set_variable_equation_type(1, TIME_INDEPENDENT);
-  set_dependencies_value_term_RHS(1, "grad(u)");
+  set_dependencies_value_term_RHS(1, "grad(u)"); // TODO: Fix so we can use div(u) instead
   set_dependencies_gradient_term_RHS(1, "grad(p)");
   set_dependencies_value_term_LHS(1, "");
   set_dependencies_gradient_term_LHS(1, "grad(change(p))");

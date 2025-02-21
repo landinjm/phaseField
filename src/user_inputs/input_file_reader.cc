@@ -646,7 +646,7 @@ inputFileReader::declare_BC_parameters()
         {
           continue;
         }
-      if (variable.field_type == SCALAR)
+      if (variable.field_type == fieldType::SCALAR)
         {
           std::string bc_text = "boundary condition for ";
           bc_text.append(variable.name);
@@ -667,7 +667,7 @@ inputFileReader::declare_BC_parameters()
             dealii::Patterns::Anything(),
             "The boundary conditions for one of the governing equations).");
 
-          bc_text = "Boundary condition for variable ";
+          bc_text = "boundary condition for ";
           bc_text.append(variable.name);
           bc_text.append(", y component");
           parameter_handler.declare_entry(
@@ -676,7 +676,7 @@ inputFileReader::declare_BC_parameters()
             dealii::Patterns::Anything(),
             "The boundary conditions for one of the governing equations).");
 
-          bc_text = "Boundary condition for variable ";
+          bc_text = "boundary condition for ";
           bc_text.append(variable.name);
           bc_text.append(", z component");
           parameter_handler.declare_entry(

@@ -12,11 +12,11 @@ subsection rectangular mesh
 end
 
 set time step = 1.0e-2
-set number steps = 5000
+set number steps = 10000
 
 subsection output
     set condition = EQUAL_SPACING
-    set number = 5
+    set number = 10
 end
 
 set boundary condition for u, x component = NATURAL
@@ -24,19 +24,19 @@ set boundary condition for u, y component = NATURAL
 set boundary condition for u, z component = NATURAL
 set boundary condition for p = NATURAL
 
-subsection pinning point: p
+subsection pinning point for p
     set value = 0.0
     set x = 0.0
     set y = 0.0
     set z = 0.0
 end
 
-subsection Linear solver parameters: p
-    set Tolerance type = ABSOLUTE_RESIDUAL
-    set Tolerance value = 1.0e-8
-    set Maximum linear solver iterations = 100
-    set Preconditioner = GMG
-    set Smoothing range = 20
-    set Smoother degree = 5
-    set Eigenvalue CG iterations = 20
+subsection linear solver parameters: p
+    set tolerance type = ABSOLUTE_RESIDUAL
+    set tolerance value = 1.0e-8
+    set max iterations = 100
+    set preconditioner type = GMG
+    set smoothing range = 20
+    set smoother degree = 5
+    set eigenvalue cg iterations = 20
 end

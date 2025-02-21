@@ -203,7 +203,7 @@ userInputParameters<dim>::assign_boundary_parameters(
         {
           continue;
         }
-      if (variable.field_type == SCALAR)
+      if (variable.field_type == fieldType::SCALAR)
         {
           std::string bc_text = "boundary condition for ";
           bc_text.append(variable.name);
