@@ -1,0 +1,42 @@
+set dim = 2
+set degree = 1
+set global refinement = 4
+
+subsection rectangular mesh
+    set x size = 1.0
+    set y size = 1.0
+    set z size = 1.0
+    set x subdivisions = 1
+    set y subdivisions = 1
+    set z subdivisions = 1
+end
+
+set time step = 1.0e-2
+set number steps = 5000
+
+subsection output
+    set condition = EQUAL_SPACING
+    set number = 5
+end
+
+set boundary condition for u, x component = NATURAL
+set boundary condition for u, y component = NATURAL
+set boundary condition for u, z component = NATURAL
+set boundary condition for p = NATURAL
+
+subsection pinning point: p
+    set value = 0.0
+    set x = 0.0
+    set y = 0.0
+    set z = 0.0
+end
+
+subsection Linear solver parameters: p
+    set Tolerance type = ABSOLUTE_RESIDUAL
+    set Tolerance value = 1.0e-8
+    set Maximum linear solver iterations = 100
+    set Preconditioner = GMG
+    set Smoothing range = 20
+    set Smoother degree = 5
+    set Eigenvalue CG iterations = 20
+end

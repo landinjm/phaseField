@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: © 2025 PRISMS Center at the University of Michigan
 // SPDX-License-Identifier: GNU Lesser General Public Version 2.1
 
-#ifndef CUSTOM_PDE_H_
-#define CUSTOM_PDE_H_
+#ifndef custom_pde_h
+#define custom_pde_h
 
-#include <core/matrix_free_operator.h>
-#include <core/user_inputs/user_input_parameters.h>
-#include <core/variable_attributes.h>
+#include <prismspf/config.h>
+#include <prismspf/core/matrix_free_operator.h>
+#include <prismspf/core/variable_attributes.h>
+#include <prismspf/user_inputs/user_input_parameters.h>
 
-using namespace dealii;
+PRISMS_PF_BEGIN_NAMESPACE
 
 /**
  * \brief This is a derived class of `matrixFreeOperator` where the user implements their
@@ -32,9 +33,12 @@ public:
   /**
    * \brief Constructor.
    */
-  customPDE(const userInputParameters<dim> &_user_inputs)
-    : matrixFreeOperator<dim, degree, number>(_user_inputs.var_attributes)
+  customPDE(const userInputParameters<dim>                   &_user_inputs,
+            const std::map<unsigned int, variableAttributes> &subset_attributes,
+            const unsigned int                               &_current_index = 0)
+    : matrixFreeOperator<dim, degree, number>(subset_attributes)
     , user_inputs(_user_inputs)
+    , current_index(_current_index)
   {}
 
 private:
@@ -63,9 +67,26 @@ private:
                             &q_point_loc) const override;
 
   /**
-   * \brief The userinputs.
+   * \brief User-implemented class for the RHS of postprocessed explicit equations.
+   */
+  void
+  compute_postprocess_explicit_RHS(
+    variableContainer<dim, degree, number>                    &variable_list,
+    const dealii::Point<dim, dealii::VectorizedArray<number>> &q_point_loc)
+    const override;
+
+  /**
+   * \brief The user-inputs.
    */
   const userInputParameters<dim> &user_inputs;
+
+  /**
+   * \brief The current index that is being solved. For explicit equations, they are
+   * solved concurrently, so this should not be used.
+   */
+  const unsigned int current_index;
 };
+
+PRISMS_PF_END_NAMESPACE
 
 #endif
