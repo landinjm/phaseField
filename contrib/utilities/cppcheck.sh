@@ -18,24 +18,11 @@ if ! [ -x "$(command -v cppcheck)" ] ; then
     exit 1
 fi
 
-# Directories containing the .cc and .h files
-TARGET_DIRS=("src" "include" "tests" "applications")
-
-for TARGET_DIR in "${TARGET_DIRS[@]}" ; do
-  # Check if the directory exists
-  if [ ! -d "$TARGET_DIR" ] ; then
-    echo "Directory $TARGET_DIR does not exist"
-    exit 2
-  fi
-
-  # Find all .cc and .h files and run cppcheck on each
-  find "$TARGET_DIR" -type f \( -name "*.cc" -o -name "*.h" \) -print0 | while IFS= read -r -d '' FILE ; do
-    cppcheck --enable=all --language=c++ --std=c++17 --suppress=missingIncludeSystem --suppress=unknownMacro "$FILE" >> "output.txt" 2>&1
-  done
-done
+# Run cppcheck
+cppcheck --enable=all --language=c++ --std=c++17 --suppress=missingIncludeSystem --suppress=unknownMacro . > "output.txt" 2>&1
 
 # grep interesting errors and make sure we remove duplicates:
-grep -E '(warning|error|style): ' output.txt | sort | uniq >cppcheck.log
+grep -E '(warning|error|style|performance|portability): ' output.txt | sort | uniq >cppcheck.log
 
 # If we have errors, report them and set exit status to failure
 if [ -s cppcheck.log ]; then
