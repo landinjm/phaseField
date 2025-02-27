@@ -11,10 +11,6 @@
 
 PRISMS_PF_BEGIN_NAMESPACE
 
-// NOLINTBEGIN(hicpp-explicit-conversions)
-
-// NOLINTBEGIN(cppcoreguidelines-macro-usage)
-
 /**
  * Macro for deal.II AssertThrow that is only valid in DEBUG mode. This is used to throw
  * and error that can be caught by catch2 while not bloating code in release mode.
@@ -24,8 +20,6 @@ PRISMS_PF_BEGIN_NAMESPACE
 #else
 #  define AssertThrowDebug(cond, exc)
 #endif
-
-// NOLINTEND(cppcoreguidelines-macro-usage)
 
 /**
  * Exception for parts of the library that have yet to be implemented yet. The argument is
@@ -55,8 +49,6 @@ DeclException2(DependencyNotFound,
                << "Attemped access of the variable with index " << arg1
                << " and dependency type " << arg2
                << " that was not marked as needed. Please check customAttributeLoader.");
-
-// NOLINTEND(hicpp-explicit-conversions)
 
 PRISMS_PF_END_NAMESPACE
 

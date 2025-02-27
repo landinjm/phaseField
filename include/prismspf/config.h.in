@@ -1,8 +1,6 @@
 #ifndef prisms_pf_config_h
 #define prisms_pf_config_h
 
-// NOLINTBEGIN
-
 #cmakedefine PRISMS_PF_SOURCE_DIR "@PRISMS_PF_SOURCE_DIR@"
 
 // Optional features:
@@ -101,7 +99,5 @@
   template class class_name<1>;              \
   template class class_name<2>;              \
   template class class_name<3>;
-
-// NOLINTEND
 
 #endif

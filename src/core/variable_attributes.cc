@@ -423,8 +423,6 @@ variableAttributes::find_circular_dependencies(
   recursive_DFS(other_var_attributes, visited, current_stack, field_index);
 }
 
-// NOLINTBEGIN(misc-no-recursion)
-
 void
 variableAttributes::recursive_DFS(
   const std::map<unsigned int, variableAttributes> &other_var_attributes,
@@ -455,7 +453,5 @@ variableAttributes::recursive_DFS(
   // Remove the node from the current recursion stack
   current_stack.erase(vertex);
 }
-
-// NOLINTEND(misc-no-recursion)
 
 PRISMS_PF_END_NAMESPACE
