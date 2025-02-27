@@ -77,7 +77,7 @@ message(STATUS "=========================================================")
 message(STATUS "")
 
 # Find deal.II installation
-find_package(deal.II 9.5.0 QUIET
+find_package(deal.II 9.6.0 QUIET
 	HINTS ${DEAL_II_DIR} $ENV{DEAL_II_DIR}
   )
 if(NOT ${deal.II_FOUND})
@@ -91,6 +91,13 @@ endif()
 message(STATUS "Found deal.II version ${DEAL_II_PACKAGE_VERSION} at '${deal.II_DIR}'")
 
 set(DEALII_INSTALL_VALID ON)
+
+if(NOT DEAL_II_WITH_LAPACK)
+    message(SEND_ERROR
+      "\n**deal.II was built without support for lapack!\n"
+      )
+    set(DEALII_INSTALL_VALID OFF)
+endif()
 
 if(NOT DEAL_II_WITH_P4EST)
     message(SEND_ERROR
@@ -182,7 +189,7 @@ add_subdirectory(src)
 if(CMAKE_GENERATOR MATCHES "Ninja")
   set(_make_command "$ ninja")
 else()
-  set(_make_command " $ make")
+  set(_make_command "$ make")
 endif()
 
 # Debug and release targets
