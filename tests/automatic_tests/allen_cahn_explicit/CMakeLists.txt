@@ -6,7 +6,12 @@
 cmake_minimum_required(VERSION 3.13.4)
 
 # Find the PRISMS-PF package
-find_package(PRISMS-PF REQUIRED)
+find_package(PRISMS-PF REQUIRED
+  HINTS ${PRISMS_PF_DIR} $ENV{PRISMS_PF_DIR}
+  )
+if(NOT DEFINED PRISMS_PF_DIR AND DEFINED ENV{PRISMS_PF_DIR})
+  set(PRISMS_PF_DIR $ENV{PRISMS_PF_DIR})
+endif()
 
 message(STATUS "")
 message(STATUS "=========================================================")
@@ -183,7 +188,7 @@ project(myapp CXX)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include_directories(${CMAKE_BINARY_DIR})
-include_directories(${PRISMS-PF_DIR}/../../../include)
+include_directories(${PRISMS_PF_DIR}/../../../include)
 
 # Find Caliper if enabled
 if(${PRISMS_PF_WITH_CALIPER})
@@ -193,7 +198,7 @@ endif()
 
 # Set the location of the main.cc file
 set(TARGET_SRC 
-    "${PRISMS-PF_DIR}/../../../src/main.cc" 
+    "${PRISMS_PF_DIR}/../../../src/main.cc" 
     "${CMAKE_CURRENT_SOURCE_DIR}/equations.cc" 
     "${CMAKE_CURRENT_SOURCE_DIR}/ICs_and_BCs.cc"
     )
@@ -203,7 +208,7 @@ if(${PRISMS_PF_BUILD_DEBUG} STREQUAL "ON")
   add_executable(main_debug ${TARGET_SRC})
   set_property(TARGET main_debug PROPERTY OUTPUT_NAME main-debug)
   deal_ii_setup_target(main_debug DEBUG)
-  target_link_libraries(main_debug ${PRISMS-PF_DIR}/../../libprisms-pf-debug.a)
+  target_link_libraries(main_debug ${PRISMS_PF_DIR}/../../libprisms-pf-debug.a)
 
   if(${PRISMS_PF_WITH_CALIPER})
     target_link_libraries(main_debug caliper)
@@ -214,7 +219,7 @@ if(${PRISMS_PF_BUILD_RELEASE} STREQUAL "ON")
   add_executable(main_release ${TARGET_SRC})
   set_property(TARGET main_release PROPERTY OUTPUT_NAME main)
   deal_ii_setup_target(main_release RELEASE)
-  target_link_libraries(main_release ${PRISMS-PF_DIR}/../../libprisms-pf-release.a)
+  target_link_libraries(main_release ${PRISMS_PF_DIR}/../../libprisms-pf-release.a)
 
   if(${PRISMS_PF_WITH_CALIPER})
     target_link_libraries(main_release caliper)
