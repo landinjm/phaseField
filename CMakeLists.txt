@@ -216,7 +216,7 @@ message(STATUS "Configuring PRISMS-PF build targets")
 message(STATUS "=========================================================")
 message(STATUS "")
 
-project(prisms_pf CXX)
+project(prisms-pf CXX)
 
 # Grab flag for additional optimizations
 set(ADDITIONAL_OPTIMIZATIONS OFF CACHE BOOL "Whether the user wants to enable additional optimizations, or not.")
@@ -387,6 +387,46 @@ configure_file(
   ${CMAKE_BINARY_DIR}/cmake/prisms_pf_config.cmake
   @ONLY
 )
+
+# Install library targets
+if(TARGET ${LIBRARY_NAME_DEBUG})
+  install(TARGETS ${LIBRARY_NAME_DEBUG}
+          EXPORT PRISMSPFTargets
+          ARCHIVE DESTINATION lib)
+endif()
+
+if(TARGET ${LIBRARY_NAME_RELEASE})
+  install(TARGETS ${LIBRARY_NAME_RELEASE}
+          EXPORT PRISMSPFTargets
+          ARCHIVE DESTINATION lib)
+endif()
+
+# Install headers
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/
+        DESTINATION include
+        FILES_MATCHING PATTERN "*.h")
+
+# Export the CMake config
+install(EXPORT PRISMSPFTargets
+        FILE PRISMSPFTargets.cmake
+        NAMESPACE prisms_pf::
+        DESTINATION lib/cmake/prismspf)
+
+# Install cmake scripts and config
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/cmake/
+        DESTINATION lib/cmake/prismspf
+        FILES_MATCHING PATTERN "*.cmake")
+
+# Install the version number
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+  "${CMAKE_BINARY_DIR}/PRISMS-PFConfigVersion.cmake"
+  VERSION ${PRISMS_PF_VERSION}
+  COMPATIBILITY SameMajorVersion
+)
+install(FILES "${CMAKE_BINARY_DIR}/PRISMS-PFConfigVersion.cmake"
+        DESTINATION lib/cmake/prismspf)
+
 
 # Print the config
 file(READ ${CMAKE_SOURCE_DIR}/summary.log PRISMS_PF_SUMMARY)

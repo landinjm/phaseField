@@ -5,20 +5,15 @@
 
 cmake_minimum_required(VERSION 3.13.4)
 
-# Get the core library's directory (3 levels up from the macro file)
-get_filename_component(PRISMS_PF_CORE_DIR ${CMAKE_CURRENT_LIST_DIR}/../../.. ABSOLUTE)
+# Find the PRISMS-PF package
+find_package(PRISMS-PF REQUIRED)
 
-# Include core library's configuration
-include(${PRISMS_PF_CORE_DIR}/cmake/prisms_pf_config.cmake)
+# Grab the macros
+include(setup_application)
+include(macros/macro_prisms_pf_autopilot)
 
-# Include setup script
-include(${PRISMS_PF_CORE_DIR}/cmake/setup_application.cmake)
-
-# Create a project for the application
+# Create project
 project(myapp CXX)
 
-# Include the autopilot macro
-include(${PRISMS_PF_CORE_DIR}/cmake/macros/macro_prisms_pf_autopilot.cmake)
-
-# Set up the application
+# Run autopilot
 prisms_pf_autopilot(${PRISMS_PF_CORE_DIR})
