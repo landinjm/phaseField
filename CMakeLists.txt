@@ -384,7 +384,7 @@ include(${CMAKE_SOURCE_DIR}/cmake/write_config.cmake)
 # Generate configuration file for applications
 configure_file(
   ${CMAKE_SOURCE_DIR}/cmake/prisms_pf_config.cmake.in
-  ${CMAKE_BINARY_DIR}/cmake/prisms_pf_config.cmake
+  ${CMAKE_BINARY_DIR}/PRISMS-PFConfig.cmake
   @ONLY
 )
 
@@ -405,6 +405,10 @@ endif()
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/
         DESTINATION include
         FILES_MATCHING PATTERN "*.h")
+
+# Install the shared main.cc file
+install(FILES "${CMAKE_BINARY_DIR}/src/main.cc"
+        DESTINATION src)
 
 # Export the CMake config
 install(EXPORT PRISMSPFTargets
@@ -427,6 +431,14 @@ write_basic_package_version_file(
 install(FILES "${CMAKE_BINARY_DIR}/PRISMS-PFConfigVersion.cmake"
         DESTINATION lib/cmake/prismspf)
 
+# Install the main config file
+configure_file(
+  ${CMAKE_SOURCE_DIR}/cmake/prisms_pf_config.cmake.in
+  ${CMAKE_BINARY_DIR}/PRISMS-PFConfig.cmake
+  @ONLY
+)
+install(FILES "${CMAKE_BINARY_DIR}/PRISMS-PFConfig.cmake"
+        DESTINATION lib/cmake/prismspf)
 
 # Print the config
 file(READ ${CMAKE_SOURCE_DIR}/summary.log PRISMS_PF_SUMMARY)
