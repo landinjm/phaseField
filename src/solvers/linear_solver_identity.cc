@@ -118,7 +118,8 @@ identitySolver<dim, degree>::solve(const double &step_length)
 
   // Update the solutions
   (*solution).add(step_length, *this->newton_update);
-  this->solution_handler->update(fieldSolveType::NONEXPLICIT_LINEAR, this->field_index);
+  this->solution_handler->update(this->variable_attributes->field_solve_type,
+                                 this->field_index);
 
   // Apply constraints
   // This may be redundant with the constraints on the update step.

@@ -147,6 +147,7 @@ nonexplicitSelfNonlinearSolver<dim, degree>::solve()
 
           iteration++;
 
+          // TODO (landinjm): Check the convergence of the nonlinear solve somehow
           if (iteration <
               this->user_inputs->nonlinear_solve_parameters.nonlinear_solve.at(index)
                 .max_iterations)
