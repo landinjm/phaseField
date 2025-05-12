@@ -40,7 +40,7 @@ identitySolver<dim, degree>::identitySolver(
 {}
 
 template <unsigned int dim, unsigned int degree>
-inline void
+void
 identitySolver<dim, degree>::init()
 {
   this->system_matrix->clear();
@@ -63,12 +63,12 @@ identitySolver<dim, degree>::init()
 }
 
 template <unsigned int dim, unsigned int degree>
-inline void
+void
 identitySolver<dim, degree>::reinit()
 {}
 
 template <unsigned int dim, unsigned int degree>
-inline void
+void
 identitySolver<dim, degree>::solve(const double &step_length)
 {
   auto *solution = this->solution_handler->get_solution_vector(this->field_index,

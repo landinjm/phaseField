@@ -56,7 +56,7 @@ nonexplicitLinearSolver<dim, degree>::nonexplicitLinearSolver(
 {}
 
 template <unsigned int dim, unsigned int degree>
-inline void
+void
 nonexplicitLinearSolver<dim, degree>::init()
 {
   this->compute_subset_attributes(fieldSolveType::NONEXPLICIT_LINEAR);
@@ -105,7 +105,7 @@ nonexplicitLinearSolver<dim, degree>::init()
 }
 
 template <unsigned int dim, unsigned int degree>
-inline void
+void
 nonexplicitLinearSolver<dim, degree>::solve()
 {
   // If the subset attribute is empty return early
