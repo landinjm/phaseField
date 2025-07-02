@@ -39,7 +39,7 @@ public:
    * \brief Postprocess and validate parameters.
    */
   virtual void
-  postproess_and_validate() = 0;
+  postprocess_and_validate() = 0;
 
   /**
    * \brief Maximum number of subsections
