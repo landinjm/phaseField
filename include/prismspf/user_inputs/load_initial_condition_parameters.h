@@ -11,6 +11,7 @@
 
 #include <prismspf/config.h>
 
+#include <array>
 #include <cstdint>
 #include <filesystem>
 #include <string>

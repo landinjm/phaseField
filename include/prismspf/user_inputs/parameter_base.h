@@ -4,7 +4,7 @@
 #pragma once
 
 #include <prismspf/core/conditional_ostreams.h>
-#include <prismspf/core/variable_attributes.h>
+#include <prismspf/core/field_attributes.h>
 
 #include <prismspf/config.h>
 
@@ -13,12 +13,11 @@ PRISMS_PF_BEGIN_NAMESPACE
 /**
  * @brief A base class for the various subcontainers of the user inputs.
  */
-template <unsigned int dim>
 class ParameterBase
 {
 public:
   /**
-   * @brief  Constructor.
+   * @brief Constructor.
    */
   ParameterBase() = default;
 
@@ -28,11 +27,38 @@ public:
   virtual ~ParameterBase() = default;
 
   /**
-   * @brief Postprocess and validate parameters.
+   * @brief Copy constructor.
+   */
+  ParameterBase(const ParameterBase &parameter_base) = default;
+
+  /**
+   * @brief Copy assignment.
+   */
+  ParameterBase &
+  operator=(const ParameterBase &parameter_base) = default;
+
+  /**
+   * @brief Move constructor.
+   */
+  ParameterBase(ParameterBase &&parameter_base) noexcept = default;
+
+  /**
+   * @brief Move assignment.
+   */
+  ParameterBase &
+  operator=(ParameterBase &&parameter_base) noexcept = default;
+
+  /**
+   * @brief Postprocess parameters.
    */
   virtual void
-  postprocess_and_validate(
-    const std::map<unsigned int, VariableAttributes> &var_attributes) = 0;
+  postprocess(const std::vector<FieldAttributes> &field_attributes) = 0;
+
+  /**
+   * @brief Validate parameters.
+   */
+  virtual void
+  validate(const std::vector<FieldAttributes> &field_attributes) const = 0;
 
   /**
    * @brief Print parameters to summary.log
@@ -42,7 +68,7 @@ public:
   {
     ConditionalOStreams::pout_summary()
       << "================================================\n"
-      << "  Base Parameter Class - No Parameters Defined\n"
+      << "  Base Parameter Class - Nothing Defined\n"
       << "================================================\n"
       << std::flush;
   };
