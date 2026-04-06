@@ -13,6 +13,7 @@
 #include <prismspf/core/grid_refiner_criterion.h>
 #include <prismspf/core/types.h>
 
+#include <prismspf/utilities/assert.h>
 #include <prismspf/utilities/utilities.h>
 
 #include <prismspf/config.h>
@@ -275,7 +276,7 @@ struct SpatialDiscretization
       {
         return;
       }
-    AssertThrow(false, UnreachableCode("Invalid TriangulationType"));
+    Unreachable("Invalid TriangulationType");
   }
 
   /**

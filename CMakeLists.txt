@@ -429,6 +429,15 @@ install(
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/prismspf
 )
 
+# Install the vendored libassert
+if(CMAKE_BUILD_TYPE STREQUAL "DebugRelease")
+	install(
+	  DIRECTORY ${CMAKE_BINARY_DIR}/_deps/libassert-release/install/include/libassert
+		DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+	)
+else()
+endif()
+
 # Export the targets file so downstream can use find_package(PRISMS-PF)
 install(
   EXPORT prisms_pf_targets

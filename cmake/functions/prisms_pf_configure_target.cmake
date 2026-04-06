@@ -77,13 +77,13 @@ function(prisms_pf_configure_target target_name build_type)
   endif()
 
   # Link other dependencies
-  # TODO: We don't need to set everything as public, and we shouldn't.
-  # Ideally, the only public bits need to be MPI and deal.II
+	# NOTE: libassert must be public so we can have assertion definitions in
+	# header files. I couldn't figure out a way to write a wrapper that
+	# preserves the usefulness of libassert so we make it public.
   target_link_libraries(
     ${target_name}
     PUBLIC
       MPI::MPI_CXX
-    PRIVATE
-      $<BUILD_LOCAL_INTERFACE:libassert::assert>
+      libassert::assert
   )
 endfunction()
