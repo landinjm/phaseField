@@ -91,6 +91,20 @@ private:
                 Gamma * fixed_power<2>(n[2]));
   }
 
+  DEAL_II_ALWAYS_INLINE inline ScalarValue
+  d_A_d_theta(ScalarGrad n) const
+  {
+    using Symmetries::sin_theta;
+    return -epsilon_xy * number(6) * sin_theta<6>(n[0], n[1]);
+  }
+
+  DEAL_II_ALWAYS_INLINE inline ScalarValue
+  d_A_d_psi(ScalarGrad n) const
+  {
+    using Symmetries::sin_psi;
+    return -epsilon_z * number(2) * sin_psi<2>(n[0], n[1], n[2]);
+  }
+
   void
   set_initial_condition([[maybe_unused]] const unsigned int       &index,
                         [[maybe_unused]] const unsigned int       &component,
@@ -130,13 +144,14 @@ private:
               unsigned int                         solve_block_id) const override
 
   {
+    using dealii::Utilities::fixed_power;
+    using std::sqrt;
+
     const double dt = sim_timer.get_timestep();
 
     // Explicit u and phi evolution
     if (solve_block_id == 0)
       {
-        using dealii::Utilities::fixed_power;
-
         ScalarValue u        = variable_list.template get_value<Scalar, OldOne>(0);
         ScalarGrad  u_grad   = variable_list.template get_gradient<Scalar, OldOne>(0);
         ScalarValue phi      = variable_list.template get_value<Scalar, OldOne>(1);
@@ -172,16 +187,47 @@ private:
         ScalarGrad  phi_grad = variable_list.template get_gradient<Scalar, Current>(1);
 
         // Compute the interfacial normal vector for the anisotropy function
-        ScalarGrad normal = phi_grad / (phi_grad.norm() + reg_val);
+        ScalarValue phi_grad_norm_2 = phi_grad.norm_square();
+        ScalarGrad  normal          = phi_grad / (sqrt(phi_grad_norm_2) + reg_val);
 
-        // Energetic anisotropy and it's derivative
-        ScalarValue A_n = A(normal);
+        // Energetic anisotropy
+        ScalarValue A_n   = A(normal);
+        ScalarValue A_n_2 = fixed_power<2>(A_n);
 
         // Kinetic anisotropy
         ScalarValue B_n = B(normal);
 
-        variable_list.set_value_term(2, 0.0);
-        // variable_list.set_gradient_term(2, 0.0);
+        // The derivative of the energetic anisotropy with respect to the gradient of phi
+        // TODO: Might be able to simplify this
+        ScalarValue phi_x_2_and_phi_y_2 = phi_grad_norm_2 - fixed_power<2>(phi_grad[2]);
+        ScalarValue sqrt_phi_x_2_and_phi_y_2 = sqrt(phi_x_2_and_phi_y_2);
+
+        ScalarGrad d_theta_d_grad_phi;
+        d_theta_d_grad_phi[0] = -phi_grad[1] / (phi_x_2_and_phi_y_2 + reg_val);
+        d_theta_d_grad_phi[1] = phi_grad[0] / (phi_x_2_and_phi_y_2 + reg_val);
+        d_theta_d_grad_phi[2] = number(0);
+
+        ScalarGrad d_psi_d_grad_phi;
+        d_psi_d_grad_phi[0] = phi_grad[0] * phi_grad[2] /
+                              (sqrt_phi_x_2_and_phi_y_2 * phi_grad_norm_2 + reg_val);
+        d_psi_d_grad_phi[1] = phi_grad[1] * phi_grad[2] /
+                              (sqrt_phi_x_2_and_phi_y_2 * phi_grad_norm_2 + reg_val);
+        d_psi_d_grad_phi[2] = -sqrt_phi_x_2_and_phi_y_2 / (phi_grad_norm_2 + reg_val);
+
+        ScalarGrad d_A_n_d_grad_phi =
+          d_A_d_theta(normal) * d_theta_d_grad_phi + d_A_d_psi(normal) * d_psi_d_grad_phi;
+
+        // The gradient must consider horizontal and vertial growth preference. As such,
+        // we multiply by Gamma. We do this twice because there's two gradient operators.
+        phi_grad[2] *= Gamma * Gamma;
+
+        // The anisotropy term
+        // TODO: Should probably refactor this and above into a helper function
+        ScalarGrad anisotropy =
+          -number(0.5) * A_n_2 * phi_grad - phi_grad_norm_2 * A_n * d_A_n_d_grad_phi;
+
+        variable_list.set_value_term(2, -f_prime(phi) + lambda * B_n * g_prime(phi) * u);
+        variable_list.set_gradient_term(2, anisotropy);
       }
   }
 

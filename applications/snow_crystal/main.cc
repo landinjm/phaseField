@@ -22,7 +22,7 @@ main(int argc, char *argv[])
   ParseCMDOptions cli_options(argc, argv);
 
   constexpr unsigned int dim    = 3;
-  constexpr unsigned int degree = 2;
+  constexpr unsigned int degree = 1;
 
   /**
    * We have four fields in this application.
