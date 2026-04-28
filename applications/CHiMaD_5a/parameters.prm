@@ -1,0 +1,26 @@
+subsection Rectangular mesh
+  set x size = 30.0
+  set y size = 6.0
+  set x subdivisions = 5
+  set y subdivisions = 1
+end
+
+set global refinement = 2
+
+subsection linear solver parameters: 0
+  set solver_ids               = 1
+
+  set max iterations           = 1
+  set tolerance type           = RMSEPerField
+  set tolerance value          = 1e-10
+end
+
+subsection boundary conditions: 0
+  set variables = u
+  set conditions = Dirichlet, Natural, Dirichlet, Dirichlet
+end
+
+subsection boundary conditions: 1
+  set variables = p
+  set conditions = Natural, Dirichlet, Natural, Natural
+end
