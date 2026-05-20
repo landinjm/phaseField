@@ -6,13 +6,14 @@
     <tab type="mainpage" visible="yes" title=""/>
     <tab type="pages" visible="no" title="" intro=""/>
     <tab	type="usergroup" url="\ref installation" title="Installation">
-	    <tab type="user" url="\ref docker" title="Docker"/>
-	    <tab type="user" url="\ref source" title="Source"/>
+      <tab type="user" url="\ref docker" title="Docker"/>
+      <tab type="user" url="\ref source" title="Source"/>
     </tab>
     <tab	type="usergroup" url="\ref tutorial" title="Tutorial">
       <tab type="user" url="structure.html" title="Structure"/>
     </tab>
     <tab type="user" url="applications.html" title="Applications"/>
+    <tab type="user" url="tips.html" title="Tips &amp; Tricks"/>
     <tab type="user" url="contact.html" title="Contact"/>
     <tab type="topics" visible="yes" title="" intro=""/>
     <tab type="modules" visible="yes" title="" intro="">
