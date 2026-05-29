@@ -37,13 +37,12 @@ public:
           const PDEOperatorBase<dim, degree, number> &_pde_operator);
 
   /**
-   * @brief Main time-stepping loop that calls solve_increment, reinit_system,
+   * @brief Main time-stepping loop that calls solve_increment, init_system,
    * output_results, etc...
    */
   void
   solve();
 
-private:
   /**
    * @brief Solve a single increment of the given PDEs.
    */
@@ -57,11 +56,12 @@ private:
   init_system();
 
   /**
-   * @brief Reinitialize the system.
+   *  @brief Get the solve context.
    */
-  void
-  reinit_system();
+  const SolveContext<dim, degree, number> &
+  get_solve_context() const;
 
+private:
   /**
    * @brief Field attributes.
    */
@@ -98,7 +98,7 @@ private:
   ConstraintManager<dim, degree, number> constraint_manager;
 
   /**
-   * @brief Solver context.
+   * @brief Solve context.
    */
   SolveContext<dim, degree, number> solve_context;
 

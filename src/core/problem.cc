@@ -123,6 +123,13 @@ Problem<dim, degree, number>::Problem(
 {}
 
 template <unsigned int dim, unsigned int degree, typename number>
+const SolveContext<dim, degree, number> &
+Problem<dim, degree, number>::get_solve_context() const
+{
+  return solve_context;
+}
+
+template <unsigned int dim, unsigned int degree, typename number>
 void
 Problem<dim, degree, number>::init_system()
 {
